@@ -1,0 +1,7 @@
+All versions of NUnit after 2.2 are compiled with a project called "fit".  Fit is licensed under the GPL, meaning that NUnit (after version 2.2) should also be licensed under the GPL.  The authors of NUnit dispute this, claiming that the author of fit "says it's okay".
+
+However, in the interests of not exposing ourselves to a GPL violation, we are choosing not to use a version that is questionably covered by the GPL.
+
+NUnit is used only for unit testing, but the problem is many of our projects include the DLL in the installer or distribution.  If we were to exclude the NUnit DLLs we could avoid this problem entirely (as it would then just be something we use in-house, not something we distribute, so we would not be violating the terms of the GPL).
+
+Until we change our unit testing process or installer process (or NUnit ceases using the fit library), we will not be able to upgrade to a later version of NUnit.
