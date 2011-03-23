@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicing.Common", "Azavea.NijPredictivePolicing.Common\Azavea.NijPredictivePolicing.Common.csproj", "{9E1E6F34-233E-4145-8DB0-75BFA5DB1715}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicing.Test", "Azavea.NijPredictivePolicing.Test\Azavea.NijPredictivePolicing.Test.csproj", "{73339E71-5900-4FC3-9A29-8E64A1BB805C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{9E1E6F34-233E-4145-8DB0-75BFA5DB1715}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E1E6F34-233E-4145-8DB0-75BFA5DB1715}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E1E6F34-233E-4145-8DB0-75BFA5DB1715}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73339E71-5900-4FC3-9A29-8E64A1BB805C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73339E71-5900-4FC3-9A29-8E64A1BB805C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73339E71-5900-4FC3-9A29-8E64A1BB805C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73339E71-5900-4FC3-9A29-8E64A1BB805C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
