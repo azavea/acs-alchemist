@@ -9,7 +9,8 @@ namespace Azavea.NijPredictivePolicing.Common
     public class Utilities
     {
         /// <summary>
-        /// Copies stream "from" to stream "to" until it can't read anymore data
+        /// Copies stream "from" to stream "to" until it can't read anymore data.  This function 
+        /// is built into .NET 4.0 and later, but until we upgrade, this will do.
         /// </summary>
         /// <param name="from">The stream to read from</param>
         /// <param name="to">The stream to write to</param>

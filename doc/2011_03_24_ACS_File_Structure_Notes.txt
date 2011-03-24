@@ -1,0 +1,84 @@
+Resources:
+http://www.census.gov/acs/www/
+http://www2.census.gov/acs2005_2009_5yr/summaryfile/
+http://www.census.gov/acs/www/guidance_for_data_users/handbooks/
+http://www2.census.gov/acs2009_5yr/summaryfile/ACS_2005-2009_SF_Tech_Doc.pdf
+http://www.itl.nist.gov/fipspubs/fip5-2.htm
+
++-------------------------+
+| ACS Data File Structure |
++-------------------------+
+
+Geography File:
+Located At http://www2.census.gov/acs2009_5yr/summaryfile/2005-2009_ACSSF_By_State_All_Tables/*.zip
+Year = [xxxx] - Last year of the period
+Period = [x] - Period length in years
+State = [AB] - Standard state abreviation
+Filename = "g" + Year + Period + State + ".txt"
+
+File Columns:
+NAME		DESCRIPTION 				SIZE 	START
+---------------------------------------------------------
+FILEID	 	"ACSSF"						6		1
+STUSAB 		State Postal Abbreviation 	2 		7 
+SUMLEVEL 	Summary Level 				3 		9 
+COMPONENT 	Geographic Component 		2 		12
+LOGRECNO 	Logical Record Number 		7 		14
+
+Many other columns too numerous to enumerate here, but documented in http://www2.census.gov/acs2009_5yr/summaryfile/ACS_2005-2009_SF_Tech_Doc.pdf section 2.4
+Other columns include State, County, Tract, and Block Group, which can be used to map geographic areas to a Logical Record Number
+
+Shape File:
+Located at http://www.census.gov/geo/cob/bdy/bg/bg00shp/bg[FIPS-code]_d00_shp.zip 
+[FIPS-code] is a somewhat arbitrary 2-digit code corresponding to a US state, see link in Resources section.
+Index of files: http://www.census.gov/geo/www/cob/bg2000.html
+Relevant Metadata for each polygon:
+ - STATE - FIPS 5-2 state code
+ - COUNTY - 3-digit county code
+ - TRACT - 4-digit census tract code
+ - BLKGROUP - 1 digit block group code
+
+ 
+Sequence_Number_and_Table_Number_Lookup.xls:
+Located at http://www2.census.gov/acs2009_5yr/summaryfile/Sequence_Number_and_Table_Number_Lookup.xls
+Maps Column Names to Sequence Numbers and Row Locations
+Each row corresponds to a database column
+File Columns:
+ - File ID (fileid) - Always "ACSSF" as far as I can tell
+ - Table ID (tblid)
+ - Sequence Numbers (seq) - Correspond to names of Estimate/MoE files
+ - Position (position) - ?
+ - Cells (cells) - ?
+ - Title (title) - Column Description
+
+Estimate and MoE Files: 
+Located at http://www2.census.gov/acs2009_5yr/summaryfile/2005-2009_ACSSF_By_State_All_Tables/*.zip
+Naming convention is as follows (x denotes a digit):
+Type = ["e" | "m"] - Estimate or Margin of error
+Year = [xxxx] - Last year of the period
+Period = [x] - Period length in years
+State = [AB] - Standard state abreviation
+Seq = [xxxx] - Sequence Number
+Res = [xxx] - Reserved for future use, currently "000"
+Filename = Type + Year + Period + State + Seq + Res + ".txt"
+
+Each file contains a bunch of rows from a database with the following schema:
+FIELD NAME 			DESCRIPTION 					FIELD SIZE		NOTES	
+--------------------------------------------------------------------------------------------------
+FILEID 				File Identification				6 Characters	Always "ACSSF"
+FILETYPE 			File Type 						6 Characters	Year + Type + Period
+STUSAB 				State/U.S.-Abbreviation (USPS) 	2 Characters	State
+CHARACTER 			Character Iteration 			3 Characters	Seems to correspond to Res (i.e. currently always "000")
+SEQUENCE 			Sequence Number 				4 Characters	Seq
+LOGRECNO 			Logical Record Number 			7 Characters	Location Identifier
+Field # 7 and up 	Estimates 						Various			Defined by position and cells in Sequence_Number_and_Table_Number_Lookup.xls
+
+256 is a hard max for number of fields in one row.
+
+Excerpt from a file:
+ACSSF,2009e5,pa,000,0021,0011311,2724,2618,86,46,40,20,20,0,2201,2144,37,37,0,20,20,0,446,446,0,0,0,0,0,0,24,24,0,0,0,0,0,0,53,4,49,9,40,0,0,0,2239,367,1646,110,14,102,1733,335,1234,96,14,54,429,32,345,14,0,38,24,0,24,0,0,0,53,0,43,0,0,10,1971,258,892,428,299,94,1506,198,745,304,200,59,397,39,116,114,93,35,24,0,18,0,6,0,44,21,13,10,0,0,2239,237,2002,307,179,254,376,365,209,110,202,1733,211,1522,232,82,194,321,310,159,89,135,429,17,412,52,93,44,50,55,44,21,53,24,0,24,0,4,0,0,0,6,0,14,53,9,44,23,0,16,5,0,0,0,0,32198,33265,30152,90357,9750,2850,64,102,2684,2314,43,85,2186,459,21,0,438,24,0,0,24,53,0,17,36
+ACSSF,2009e5,pa,000,0021,0011312,5318,4936,250,228,22,132,132,0,3855,3733,116,105,11,6,6,0,1274,1166,73,73,0,35,35,0,27,17,10,10,0,0,0,0,162,20,51,40,11,91,91,0,4383,838,2720,531,120,174,3070,643,1831,359,106,131,1131,195,727,152,14,43,27,0,27,0,0,0,155,0,135,20,0,0,3646,617,1469,973,423,164,2502,375,1150,628,250,99,962,97,299,335,166,65,27,10,0,10,7,0,155,135,20,0,0,0,4383,467,3916,742,290,510,565,859,539,123,288,3070,405,2665,489,187,409,418,541,331,108,182,1131,55,1076,246,103,101,133,212,160,15,106,27,0,27,7,0,0,10,10,0,0,0,155,7,148,0,0,0,4,96,48,0,0,31455,30491,29821,31625,48488,5651,407,363,4881,4148,292,323,3533,1314,97,30,1187,27,0,10,17,162,18,0,144
+ACSSF,2009e5,pa,000,0021,0011313,5723,5125,519,220,299,79,59,20,4103,3928,155,145,10,20,20,0,1193,1146,41,29,12,6,6,0,48,48,0,0,0,0,0,0,379,3,323,46,277,53,33,20,4849,1286,2787,483,81,212,3431,948,1895,352,58,178,1049,229,654,124,8,34,48,9,39,0,0,0,321,100,199,7,15,0,4053,865,1847,855,337,149,2822,520,1437,536,247,82,917,144,355,295,70,53,39,0,19,6,14,0,275,201,36,18,6,14,4849,466,4383,711,472,915,757,746,445,97,240,3431,354,3077,466,348,646,587,491,348,67,124,1049,82,967,232,61,138,103,234,67,30,102,48,0,48,0,0,3,15,0,16,0,14,321,30,291,13,63,128,52,21,14,0,0,26129,26510,29208,50938,21027,5955,388,600,4967,4341,293,398,3650,1180,79,29,1072,55,0,7,48,379,16,166,197
+ACSSF,2009e5,pa,000,0021,0011314,3677,3193,455,80,375,29,29,0,2346,2282,35,18,17,29,29,0,876,844,32,20,12,0,0,0,0,0,0,0,0,0,0,0,455,67,388,42,346,0,0,0,3101,729,1966,255,36,115,1975,450,1217,187,26,95,746,152,515,49,10,20,0,0,0,0,0,0,380,127,234,19,0,0,2645,509,1137,534,300,165,1739,272,894,353,161,59,632,83,182,141,139,87,0,0,0,0,0,0,274,154,61,40,0,19,3101,347,2754,413,319,585,464,466,264,49,194,1975,189,1786,266,225,373,313,295,190,25,99,746,84,662,81,24,139,89,157,74,22,76,0,0,0,0,0,0,0,0,0,0,0,380,74,306,66,70,73,62,14,0,2,19,26485,26115,34815,.,16037,3988,215,532,3241,2657,114,212,2331,876,21,89,766,0,0,0,0,455,80,231,144
+
+
