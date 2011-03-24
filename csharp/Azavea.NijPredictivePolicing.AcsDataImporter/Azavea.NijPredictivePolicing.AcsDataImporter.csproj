@@ -48,6 +48,16 @@
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Azavea.NijPredictivePolicing.AcsImporterLibrary\Azavea.NijPredictivePolicing.AcsImporterLibrary.csproj">
+      <Project>{F524B387-A813-4FE4-AD37-E21D7645A1DC}</Project>
+      <Name>Azavea.NijPredictivePolicing.AcsImporterLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Azavea.NijPredictivePolicing.Common\Azavea.NijPredictivePolicing.Common.csproj">
+      <Project>{9E1E6F34-233E-4145-8DB0-75BFA5DB1715}</Project>
+      <Name>Azavea.NijPredictivePolicing.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

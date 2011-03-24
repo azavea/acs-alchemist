@@ -49,6 +49,12 @@ namespace Azavea.NijPredictivePolicing.Common
         /// </summary>
         public const string BlockGroupsDataTableSuffix = "_Tracts_Block_Groups_Only.zip";
 
+
+        /// <summary>
+        /// Place to dump temporary files
+        /// </summary>
+        public const string LocalTempDirectory = "output";
+
         //Might want to move these functions out of Settings at a later date, but for now 
         //not sure where else to put them
         /// <summary>

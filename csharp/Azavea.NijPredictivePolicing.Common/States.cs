@@ -9,7 +9,6 @@ namespace Azavea.NijPredictivePolicing.Common
     {
         Alabama = 0,
         Alaska,
-        AmericanSamoa,
         Arizona,
         Arkansas,
         California,
@@ -19,7 +18,6 @@ namespace Azavea.NijPredictivePolicing.Common
         DistrictofColumbia,
         Florida,
         Georgia,
-        Guam,
         Hawaii,
         Idaho,
         Illinois,
@@ -44,7 +42,6 @@ namespace Azavea.NijPredictivePolicing.Common
         NewYork,
         NorthCarolina,
         NorthDakota,
-        NorthernMarianasIslands,
         Ohio,
         Oklahoma,
         Oregon,

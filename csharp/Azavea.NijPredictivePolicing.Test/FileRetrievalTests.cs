@@ -8,6 +8,7 @@ using System.Net;
 using System.IO;
 using Azavea.NijPredictivePolicing.Common;
 using Azavea.NijPredictivePolicing.Test.Helpers;
+using Azavea.NijPredictivePolicing.AcsImporterLibrary;
 
 namespace Azavea.NijPredictivePolicing.Test
 {
@@ -21,14 +22,7 @@ namespace Azavea.NijPredictivePolicing.Test
 
         private static ILog _log = null;
 
-        //TODO: Add this to a utilities class somewhere
-        public static void CopyTo(Stream from, Stream to)
-        {
-            byte[] buffer = new byte[4096];
-            int read = 0;
-            while ((read = from.Read(buffer, 0, buffer.Length)) > 0)
-                to.Write(buffer, 0, read);
-        }
+        
 
         [TestFixtureSetUp]
         public void Init()
@@ -41,37 +35,41 @@ namespace Azavea.NijPredictivePolicing.Test
 
 
         [Test]
-        public void GetPaBlockGroupsFile()
+        public void CheckAllStateFiles()
         {
-            bool getFile = false;   //Set to true if you actually want to download the file
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
-                Settings.GetStateBlockGroupFileUrl(StateList.Pennsylvania));
-
-            request.KeepAlive = false;  //We're only doing this once
-
-            request.Credentials = CredentialCache.DefaultCredentials;
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-            _log.DebugFormat("Content length is {0}", response.ContentLength);
-            _log.DebugFormat("Content type is {0}", response.ContentType);
-
-            if (getFile)
+            bool fail = false;
+            foreach (StateList state in Enum.GetValues(typeof(StateList)))
             {
-                Stream data = response.GetResponseStream();
-                _log.DebugFormat("Response stream received.");
+                try
+                {
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
+                        Settings.GetStateBlockGroupFileUrl(state));
 
-                FileStream writeme = new FileStream(
-                    Path.Combine(OutputDir, Settings.GetStateBlockGroupFileName(StateList.Pennsylvania)),
-                    FileMode.Create
-                    );
-
-                CopyTo(data, writeme);
-
-                data.Close();
-                writeme.Close();
+                    request.Credentials = CredentialCache.DefaultCredentials;
+                    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                    response.Close();
+                    _log.DebugFormat("{0} still exists", States.StateToCensusName(state));
+                }
+                catch
+                {
+                    _log.DebugFormat("{0} is missing!", States.StateToCensusName(state));
+                    fail = true;
+                }
             }
 
-            response.Close();
+            Assert.IsFalse(fail);
+        }
+
+        [Test]
+        public void CheckDownloaderUtilities()
+        {   
+            string dummy;
+            //Wyoming has smallest file to download
+            string err = AreaDownloader.GetStateBlockGroupFile(StateList.Wyoming, out dummy);
+            if (!string.IsNullOrEmpty(err))
+            {
+                Assert.Fail("Error: Message was: {0}", err);
+            }
         }
     }
 }
