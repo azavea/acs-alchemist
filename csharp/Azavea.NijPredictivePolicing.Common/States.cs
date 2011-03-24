@@ -63,7 +63,7 @@ namespace Azavea.NijPredictivePolicing.Common
         WestVirginia,
         Wisconsin,
         Wyoming,
-        UnitedStates
+        UnitedStates        //Not really a state, but ACS includes it as an option
     }
 
     public class States

@@ -49,7 +49,8 @@ namespace Azavea.NijPredictivePolicing.Common
         /// </summary>
         public const string BlockGroupsDataTableSuffix = "_Tracts_Block_Groups_Only.zip";
 
-        //Might want to move this out of Settings at a later date, but for now not sure where else to put it
+        //Might want to move these functions out of Settings at a later date, but for now 
+        //not sure where else to put them
         /// <summary>
         /// Given a state, returns the URL to the file containing its block group data
         /// </summary>
@@ -57,7 +58,18 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <returns></returns>
         public static string GetStateBlockGroupFileUrl(StateList state)
         {
-            return CurrentAcsAllStateTablesUrl + States.StateToCensusName(state);
+            return CurrentAcsAllStateTablesUrl + States.StateToCensusName(state) + 
+                BlockGroupsDataTableSuffix;
+        }
+
+        /// <summary>
+        /// Given a state, returns the name to the file containing its block group data
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public static string GetStateBlockGroupFileName(StateList state)
+        {
+            return States.StateToCensusName(state) + BlockGroupsDataTableSuffix;
         }
 
 

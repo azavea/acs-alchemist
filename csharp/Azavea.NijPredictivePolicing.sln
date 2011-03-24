@@ -15,6 +15,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicing.Common", "Azavea.NijPredictivePolicing.Common\Azavea.NijPredictivePolicing.Common.csproj", "{9E1E6F34-233E-4145-8DB0-75BFA5DB1715}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicing.Test", "Azavea.NijPredictivePolicing.Test\Azavea.NijPredictivePolicing.Test.csproj", "{73339E71-5900-4FC3-9A29-8E64A1BB805C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A8D5E203-EA5A-4560-A4D6-6586F8C3ABA6} = {A8D5E203-EA5A-4560-A4D6-6586F8C3ABA6}
+		{9E1E6F34-233E-4145-8DB0-75BFA5DB1715} = {9E1E6F34-233E-4145-8DB0-75BFA5DB1715}
+		{F524B387-A813-4FE4-AD37-E21D7645A1DC} = {F524B387-A813-4FE4-AD37-E21D7645A1DC}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
