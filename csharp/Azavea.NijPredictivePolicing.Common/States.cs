@@ -55,7 +55,6 @@ namespace Azavea.NijPredictivePolicing.Common
         Utah,
         Vermont,
         Virginia,
-        VirginIslands,
         Washington,
         WestVirginia,
         Wisconsin,
