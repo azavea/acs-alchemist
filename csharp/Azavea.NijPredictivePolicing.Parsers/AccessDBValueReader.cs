@@ -192,12 +192,12 @@ namespace Azavea.NijPredictivePolicing.Parsers
             /// <summary>
             /// the last line we read from our datastream (during MoveNext)
             /// </summary>
-            protected string[] _currentLine = null;
+            protected List<string> _currentLine = null;
 
             /// <summary>
             /// the internal array of column names for this file
             /// </summary>
-            protected string[] _columnNames = null;
+            protected List<string> _columnNames = null;
 
             /// <summary>
             /// our constructor (would rather have this protected, but it wasn't having it...)
@@ -211,12 +211,12 @@ namespace Azavea.NijPredictivePolicing.Parsers
             }
 
 
-            #region IEnumerator<string[]> Members
+            #region IEnumerator<List<string>> Members
 
             /// <summary>
             /// IEnumerator...
             /// </summary>
-            public string[] Current
+            public List<string> Current
             {
                 get  { return _internalGetCurrent(); }
             }
@@ -225,13 +225,13 @@ namespace Azavea.NijPredictivePolicing.Parsers
             /// Reads a row of data from the AccessDB using our current data reader
             /// </summary>
             /// <returns></returns>
-            protected string[] _internalGetCurrent()
+            protected List<string> _internalGetCurrent()
             {
                 if (_currentLine == null)
-                    _currentLine = new string[_data.FieldCount];
+                    _currentLine = new List<string>(_data.FieldCount);
 
                 for (int i = 0, max = _data.FieldCount; i < max; i++)                
-                    _currentLine[i] = String.Empty + _data.GetValue(i);
+                    _currentLine.Add(String.Empty + _data.GetValue(i));
                 
                 return _currentLine;
             }
@@ -290,7 +290,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
             /// <summary>
             /// Gets a list of columns from the Access database for the current table
             /// </summary>
-            public string[] GetColumns()
+            public List<string> GetColumns()
             {
                 if (_columnNames != null)
                     return _columnNames;
@@ -298,10 +298,10 @@ namespace Azavea.NijPredictivePolicing.Parsers
                 DataTable schemaDT = _data.GetSchemaTable();
                 if ((schemaDT != null) && (schemaDT.Rows.Count > 0))
                 {
-                    _columnNames = new string[schemaDT.Rows.Count];
+                    _columnNames = new List<string>(schemaDT.Rows.Count);
                     for (int i = 0; i < schemaDT.Rows.Count; i++)
                     {
-                        _columnNames[i] = (schemaDT.Rows[i][0] as string);
+                        _columnNames.Add(schemaDT.Rows[i][0] as string);
                     }
                 }
                 return _columnNames;

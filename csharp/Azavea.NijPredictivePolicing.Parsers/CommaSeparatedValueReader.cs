@@ -14,9 +14,9 @@ namespace Azavea.NijPredictivePolicing.Parsers
 
 
         /// <summary>
-        /// the tab, for the tab-separated part
+        /// Some countries use other characters such as ;
         /// </summary>
-        protected char[] _splitChars = new char[] { ',' };
+        protected const char Comma = ',';
 
         /// <summary>
         /// an internal copy of our filename
@@ -126,19 +126,14 @@ namespace Azavea.NijPredictivePolicing.Parsers
             CommaSeparatedValueReader _parent;
 
             /// <summary>
-            /// an easier way to parse our tsv stream...
-            /// </summary>
-            StreamReader _data;
-
-            /// <summary>
             /// the last line we read from our datastream (during MoveNext)
             /// </summary>            
-            protected string _currentLine = null;
+            protected List<string> _currentRow = null;
 
             /// <summary>
             /// the internal array of column names for this file
             /// </summary>
-            protected string[] _columnNames = null;
+            protected List<string> _columnNames = null;
 
             /// <summary>
             /// our constructor (would rather have this protected, but it wasn't having it...)
@@ -148,20 +143,139 @@ namespace Azavea.NijPredictivePolicing.Parsers
                 _parent = parent;
                 _parent.ResetStream();
                 
-                _data = new StreamReader(_parent._dataStream);
                 Reset();
                 GetColumns();
             }
 
+            /// <summary>
+            /// Used to seek to next comma or newline.  If the current char is a , or a newline, it returns -a value less than 0 and advances to the next field (either 1 or 2 places depending on CRLF).  Otherwise, it advances 1 and returns the character read.
+            /// </summary>
+            /// <param name="fs">The filestream to read</param>
+            /// <returns>-1 on comma encountered, -2 on newline encountered, -3 on EOF encountered, character read otherwise</returns>
+            protected static int IsCurrentCommaOrNewLine(FileStream fs)
+            {
+                int temp = fs.ReadByte();
+                char c = (char)temp;
 
-            #region IEnumerator<string[]> Members
+                if (c == Comma)
+                    return -1;
+                else if (c == '\n')
+                    return -2;
+                else if (temp == -1)
+                    return -3;
+
+                //Could be followed by '\n' (stupid windows) so we have to check
+                else if (c == '\r')
+                {
+                    int next = fs.ReadByte();
+
+                    if ((char)next != '\n')
+                    {
+                        //Oops, went too far, go back one
+                        fs.Seek(-1, SeekOrigin.Current);
+                    }
+
+                    return -2;
+                }
+
+                return (int)c;
+            }
+
+            /// <summary>
+            /// Gets the next field from fs
+            /// </summary>
+            /// <param name="fs">The filestream to read, positioned at the start of the field</param>
+            /// <param name="lastFieldInRow">Set to true if this is the last field in the row, false otherwise</param>
+            /// <returns></returns>
+            public static string GetNextField(FileStream fs, ref bool lastFieldInRow)
+            {
+                StringBuilder buffer = new StringBuilder(1024);
+
+                int first;
+                if (fs.CanRead && (fs.Position < fs.Length))
+                    first = fs.ReadByte();
+                else
+                    return "";
+
+                if (first == -1 || (char)first == ',') 
+                    return "";
+
+                char c = (char)first;
+                if (c == '\"')
+                {
+                    while (fs.CanRead && (fs.Position < fs.Length))
+                    {
+                        c = (char)fs.ReadByte();
+                        if (c == '\"')
+                        {
+                            int next = fs.ReadByte();
+
+                            //End of input, we're done
+                            if (next < 0)
+                            {
+                                lastFieldInRow = true;
+                                break;
+                            }
+
+                            //First " was escaped, add one quote and keep going
+                            else if ((char)next == '\"')
+                            {
+                                buffer.Append('\"');
+                                continue;
+                            }
+
+                            //End of quoted string, seek until next , and then exit
+                            //This silently throws away data in malformed CSVs; better way to do it?
+                            else
+                            {
+                                //Seek to end of field
+                                while((next = IsCurrentCommaOrNewLine(fs)) >= 0);
+                                //Return true if newline or eof encountered, false if ,
+                                lastFieldInRow = (next == -1) ? false : true;
+                            }
+                        }
+                        else
+                            buffer.Append(c);
+                    }
+                }
+                else
+                {
+                    buffer.Append(c);
+                    int temp;
+                    while ((temp = IsCurrentCommaOrNewLine(fs)) >= 0)
+                    {
+                        buffer.Append((char)temp);
+                    }
+                    lastFieldInRow = (temp == -1) ? false : true;
+                }
+
+                return buffer.ToString();
+            }
+
+
+            protected List<string> GetNextRow(FileStream fs)
+            {
+                var result = new List<string>((_columnNames != null) ? _columnNames.Count : 32);
+                bool lastField = false;
+                string currentField;
+
+                while (!lastField)
+                {
+                    currentField = GetNextField(fs, ref lastField);
+                    result.Add(currentField);
+                }
+
+                return result;
+            }
+
+            #region IEnumerator<List<string>> Members
 
             /// <summary>
             /// IEnumerator...
             /// </summary>
-            public string[] Current
+            public List<string> Current
             {
-                get { return _currentLine.Split(_parent._splitChars, StringSplitOptions.None); }
+                get { return _currentRow; }
             }
 
             #endregion
@@ -170,8 +284,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
 
             public void Dispose()
             {
-                _currentLine = null;
-                _data = null;
+                _currentRow = null;
                 _parent = null;
             }
 
@@ -184,11 +297,11 @@ namespace Azavea.NijPredictivePolicing.Parsers
             /// </summary>
             public bool MoveNext()
             {
-                if (_data.EndOfStream)
+                if (_parent._dataStream.Position >= _parent._dataStream.Length || 
+                    !_parent._dataStream.CanRead)
                     return false;
 
-                //this is why we like StreamReaders...               
-                _currentLine = _data.ReadLine();
+                _currentRow = GetNextRow(_parent._dataStream as FileStream);
                 return true;
             }
 
@@ -198,7 +311,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
             /// </summary>
             object System.Collections.IEnumerator.Current
             {
-                get { return _currentLine.Split(_parent._splitChars, StringSplitOptions.None); }
+                get { return _currentRow; }
             }
 
             /// <summary>
@@ -207,8 +320,8 @@ namespace Azavea.NijPredictivePolicing.Parsers
             public void Reset()
             {
                 //move back to before the data
-                _data.BaseStream.Seek(0, SeekOrigin.Begin);
-                _currentLine = null;
+                _parent._dataStream.Seek(0, SeekOrigin.Begin);
+                _currentRow = null;
                 _columnNames = null;
             }
 
@@ -216,7 +329,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
 
             #region RowEnumerator Members
 
-            public string[] GetColumns()
+            public List<string> GetColumns()
             {
                 if (_columnNames != null)
                     return _columnNames;

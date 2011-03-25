@@ -138,7 +138,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
             /// <summary>
             /// the internal array of column names for this file
             /// </summary>
-            protected string[] _columnNames = null;
+            protected List<string> _columnNames = null;
 
             /// <summary>
             /// our constructor (would rather have this protected, but it wasn't having it...)
@@ -159,9 +159,10 @@ namespace Azavea.NijPredictivePolicing.Parsers
             /// <summary>
             /// IEnumerator...
             /// </summary>
-            public string[] Current
+            public List<string> Current
             {
-                get { return _currentLine.Split(_parent._splitChars, StringSplitOptions.None); }
+                get { return new List<string>(
+                    _currentLine.Split(_parent._splitChars, StringSplitOptions.None)); }
             }
 
             #endregion
@@ -216,7 +217,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
 
             #region RowEnumerator Members
 
-            public string[] GetColumns()
+            public List<string> GetColumns()
             {
                 if (_columnNames != null)
                     return _columnNames;
