@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicin
 		{F524B387-A813-4FE4-AD37-E21D7645A1DC} = {F524B387-A813-4FE4-AD37-E21D7645A1DC}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicing.Parsers", "Azavea.NijPredictivePolicing.Parsers\Azavea.NijPredictivePolicing.Parsers.csproj", "{C3B6D310-5133-481A-87B3-620E6644805F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{73339E71-5900-4FC3-9A29-8E64A1BB805C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73339E71-5900-4FC3-9A29-8E64A1BB805C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73339E71-5900-4FC3-9A29-8E64A1BB805C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3B6D310-5133-481A-87B3-620E6644805F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3B6D310-5133-481A-87B3-620E6644805F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3B6D310-5133-481A-87B3-620E6644805F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3B6D310-5133-481A-87B3-620E6644805F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
