@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using System.IO;
-using Azavea.NijPredictivePolicing.Parsers;
 
-namespace Azavea.NijPredictivePolicing.Test
+namespace Azavea.NijPredictivePolicing.Test.Common.Data
 {
     [TestFixture]
-    public class NullSeparatedValueReaderTests
+    public class FixedWidthColumnFileTests
     {
         
 
