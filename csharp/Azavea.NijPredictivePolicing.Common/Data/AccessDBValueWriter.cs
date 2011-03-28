@@ -7,7 +7,6 @@ using log4net;
 using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
-using ADOX;
 
 
 namespace Azavea.NijPredictivePolicing.Parsers

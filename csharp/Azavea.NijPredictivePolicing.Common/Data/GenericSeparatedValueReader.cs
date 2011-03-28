@@ -7,12 +7,11 @@ using log4net;
 using System.Collections;
 
 
-namespace Azavea.NijPredictivePolicing.Parsers
+namespace Azavea.NijPredictivePolicing.Common.Data
 {
-    public class TabSeparatedValueReader : IDataFileReader, IEnumerable<List<string>>
+    public class GenericSeparatedValueReader : IDataFileReader, IEnumerable<List<string>>
     {
         private readonly ILog _log = LogManager.GetLogger(new System.Diagnostics.StackTrace().GetFrame(0).GetMethod().DeclaringType.Namespace);
-
 
         /// <summary>
         /// the tab, for the tab-separated part
@@ -29,9 +28,11 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// </summary>
         protected System.IO.Stream _dataStream;
 
-        public TabSeparatedValueReader() { }
-        public TabSeparatedValueReader(string filename)
+
+        public GenericSeparatedValueReader() { }
+        public GenericSeparatedValueReader(string filename, char[] delims)
         {
+            _splitChars = delims;
             LoadFile(filename);
         }
 
@@ -60,10 +61,21 @@ namespace Azavea.NijPredictivePolicing.Parsers
             return false;
         }
 
+        //public bool LoadFile(Stream input)
+        //{
+        //    _filename = null;
+        //    _dataStream = input;
+        //    return true;
+        //}
+
+        //public string[] ColumnNames()
+        //{
+        //    return null;
+        //}
+
         /// <summary>
         /// here for the interface
         /// </summary>
-        /// <returns></returns>
         public List<string> TableNames()
         {
             //here for the interface
@@ -73,30 +85,29 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// <summary>
         /// here for the interface
         /// </summary>
-        /// <param name="tableName"></param>
         public void SetTablename(string tableName)
         {
             //here for the interface
         }
 
         /// <summary>
-        /// returns an TabSeparatedValueFileEnumerator
+        /// returns an GenericSeparatedValueFileEnumerator
         /// </summary>
         IEnumerator<List<string>> System.Collections.Generic.IEnumerable<List<string>>.GetEnumerator()
         {
-            return new TabSeparatedValueFileEnumerator(this);
+            return new GenericSeparatedValueFileEnumerator(this);
         }
 
         /// <summary>
-        /// returns an TabSeparatedValueFileEnumerator
+        /// returns an GenericSeparatedValueFileEnumerator
         /// </summary>
         IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return new TabSeparatedValueFileEnumerator(this);
+            return new GenericSeparatedValueFileEnumerator(this);
         }
 
         /// <summary>
-        /// Resets the input stream to the beginning, which is a very good place to start.
+        ///  Resets the input stream to the beginning, which is a very good place to start.
         /// </summary>
         protected void ResetStream()
         {
@@ -126,12 +137,12 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// (don't share a TabSeparatedValueReader, and really don't enumerate over it concurrently.
         /// you wouldn't share a stream, would you?)
         /// </summary>
-        public class TabSeparatedValueFileEnumerator : IRowEnumerator
+        public class GenericSeparatedValueFileEnumerator : IRowEnumerator
         {
             /// <summary>
             /// our pointer back to the collection
             /// </summary>
-            TabSeparatedValueReader _parent;
+            GenericSeparatedValueReader _parent;
 
             /// <summary>
             /// an easier way to parse our tsv stream...
@@ -151,7 +162,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
             /// <summary>
             /// our constructor (would rather have this protected, but it wasn't having it...)
             /// </summary>
-            public TabSeparatedValueFileEnumerator(TabSeparatedValueReader parent)
+            public GenericSeparatedValueFileEnumerator(GenericSeparatedValueReader parent)
             {
                 _parent = parent;
                 _parent.ResetStream();
@@ -162,7 +173,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
             }
 
 
-            #region IEnumerator<string[]> Members
+            #region IEnumerator<List<string>> Members
 
             /// <summary>
             /// IEnumerator...
@@ -207,7 +218,8 @@ namespace Azavea.NijPredictivePolicing.Parsers
             /// </summary>
             object System.Collections.IEnumerator.Current
             {
-                get { return _currentLine.Split(_parent._splitChars, StringSplitOptions.None); }
+                get { return new List<string>(
+                    _currentLine.Split(_parent._splitChars, StringSplitOptions.None)); }
             }
 
             /// <summary>

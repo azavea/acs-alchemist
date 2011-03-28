@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Azavea.NijPredictivePolicing.Parsers
+namespace Azavea.NijPredictivePolicing.Common.Data
 {
     /// <summary>
     /// Just like an IEnumerator for an array of strings, except this gives us a list of column names too

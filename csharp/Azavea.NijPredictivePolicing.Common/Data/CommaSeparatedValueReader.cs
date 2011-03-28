@@ -7,11 +7,11 @@ using log4net;
 using System.Collections;
 
 
-namespace Azavea.NijPredictivePolicing.Parsers
+namespace Azavea.NijPredictivePolicing.Common.Data
 {
     public class CommaSeparatedValueReader : IDataFileReader, IEnumerable<List<string>>
-    {
-        private readonly ILog _log = LogManager.GetLogger(new System.Diagnostics.StackTrace().GetFrame(0).GetMethod().DeclaringType.Namespace);
+    {        
+        private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 
         /// <summary>

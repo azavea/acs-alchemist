@@ -6,7 +6,7 @@ using log4net;
 using System.IO;
 using System.Collections;
 
-namespace Azavea.NijPredictivePolicing.Parsers
+namespace Azavea.NijPredictivePolicing.Common.Data
 {
     /// <summary>
     /// Used primarily for reading binary files with constant-sized field entries.  Assumes rows are terminated with newlines.

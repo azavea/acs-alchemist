@@ -6,21 +6,17 @@ using System.IO;
 using log4net;
 
 
-namespace Azavea.NijPredictivePolicing.Parsers
+namespace Azavea.NijPredictivePolicing.Common.Data
 {
     /// <summary>
-    /// A basic implementation of the IDataWriter interface, so we can simply export CSV files.  
-    /// Should be compliant with RFC4180 ( http://tools.ietf.org/html/rfc4180 ).
+    /// a basic implementation of the IDataWriter interface, so we can simply export tab separated value files
     /// </summary>
-    public class CommaSeparatedValueWriter : IDataFileWriter
+    public class GenericSeparatedValueWriter : IDataFileWriter
     {
-        private readonly ILog _log = LogManager.GetLogger(new System.Diagnostics.StackTrace().GetFrame(0).GetMethod().DeclaringType.Namespace);
-
-
         /// <summary>
         /// the tab, for the tab-separated part
         /// </summary>
-        protected char[] _splitChars = new char[] { ',' };
+        protected char[] _splitChars = new char[] { '\t' };
 
         /// <summary>
         /// an internal copy of our filename
@@ -41,14 +37,15 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// construct a new blank writer
         /// (any writes will throw exceptions if you don't set a stream or a file!)
         /// </summary>
-        public CommaSeparatedValueWriter() { }
+        public GenericSeparatedValueWriter() { }
 
         /// <summary>
         /// construct a new writer to append to the given file
         /// </summary>
         /// <param name="filename"></param>
-        public CommaSeparatedValueWriter(string filename)
+        public GenericSeparatedValueWriter(string filename, char[] delims)
         {
+            _splitChars = delims;
             SetWriteFile(filename);
         }
 
@@ -60,76 +57,81 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// </summary>
         public bool SetWriteFile(string filename)
         {
-            try
-            {
-                _filename = filename;
-                FileStream fs = new FileStream(filename, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.Read);
-                _outputStream = new StreamWriter(fs);
-                return _outputStream.BaseStream.CanWrite;
-            }
-            catch (Exception ex)
-            {
-                _log.Error("SetWriteFile", ex);
-            }
-            return false;
+            _filename = filename;
+            FileStream fs = new FileStream(filename, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.Read);
+            _outputStream = new StreamWriter(fs);
+            return _outputStream.BaseStream.CanWrite;
         }
 
-        /// <summary>
-        /// changes the currently active table, does nothing for this type of file, since it only contains one table.
-        /// </summary>
         public void SetTablename(string tableName)
         {
             //_tablename = tableName;
         }
 
-        /// <summary>
-        /// simply appends the column row.  call this first!
-        /// (you would have to call this first anyway.)
-        /// </summary>
         public bool CreateTable(string tablename, IEnumerable<string> columns)
         {
             return WriteLine(columns);
         }
 
+        ///// <summary>
+        ///// allows you to use any functional writable stream
+        ///// </summary>
+        //public bool SetWriteStream(Stream output)
+        //{
+        //    _filename = null;
+        //    _outputStream = new StreamWriter(output);
+        //    return _outputStream.BaseStream.CanWrite;
+        //}
 
         /// <summary>
-        /// Write a line directly to our output
+        /// generate the first column properly
         /// </summary>
-        /// <param name="line"></param>
-        /// <returns></returns>
+        public string MakeColumnLine(List<string> columns)
+        {
+            StringBuilder colLine = new StringBuilder(512);
+            for (int i = 0; i < columns.Count; i++)
+            {
+                if (i > 0)
+                    colLine.Append(_splitChars);
+
+                colLine.Append(columns[i]);
+            }
+
+            return colLine.ToString();
+        }
+
+        /// <summary>
+        /// generate the first column properly
+        /// </summary>
+        public string MakeFormatLine(List<string> columns)
+        {
+            StringBuilder formatLine = new StringBuilder(512);
+            for (int i = 0; i < columns.Count; i++)
+            {
+                if (i > 0)
+                    formatLine.Append(_splitChars);
+
+                formatLine.Append("{" + i + "}");
+            }
+
+            return formatLine.ToString();
+        }
+
         public bool WriteLine(string line)
         {
             _outputStream.WriteLine(line);
             return true;
         }
 
-        /// <summary>
-        /// If input contains ,s or newlines, escapes all "s and brackets in "s and returns the result, 
-        /// otherwise returns input unmodified
-        /// </summary>
-        /// <param name="input">The string to escape and quote (if necessary)</param>
-        /// <returns>The escaped and quoted string</returns>
-        public string QuoteAndEscape(string input)
-        {
-            if (input.Contains('\n') || input.Contains(','))
-            {
-                string temp = input.Replace("\"", "\"\"");
-                StringBuilder result = new StringBuilder(temp.Length + 2);
-                result.Append('\"').Append(temp).Append('\"');
-                return result.ToString();
-            }
-            else
-            {
-                return input;
-            }
-        }
-
+        //public bool WriteLine(IEnumerable<object> values)
+        //{
+        //    return WriteLine((IEnumerable<string>)values);
+        //}
 
 
         /// <summary>
         /// Make sure you have a value for every column!
         /// This is really intentionally not thread safe, do not share this class across threads.
-        /// really, don't write one of these files across multiple threads at the same time.
         /// </summary>
         public bool WriteLine(IEnumerable<string> values)
         {
@@ -145,10 +147,16 @@ namespace Azavea.NijPredictivePolicing.Parsers
                     if (onceThru)
                         _line.Append(this._splitChars);
 
-                    _line.Append(QuoteAndEscape(s));
+                    _line.Append(s);
                     onceThru = true;
                 }
             }
+            //else
+            //{
+            //    int two = 1 + 1;
+            //}
+            //I don't need a newline when I'm using a StreamWriter           
+            //_line.Append(Environment.NewLine);
 
             _outputStream.WriteLine(_line.ToString());
             _line.Length = 0;
@@ -176,6 +184,5 @@ namespace Azavea.NijPredictivePolicing.Parsers
         }
 
         #endregion
-
     }
 }
