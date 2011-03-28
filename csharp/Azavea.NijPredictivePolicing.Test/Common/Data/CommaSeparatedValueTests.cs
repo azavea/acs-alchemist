@@ -11,7 +11,7 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
     [TestFixture]
     class CommaSeparatedValueTests
     {
-        public const string InputDirectory = @"E:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test\TestData\ParserTests";
+        public const string InputDirectory = @"..\..\TestData\ParserTests";
 
         public const string WellFormedCsvFile = "wellFormed.csv";
 

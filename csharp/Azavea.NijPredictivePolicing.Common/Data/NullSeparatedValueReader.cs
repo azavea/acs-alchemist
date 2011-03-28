@@ -11,7 +11,7 @@ namespace Azavea.NijPredictivePolicing.Common.Data
     /// <summary>
     /// Used primarily for reading binary files with constant-sized field entries.  Assumes rows are terminated with newlines.
     /// </summary>
-    class NullSeparatedValueReader : IDataFileReader, IEnumerable<List<string>>
+    public class NullSeparatedValueReader : IDataFileReader, IEnumerable<List<string>>
     {
         
         private readonly ILog _log = LogManager.GetLogger(new System.Diagnostics.StackTrace().GetFrame(0).GetMethod().DeclaringType.Namespace);
@@ -152,6 +152,16 @@ namespace Azavea.NijPredictivePolicing.Common.Data
                 Strict = strict;
             }
 
+            public Field(Field old)
+            {
+                Start = old.Start;
+                End = old.End;
+                Strict = old.Strict;
+                DefaultValue = old.DefaultValue;
+                Type = old.Type;
+                Seeker = old.Seeker;
+                Terminator = old.Terminator;
+            }
 
             /// <summary>
             /// Determines where the record starts
@@ -243,7 +253,7 @@ namespace Azavea.NijPredictivePolicing.Common.Data
                 LENGTH,
 
                 /// <summary>
-                /// End is a offset index from the start of the line corresponding to the last character to read for this field.  If End &lt; Start, an exception is thrown.
+                /// End is a offset index from the start of the line corresponding to the character AFTER the last character to read for this field.  If End &lt; Start, an exception is thrown.
                 /// </summary>
                 INDEX
             }
@@ -261,7 +271,7 @@ namespace Azavea.NijPredictivePolicing.Common.Data
                     int myStart = 0;
                     int myEnd = 0;
                     GetFieldRange(row, currentPos, out myStart, out myEnd);
-                    currentPos = myEnd + 1;
+                    currentPos = myEnd;
 
                     return row.Substring(myStart, myEnd - myStart);
                 }
@@ -355,9 +365,9 @@ namespace Azavea.NijPredictivePolicing.Common.Data
                         break;
 
                     case Positions.FROM_END:
-                        if (Start < 0)
-                            throw new ArgumentOutOfRangeException("Start", Start, "Seeker is FROM_END, but Start < 0");
-                        start = rowSize - 1 - Start;
+                        if (Start < 1)
+                            throw new ArgumentOutOfRangeException("Start", Start, "Seeker is FROM_END, but Start < 1");
+                        start = rowSize - Start;
                         if (start >= rowSize)
                             throw new ArgumentOutOfRangeException("Start", Start, "Seeker is FROM_END, but value of Start results in out of range index");
                         break;
@@ -375,19 +385,19 @@ namespace Azavea.NijPredictivePolicing.Common.Data
                 switch (this.Terminator)
                 {
                     case Terminators.NEWLINE:
-                        end = rowSize - 1;
+                        end = rowSize;
                         break;
 
                     case Terminators.LENGTH:
                         if (End < 0)
                             throw new ArgumentOutOfRangeException("End", End, "Terminator is LENGTH, but End < 0");
                         end = start + End;
-                        if (end >= rowSize)
+                        if (end > rowSize)
                             throw new ArgumentOutOfRangeException("End", End, "Terminator is LENGTH, but value of current position results in out of range index");
                         break;
 
                     case Terminators.INDEX:
-                        if (End < 0 || End >= rowSize)
+                        if (End < 0 || End > rowSize)
                             throw new ArgumentOutOfRangeException("End", End, "Terminator is INDEX, but End is out of range");
                         else if (End < start)
                             throw new ArgumentOutOfRangeException("End", End, "Terminator is INDEX, but End < Start");
