@@ -32,15 +32,31 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
         [Test]
         public void ReaderTest()
         {
+            /* CSV Contents:
+                foo,bar,  whitespace  ," quotes "" , and commas "
+                "quoted, with
+                newline"
+
+                ,
+                ,,
+                blarg
+                blarg,"quoted, with
+                newline"
+                "quoted, with
+                newline",blarg
+                blarg,"quoted, with
+                newline",blarg
+             */
+
             CommaSeparatedValueReader reader = new CommaSeparatedValueReader();
             string filename = Path.Combine(InputDirectory, WellFormedCsvFile);
 
             var expected = new List<string[]>();
             expected.Add(new string[] { "foo", "bar", "  whitespace  ", @" quotes "" , and commas " });
             expected.Add(new string[] { "quoted, with\nnewline" });
-            expected.Add(new string[] { "" });                //empty line
-            expected.Add(new string[] { "", "" });          //single ,
-            expected.Add(new string[] { "", "", "" });    //,,
+            expected.Add(new string[] { "" });                  //empty line
+            expected.Add(new string[] { "", "" });              //single ,
+            expected.Add(new string[] { "", "", "" });          //,,
             expected.Add(new string[] { "blarg" });
             expected.Add(new string[] { "blarg", "quoted, with\nnewline" });
             expected.Add(new string[] { "quoted, with\nnewline", "blarg" });
