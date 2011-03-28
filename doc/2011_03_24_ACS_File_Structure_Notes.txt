@@ -28,6 +28,9 @@ LOGRECNO 	Logical Record Number 		7 		14
 Many other columns too numerous to enumerate here, but documented in http://www2.census.gov/acs2009_5yr/summaryfile/ACS_2005-2009_SF_Tech_Doc.pdf section 2.4
 Other columns include State, County, Tract, and Block Group, which can be used to map geographic areas to a Logical Record Number
 
+
+
+
 Shape File:
 Located at http://www.census.gov/geo/cob/bdy/bg/bg00shp/bg[FIPS-code]_d00_shp.zip 
 [FIPS-code] is a somewhat arbitrary 2-digit code corresponding to a US state, see link in Resources section.
@@ -38,18 +41,41 @@ Relevant Metadata for each polygon:
  - TRACT - 4-digit census tract code
  - BLKGROUP - 1 digit block group code
 
+
  
 Sequence_Number_and_Table_Number_Lookup.xls:
 Located at http://www2.census.gov/acs2009_5yr/summaryfile/Sequence_Number_and_Table_Number_Lookup.xls
 Maps Column Names to Sequence Numbers and Row Locations
-Each row corresponds to a database column
+Each row corresponds to a column in one of the Estimate/MoE files, except some which are aggregates.
 File Columns:
  - File ID (fileid) - Always "ACSSF" as far as I can tell
- - Table ID (tblid)
+ - Table ID (tblid) - Useless for our purposes
  - Sequence Numbers (seq) - Correspond to names of Estimate/MoE files
- - Position (position) - ?
- - Cells (cells) - ?
+ - Line Number (col) - Misnomer, this is really column number (sort of).  The actual column number is 
+	 computed as (position + col - 1), with the first column as 1.  Individual lines within a Estimate/MoE 
+	 file correspond to different locations by LOGRECNO
+ - Position (position) - The starting position to compute the real column number as described above.  
+	 If position is undefined for the current row, it inherits from the one above it.
+ - Cells (cells1) - Total number of columns for aggregate column types.  Redundant and useless.
+ - Total cells in sequence (cells2) - Total number of cells for a sequence (only appears in one row for 
+	 a given sequence number).  Redundant and useless.
  - Title (title) - Column Description
+ 
+In addition to the columns, there are several "types" of rows.  There are normal ones, which have 
+(fileid, tblid, seq, col, title) fields but are missing (position, cells1, cells2).  These correspond to actual
+numbers in actual files and are basically what we want.  They are unfortunately missing essential information in 
+the title which is provided by header rows.  
+
+There are two types of header rows, Measurement and Demographic. Measurement headers are the only rows with position 
+defined and always have cells1 defined as well. If it is the last measurement header for a sequence number, it will also 
+have cells2 defined. Their title fields are in all caps and describe the type of measurement for all their children, 
+sometimes followed by demographic in () (e.g. "SEX BY AGE". Demographic headers always (?) immediately follow 
+Measurement headers (if the are present at all; unknown if they can be absent). They don't have entries for (col, 
+position, cells1, cells2), and their titles always start with "Universe: " followed by a description of the demographic 
+(e.g. "Universe: People reporting single ancestry"). Thus, to get the full information about what a row really means, 
+you need the row's title as well as the titles for its Measurement and Demographic headers. 
+
+
 
 Estimate and MoE Files: 
 Located at http://www2.census.gov/acs2009_5yr/summaryfile/2005-2009_ACSSF_By_State_All_Tables/*.zip
