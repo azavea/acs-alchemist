@@ -14,6 +14,5 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// Get a list of column names for this enumerator (so we know what order the values are in)
         /// </summary>
         List<string> GetColumns();
-
     }
 }

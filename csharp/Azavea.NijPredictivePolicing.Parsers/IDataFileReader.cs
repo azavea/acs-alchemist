@@ -17,15 +17,6 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// Load the specified input file
         /// </summary>
         bool LoadFile(string filename);
-        //bool LoadFile(Stream input);
-
-        //ColumnNames was removed, you should get these from a RowEnumerator.
-        //string[] ColumnNames();
-
-        /// <summary>
-        /// Creates a row enumerator for the current data source
-        /// </summary>
-        IRowEnumerator GetEnumerator();
 
         /// <summary>
         /// Closes the current data source

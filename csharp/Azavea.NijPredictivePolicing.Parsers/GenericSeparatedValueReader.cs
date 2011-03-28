@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using log4net;
+using System.Collections;
 
 
 namespace Azavea.NijPredictivePolicing.Parsers
 {
-    public class GenericSeparatedValueReader : IDataFileReader
+    public class GenericSeparatedValueReader : IDataFileReader, IEnumerable<List<string>>
     {
         private readonly ILog _log = LogManager.GetLogger(new System.Diagnostics.StackTrace().GetFrame(0).GetMethod().DeclaringType.Namespace);
-
 
         /// <summary>
         /// the tab, for the tab-separated part
@@ -93,7 +93,15 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// <summary>
         /// returns an GenericSeparatedValueFileEnumerator
         /// </summary>
-        public IRowEnumerator GetEnumerator()
+        IEnumerator<List<string>> System.Collections.Generic.IEnumerable<List<string>>.GetEnumerator()
+        {
+            return new GenericSeparatedValueFileEnumerator(this);
+        }
+
+        /// <summary>
+        /// returns an GenericSeparatedValueFileEnumerator
+        /// </summary>
+        IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return new GenericSeparatedValueFileEnumerator(this);
         }

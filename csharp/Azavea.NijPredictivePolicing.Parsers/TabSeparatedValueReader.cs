@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using log4net;
+using System.Collections;
 
 
 namespace Azavea.NijPredictivePolicing.Parsers
 {
-    public class TabSeparatedValueReader : IDataFileReader
+    public class TabSeparatedValueReader : IDataFileReader, IEnumerable<List<string>>
     {
         private readonly ILog _log = LogManager.GetLogger(new System.Diagnostics.StackTrace().GetFrame(0).GetMethod().DeclaringType.Namespace);
 
@@ -79,10 +80,17 @@ namespace Azavea.NijPredictivePolicing.Parsers
         }
 
         /// <summary>
-        /// Creates a TabSeparatedValueFileEnumerator around this reader, which supports the RowEnumerator interface
+        /// returns an TabSeparatedValueFileEnumerator
         /// </summary>
-        /// <returns></returns>
-        public IRowEnumerator GetEnumerator()
+        IEnumerator<List<string>> System.Collections.Generic.IEnumerable<List<string>>.GetEnumerator()
+        {
+            return new TabSeparatedValueFileEnumerator(this);
+        }
+
+        /// <summary>
+        /// returns an TabSeparatedValueFileEnumerator
+        /// </summary>
+        IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return new TabSeparatedValueFileEnumerator(this);
         }

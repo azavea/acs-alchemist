@@ -1,0 +1,13 @@
+foo,bar,  whitespace  ," quotes "" , and commas "
+"quoted, with
+newline"
+
+,
+,,
+blarg
+blarg,"quoted, with
+newline"
+"quoted, with
+newline",blarg
+blarg,"quoted, with
+newline",blarg

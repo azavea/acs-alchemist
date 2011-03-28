@@ -53,8 +53,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CsvTests.cs" />
     <Compile Include="FileRetrievalTests.cs" />
     <Compile Include="Helpers\LogHelpers.cs" />
+    <Compile Include="NullSeparatedValueReaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -70,6 +72,13 @@
       <Project>{9E1E6F34-233E-4145-8DB0-75BFA5DB1715}</Project>
       <Name>Azavea.NijPredictivePolicing.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Azavea.NijPredictivePolicing.Parsers\Azavea.NijPredictivePolicing.Parsers.csproj">
+      <Project>{C3B6D310-5133-481A-87B3-620E6644805F}</Project>
+      <Name>Azavea.NijPredictivePolicing.Parsers</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TestData\ParserTests\wellFormed.csv" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

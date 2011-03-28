@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using log4net;
 using System.IO;
+using System.Collections;
 
 namespace Azavea.NijPredictivePolicing.Parsers
 {
     /// <summary>
     /// Used primarily for reading binary files with constant-sized field entries.  Assumes rows are terminated with newlines.
     /// </summary>
-    class NullSeparatedValueReader : IDataFileReader
+    class NullSeparatedValueReader : IDataFileReader, IEnumerable<List<string>>
     {
         
         private readonly ILog _log = LogManager.GetLogger(new System.Diagnostics.StackTrace().GetFrame(0).GetMethod().DeclaringType.Namespace);
@@ -30,12 +31,16 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// </summary>
         public List<Field> Columns;
 
+        public bool HasColumns = false;
 
         public NullSeparatedValueReader() { }
+
+        public NullSeparatedValueReader(bool hasColumns) { HasColumns = hasColumns; }
 
         public NullSeparatedValueReader(string filename, List<Field> columns)
         {
             Columns = columns;
+            HasColumns = false;
             LoadFile(filename);
         }
 
@@ -88,9 +93,17 @@ namespace Azavea.NijPredictivePolicing.Parsers
         }
 
         /// <summary>
-        /// returns an GenericSeparatedValueFileEnumerator
+        /// returns an NullSeparatedValueReaderEnumerator
         /// </summary>
-        public IRowEnumerator GetEnumerator()
+        IEnumerator<List<string>> System.Collections.Generic.IEnumerable<List<string>>.GetEnumerator()
+        {
+            return new NullSeparatedValueReaderEnumerator(this);
+        }
+
+        /// <summary>
+        /// returns an NullSeparatedValueReaderEnumerator
+        /// </summary>
+        IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return new NullSeparatedValueReaderEnumerator(this);
         }
@@ -517,6 +530,9 @@ namespace Azavea.NijPredictivePolicing.Parsers
 
             public List<string> GetColumns()
             {
+                if (!_parent.HasColumns)
+                    return null;
+
                 if (_columnNames != null)
                     return _columnNames;
 

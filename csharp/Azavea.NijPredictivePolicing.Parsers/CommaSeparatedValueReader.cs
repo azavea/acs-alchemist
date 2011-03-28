@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using log4net;
+using System.Collections;
 
 
 namespace Azavea.NijPredictivePolicing.Parsers
 {
-    public class CommaSeparatedValueReader : IDataFileReader
+    public class CommaSeparatedValueReader : IDataFileReader, IEnumerable<List<string>>
     {
         private readonly ILog _log = LogManager.GetLogger(new System.Diagnostics.StackTrace().GetFrame(0).GetMethod().DeclaringType.Namespace);
 
@@ -28,10 +29,16 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// </summary>
         protected System.IO.Stream _dataStream;
 
+        public bool HasColumns = false;
+
         public CommaSeparatedValueReader() { }
-        public CommaSeparatedValueReader(string filename)
+
+        public CommaSeparatedValueReader(bool hasColumns) { HasColumns = hasColumns; }
+
+        public CommaSeparatedValueReader(string filename, bool hasColumns)
         {
             LoadFile(filename);
+            HasColumns = hasColumns;
         }
 
 
@@ -79,10 +86,17 @@ namespace Azavea.NijPredictivePolicing.Parsers
         }
 
         /// <summary>
-        /// Creates a TabSeparatedValueFileEnumerator around this reader, which supports the RowEnumerator interface
+        /// returns an CommaSeparatedValueFileEnumerator
         /// </summary>
-        /// <returns></returns>
-        public IRowEnumerator GetEnumerator()
+        IEnumerator<List<string>> System.Collections.Generic.IEnumerable<List<string>>.GetEnumerator()
+        {
+            return new CommaSeparatedValueFileEnumerator(this);
+        }
+
+        /// <summary>
+        /// returns an CommaSeparatedValueFileEnumerator
+        /// </summary>
+        IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return new CommaSeparatedValueFileEnumerator(this);
         }
@@ -193,22 +207,59 @@ namespace Azavea.NijPredictivePolicing.Parsers
 
                 int first;
                 if (fs.CanRead && (fs.Position < fs.Length))
-                    first = fs.ReadByte();
+                    first = IsCurrentCommaOrNewLine(fs);
+                //EOF
                 else
+                {
+                    lastFieldInRow = true;
                     return "";
+                }
 
-                if (first == -1 || (char)first == ',') 
+                //Comma
+                if (first == -1)
+                {
+                    lastFieldInRow = false;
                     return "";
+                }
+
+                //Newline
+                else if (first == -2)
+                {
+                    lastFieldInRow = true;
+                    return "";
+                }
+
+                //EOF (Should never get here)
+                else if (first == -3)
+                {
+                    lastFieldInRow = true;
+                    return "";
+                }
 
                 char c = (char)first;
                 if (c == '\"')
                 {
                     while (fs.CanRead && (fs.Position < fs.Length))
                     {
-                        c = (char)fs.ReadByte();
+                        //Calling IsCurrentCommaOrNewLine allows us to convert all newlines to '\n'
+                        int next = IsCurrentCommaOrNewLine(fs);
+                        if (next == -1)
+                        {
+                            buffer.Append(Comma);
+                            continue;
+                        }
+                        else if (next == -2)
+                        {
+                            buffer.Append('\n');
+                            continue;
+                        }
+                        else if (next < 0) throw new Exception("Error in CSV parser, please debug");
+
+                        c = (char)next;
                         if (c == '\"')
                         {
-                            int next = fs.ReadByte();
+                            next = fs.ReadByte();
+                            c = (char)next;
 
                             //End of input, we're done
                             if (next < 0)
@@ -218,20 +269,29 @@ namespace Azavea.NijPredictivePolicing.Parsers
                             }
 
                             //First " was escaped, add one quote and keep going
-                            else if ((char)next == '\"')
+                            else if (c == '\"')
                             {
                                 buffer.Append('\"');
                                 continue;
                             }
 
                             //End of quoted string, seek until next , and then exit
-                            //This silently throws away data in malformed CSVs; better way to do it?
                             else
                             {
                                 //Seek to end of field
-                                while((next = IsCurrentCommaOrNewLine(fs)) >= 0);
-                                //Return true if newline or eof encountered, false if ,
-                                lastFieldInRow = (next == -1) ? false : true;
+                                if (c == Comma)
+                                {
+                                    lastFieldInRow = false;
+                                    break;
+                                }
+                                else
+                                {
+                                    //This silently throws away data in malformed CSVs; better way to do it?
+                                    while ((next = IsCurrentCommaOrNewLine(fs)) >= 0) ;
+                                    //Return true if newline or eof encountered, false if ,
+                                    lastFieldInRow = (next == -1) ? false : true;
+                                    break;
+                                }
                             }
                         }
                         else
@@ -331,6 +391,9 @@ namespace Azavea.NijPredictivePolicing.Parsers
 
             public List<string> GetColumns()
             {
+                if (!_parent.HasColumns)
+                    return null;
+
                 if (_columnNames != null)
                     return _columnNames;
 

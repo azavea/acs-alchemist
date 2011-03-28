@@ -5,10 +5,11 @@ using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
 using System.IO;
+using System.Collections;
 
 namespace Azavea.NijPredictivePolicing.Parsers
 {
-    public class AccessDBValueReader : IDataFileReader
+    public class AccessDBValueReader : IDataFileReader, IEnumerable<List<string>>
     {
         /// <summary>
         /// the ms access database filename
@@ -130,10 +131,17 @@ namespace Azavea.NijPredictivePolicing.Parsers
         }
 
         /// <summary>
-        /// grabs an enumerator that will walk the rows in the selected table
+        /// returns an AccessDBEnumerator
         /// </summary>
-        /// <returns></returns>
-        public IRowEnumerator GetEnumerator()
+        IEnumerator<List<string>> System.Collections.Generic.IEnumerable<List<string>>.GetEnumerator()
+        {
+            return new AccessDBEnumerator(this);
+        }
+
+        /// <summary>
+        /// returns an AccessDBEnumerator
+        /// </summary>
+        IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return new AccessDBEnumerator(this);
         }
