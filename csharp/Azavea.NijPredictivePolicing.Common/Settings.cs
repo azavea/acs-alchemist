@@ -10,6 +10,9 @@ namespace Azavea.NijPredictivePolicing.Common
     /// </summary>
     public class Settings
     {
+        public static Config ConfigFile;
+
+
         #region Properties
 
         /*

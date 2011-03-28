@@ -43,6 +43,10 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data.SQLite, Version=1.0.59.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\spatialite\System.Data.SQLite.DLL</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -54,8 +58,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AcsImporterLibrary\AreaDownloaderTests.cs" />
+    <Compile Include="Common\ConfigTests.cs" />
     <Compile Include="Common\Data\CommaSeparatedValueTests.cs" />
     <Compile Include="Common\Data\FixedWidthColumnFileTests.cs" />
+    <Compile Include="Common\DB\SpatialiteTests.cs" />
     <Compile Include="Helpers\LogHelpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -80,4 +86,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PostBuildEvent>copy C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\spatialite\*.dll "$(ProjectDir)$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
