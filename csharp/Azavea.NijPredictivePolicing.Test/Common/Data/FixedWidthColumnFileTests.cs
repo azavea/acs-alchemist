@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using System.IO;
-using Field = Azavea.NijPredictivePolicing.Parsers.NullSeparatedValueReader.Field;
-using Positions = Azavea.NijPredictivePolicing.Parsers.NullSeparatedValueReader.Field.Positions;
-using Types = Azavea.NijPredictivePolicing.Parsers.NullSeparatedValueReader.Field.Types;
-using Terminators = Azavea.NijPredictivePolicing.Parsers.NullSeparatedValueReader.Field.Terminators;
+using Field = Azavea.NijPredictivePolicing.Common.Data.NullSeparatedValueReader.Field;
+using Positions = Azavea.NijPredictivePolicing.Common.Data.NullSeparatedValueReader.Field.Positions;
+using Types = Azavea.NijPredictivePolicing.Common.Data.NullSeparatedValueReader.Field.Types;
+using Terminators = Azavea.NijPredictivePolicing.Common.Data.NullSeparatedValueReader.Field.Terminators;
 using System.Collections;
+using Azavea.NijPredictivePolicing.Common.Data;
 
 namespace Azavea.NijPredictivePolicing.Test.Common.Data
 {
