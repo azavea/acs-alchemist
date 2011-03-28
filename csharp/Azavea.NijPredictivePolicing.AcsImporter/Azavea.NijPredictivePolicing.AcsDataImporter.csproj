@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C3B6D310-5133-481A-87B3-620E6644805F}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{A8D5E203-EA5A-4560-A4D6-6586F8C3ABA6}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Azavea.NijPredictivePolicing.Parsers</RootNamespace>
-    <AssemblyName>Azavea.NijPredictivePolicing.Parsers</AssemblyName>
+    <RootNamespace>Azavea.NijPredictivePolicing.AcsDataImporter</RootNamespace>
+    <AssemblyName>AcsDataImporter</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -39,8 +39,6 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -51,29 +49,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccessDBValueReader.cs" />
-    <Compile Include="AccessDBValueWriter.cs" />
-    <Compile Include="CommaSeparatedValueReader.cs" />
-    <Compile Include="CommaSeparatedValueWriter.cs" />
-    <Compile Include="GenericSeparatedValueReader.cs" />
-    <Compile Include="GenericSeparatedValueWriter.cs" />
-    <Compile Include="IDataFileReader.cs" />
-    <Compile Include="IDataFileWriter.cs" />
-    <Compile Include="IRowEnumerator.cs" />
-    <Compile Include="NullSeparatedValueReader.cs" />
+    <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TabSeparatedValueReader.cs" />
-    <Compile Include="TabSeparatedValueWriter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <COMReference Include="ADOX">
-      <Guid>{00000600-0000-0010-8000-00AA006D2EA4}</Guid>
-      <VersionMajor>6</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-    </COMReference>
+    <ProjectReference Include="..\Azavea.NijPredictivePolicing.AcsImporterLibrary\Azavea.NijPredictivePolicing.AcsImporterLibrary.csproj">
+      <Project>{F524B387-A813-4FE4-AD37-E21D7645A1DC}</Project>
+      <Name>Azavea.NijPredictivePolicing.AcsImporterLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Azavea.NijPredictivePolicing.Common\Azavea.NijPredictivePolicing.Common.csproj">
+      <Project>{9E1E6F34-233E-4145-8DB0-75BFA5DB1715}</Project>
+      <Name>Azavea.NijPredictivePolicing.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

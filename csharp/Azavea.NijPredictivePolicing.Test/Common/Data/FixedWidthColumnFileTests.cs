@@ -4,17 +4,16 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using System.IO;
-using Azavea.NijPredictivePolicing.Parsers;
 using Field = Azavea.NijPredictivePolicing.Parsers.NullSeparatedValueReader.Field;
 using Positions = Azavea.NijPredictivePolicing.Parsers.NullSeparatedValueReader.Field.Positions;
 using Types = Azavea.NijPredictivePolicing.Parsers.NullSeparatedValueReader.Field.Types;
 using Terminators = Azavea.NijPredictivePolicing.Parsers.NullSeparatedValueReader.Field.Terminators;
 using System.Collections;
 
-namespace Azavea.NijPredictivePolicing.Test
+namespace Azavea.NijPredictivePolicing.Test.Common.Data
 {
     [TestFixture]
-    public class NullSeparatedValueReaderTests
+    public class FixedWidthColumnFileTests
     {
         public const string InputDirectory = @"E:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test\TestData\ParserTests";
 

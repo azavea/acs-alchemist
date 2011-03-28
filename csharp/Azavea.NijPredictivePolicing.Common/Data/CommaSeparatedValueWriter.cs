@@ -6,12 +6,13 @@ using System.IO;
 using log4net;
 
 
-namespace Azavea.NijPredictivePolicing.Parsers
+namespace Azavea.NijPredictivePolicing.Common.Data
 {
     /// <summary>
-    /// a basic implementation of the IDataWriter interface, so we can simply export tab separated value files
+    /// A basic implementation of the IDataWriter interface, so we can simply export CSV files.  
+    /// Should be compliant with RFC4180 ( http://tools.ietf.org/html/rfc4180 ).
     /// </summary>
-    public class TabSeparatedValueWriter : IDataFileWriter
+    public class CommaSeparatedValueWriter : IDataFileWriter
     {
         private readonly ILog _log = LogManager.GetLogger(new System.Diagnostics.StackTrace().GetFrame(0).GetMethod().DeclaringType.Namespace);
 
@@ -19,7 +20,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// <summary>
         /// the tab, for the tab-separated part
         /// </summary>
-        protected char[] _splitChars = new char[] { '\t' };
+        protected char[] _splitChars = new char[] { ',' };
 
         /// <summary>
         /// an internal copy of our filename
@@ -40,13 +41,13 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// construct a new blank writer
         /// (any writes will throw exceptions if you don't set a stream or a file!)
         /// </summary>
-        public TabSeparatedValueWriter() { }
+        public CommaSeparatedValueWriter() { }
 
         /// <summary>
         /// construct a new writer to append to the given file
         /// </summary>
         /// <param name="filename"></param>
-        public TabSeparatedValueWriter(string filename)
+        public CommaSeparatedValueWriter(string filename)
         {
             SetWriteFile(filename);
         }
@@ -91,51 +92,6 @@ namespace Azavea.NijPredictivePolicing.Parsers
         }
 
 
-
-        ///// <summary>
-        ///// allows you to use any functional writable stream
-        ///// </summary>
-        //public bool SetWriteStream(Stream output)
-        //{
-        //    _filename = null;
-        //    _outputStream = new StreamWriter(output);
-        //    return _outputStream.BaseStream.CanWrite;
-        //}
-
-        /// <summary>
-        /// build a column line (first line in a delim-separated value file)
-        /// </summary>
-        public string MakeColumnLine(List<string> columns)
-        {
-            StringBuilder colLine = new StringBuilder(512);
-            for (int i = 0; i < columns.Count; i++)
-            {
-                if (i > 0)
-                    colLine.Append(_splitChars);
-
-                colLine.Append(columns[i]);
-            }
-
-            return colLine.ToString();
-        }
-
-        /// <summary>
-        /// generate a String.Format line based on our column count
-        /// </summary>
-        public string MakeFormatLine(List<string> columns)
-        {
-            StringBuilder formatLine = new StringBuilder(512);
-            for (int i = 0; i < columns.Count; i++)
-            {
-                if (i > 0)
-                    formatLine.Append(_splitChars);
-
-                formatLine.Append("{" + i + "}");
-            }
-
-            return formatLine.ToString();
-        }
-
         /// <summary>
         /// Write a line directly to our output
         /// </summary>
@@ -147,10 +103,27 @@ namespace Azavea.NijPredictivePolicing.Parsers
             return true;
         }
 
-        //public bool WriteLine(IEnumerable<object> values)
-        //{
-        //    return WriteLine((IEnumerable<string>)values);
-        //}
+        /// <summary>
+        /// If input contains ,s or newlines, escapes all "s and brackets in "s and returns the result, 
+        /// otherwise returns input unmodified
+        /// </summary>
+        /// <param name="input">The string to escape and quote (if necessary)</param>
+        /// <returns>The escaped and quoted string</returns>
+        public string QuoteAndEscape(string input)
+        {
+            if (input.Contains('\n') || input.Contains(','))
+            {
+                string temp = input.Replace("\"", "\"\"");
+                StringBuilder result = new StringBuilder(temp.Length + 2);
+                result.Append('\"').Append(temp).Append('\"');
+                return result.ToString();
+            }
+            else
+            {
+                return input;
+            }
+        }
+
 
 
         /// <summary>
@@ -172,7 +145,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
                     if (onceThru)
                         _line.Append(this._splitChars);
 
-                    _line.Append(s);
+                    _line.Append(QuoteAndEscape(s));
                     onceThru = true;
                 }
             }

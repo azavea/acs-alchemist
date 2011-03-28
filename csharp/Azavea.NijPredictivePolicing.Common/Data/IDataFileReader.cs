@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 
 
-namespace Azavea.NijPredictivePolicing.Parsers
+namespace Azavea.NijPredictivePolicing.Common.Data
 {
     /// <summary>
     /// This helps us more easily abstract away interacting with our data sources

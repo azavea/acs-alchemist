@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using System.IO;
-using Azavea.NijPredictivePolicing.Parsers;
+using Azavea.NijPredictivePolicing.Common.Data;
 
-namespace Azavea.NijPredictivePolicing.Test
+namespace Azavea.NijPredictivePolicing.Test.Common.Data
 {
     [TestFixture]
-    class CsvTests
+    class CommaSeparatedValueTests
     {
         public const string InputDirectory = @"E:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test\TestData\ParserTests";
 

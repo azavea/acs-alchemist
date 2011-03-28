@@ -6,13 +6,16 @@ using System.IO;
 using log4net;
 
 
-namespace Azavea.NijPredictivePolicing.Parsers
+namespace Azavea.NijPredictivePolicing.Common.Data
 {
     /// <summary>
     /// a basic implementation of the IDataWriter interface, so we can simply export tab separated value files
     /// </summary>
-    public class GenericSeparatedValueWriter : IDataFileWriter
+    public class TabSeparatedValueWriter : IDataFileWriter
     {
+        private readonly ILog _log = LogManager.GetLogger(new System.Diagnostics.StackTrace().GetFrame(0).GetMethod().DeclaringType.Namespace);
+
+
         /// <summary>
         /// the tab, for the tab-separated part
         /// </summary>
@@ -37,15 +40,14 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// construct a new blank writer
         /// (any writes will throw exceptions if you don't set a stream or a file!)
         /// </summary>
-        public GenericSeparatedValueWriter() { }
+        public TabSeparatedValueWriter() { }
 
         /// <summary>
         /// construct a new writer to append to the given file
         /// </summary>
         /// <param name="filename"></param>
-        public GenericSeparatedValueWriter(string filename, char[] delims)
+        public TabSeparatedValueWriter(string filename)
         {
-            _splitChars = delims;
             SetWriteFile(filename);
         }
 
@@ -57,21 +59,38 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// </summary>
         public bool SetWriteFile(string filename)
         {
-            _filename = filename;
-            FileStream fs = new FileStream(filename, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.Read);
-            _outputStream = new StreamWriter(fs);
-            return _outputStream.BaseStream.CanWrite;
+            try
+            {
+                _filename = filename;
+                FileStream fs = new FileStream(filename, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.Read);
+                _outputStream = new StreamWriter(fs);
+                return _outputStream.BaseStream.CanWrite;
+            }
+            catch (Exception ex)
+            {
+                _log.Error("SetWriteFile", ex);
+            }
+            return false;
         }
 
+        /// <summary>
+        /// changes the currently active table, does nothing for this type of file, since it only contains one table.
+        /// </summary>
         public void SetTablename(string tableName)
         {
             //_tablename = tableName;
         }
 
+        /// <summary>
+        /// simply appends the column row.  call this first!
+        /// (you would have to call this first anyway.)
+        /// </summary>
         public bool CreateTable(string tablename, IEnumerable<string> columns)
         {
             return WriteLine(columns);
         }
+
+
 
         ///// <summary>
         ///// allows you to use any functional writable stream
@@ -84,7 +103,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
         //}
 
         /// <summary>
-        /// generate the first column properly
+        /// build a column line (first line in a delim-separated value file)
         /// </summary>
         public string MakeColumnLine(List<string> columns)
         {
@@ -101,7 +120,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
         }
 
         /// <summary>
-        /// generate the first column properly
+        /// generate a String.Format line based on our column count
         /// </summary>
         public string MakeFormatLine(List<string> columns)
         {
@@ -117,6 +136,11 @@ namespace Azavea.NijPredictivePolicing.Parsers
             return formatLine.ToString();
         }
 
+        /// <summary>
+        /// Write a line directly to our output
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         public bool WriteLine(string line)
         {
             _outputStream.WriteLine(line);
@@ -132,6 +156,7 @@ namespace Azavea.NijPredictivePolicing.Parsers
         /// <summary>
         /// Make sure you have a value for every column!
         /// This is really intentionally not thread safe, do not share this class across threads.
+        /// really, don't write one of these files across multiple threads at the same time.
         /// </summary>
         public bool WriteLine(IEnumerable<string> values)
         {
@@ -151,12 +176,6 @@ namespace Azavea.NijPredictivePolicing.Parsers
                     onceThru = true;
                 }
             }
-            //else
-            //{
-            //    int two = 1 + 1;
-            //}
-            //I don't need a newline when I'm using a StreamWriter           
-            //_line.Append(Environment.NewLine);
 
             _outputStream.WriteLine(_line.ToString());
             _line.Length = 0;
@@ -184,5 +203,6 @@ namespace Azavea.NijPredictivePolicing.Parsers
         }
 
         #endregion
+
     }
 }
