@@ -15,7 +15,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
     public class FileLocator
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        public static string TempPath = FileUtilities.SafePathEnsure(Settings.AppTempPath, "Downloads");
+        public static string TempPath = FileUtilities.SafePathEnsure(Settings.AppTempPath);
 
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static string GetStateBlockGroupFileUrl(AcsState state)
+        public static string GetStateBlockGroupUrl(AcsState state)
         {
             return string.Concat(
                 Settings.CurrentAcsAllStateTablesUrl,
@@ -38,6 +38,13 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         public static string GetStateBlockGroupFileName(AcsState state)
         {
             return States.StateToCensusName(state) + Settings.BlockGroupsDataTableSuffix + Settings.BlockGroupsFileTypeExtension;
+        }
+
+
+        public static string GetLocalFilename(AcsState state)
+        {
+            string basePath = FileUtilities.PathEnsure(FileLocator.TempPath, Settings.CurrentAcsDirectory);
+            return Path.Combine(basePath, state.ToString() + Settings.BlockGroupsFileTypeExtension);
         }
 
 
@@ -60,87 +67,82 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
 
 
 
-        public static string GetLocalFilename(AcsState state)
-        {
-            string basePath = FileUtilities.PathEnsure(FileLocator.TempPath, Settings.CurrentAcsDirectory);
-            return Path.Combine(basePath, state.ToString() + Settings.BlockGroupsFileTypeExtension);
-        }
 
 
-        /// <summary>
-        /// Downloads current block group file for a given state
-        /// </summary>
-        /// <param name="state">desired state</param>
-        /// <returns></returns>
-        public static bool GetStateBlockGroupFile(AcsState state)
-        {
-            return GetStateBlockGroupFile(state, string.Empty);
-        }
+        ///// <summary>
+        ///// Downloads current block group file for a given state
+        ///// </summary>
+        ///// <param name="state">desired state</param>
+        ///// <returns></returns>
+        //public static bool GetStateBlockGroupFile(AcsState state)
+        //{
+        //    return GetStateBlockGroupFile(state, string.Empty);
+        //}
 
 
-        /// <summary>
-        /// Downloads current block group file for a given state
-        /// </summary>
-        /// <param name="state">desired state</param>
-        /// <param name="path">Optional location to save the file</param>
-        /// <returns></returns>
-        public static bool GetStateBlockGroupFile(AcsState state, string filePath)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(filePath))
-                {
-                    filePath = GetLocalFilename(state);
-                }
+        ///// <summary>
+        ///// Downloads current block group file for a given state
+        ///// </summary>
+        ///// <param name="state">desired state</param>
+        ///// <param name="path">Optional location to save the file</param>
+        ///// <returns></returns>
+        //public static bool GetStateBlockGroupFile(AcsState state, string filePath)
+        //{
+        //    try
+        //    {
+        //        if (string.IsNullOrEmpty(filePath))
+        //        {
+        //            filePath = GetLocalFilename(state);
+        //        }
 
-                //if (File.Exists(filePath))
-                //{
-                //    _log.DebugFormat("Requested File for State {0} already exists", state.ToString());
-                //    return true;
-                //}
+        //        //if (File.Exists(filePath))
+        //        //{
+        //        //    _log.DebugFormat("Requested File for State {0} already exists", state.ToString());
+        //        //    return true;
+        //        //}
 
 
 
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
-                    FileLocator.GetStateBlockGroupFileUrl(state));                
+        //        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
+        //            FileLocator.GetStateBlockGroupUrl(state));                
 
-                request.KeepAlive = false;  //We're only doing this once
-                request.Credentials = CredentialCache.DefaultCredentials;
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+        //        request.KeepAlive = false;  //We're only doing this once
+        //        request.Credentials = CredentialCache.DefaultCredentials;
+        //        HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-                Stream downloadStream = response.GetResponseStream();
-                long expectedLength = response.ContentLength;
-
-
-                DateTime lastModified = response.LastModified;
+        //        Stream downloadStream = response.GetResponseStream();
+        //        long expectedLength = response.ContentLength;
 
 
-
-                if (File.Exists(filePath))
-                {
-                    _log.DebugFormat("Requested File for State {0} already exists", state.ToString());
-                    return true;
-                }
+        //        DateTime lastModified = response.LastModified;
 
 
 
-                FileStream output = new FileStream(filePath, FileMode.Create);
-                Utilities.CopyToWithProgress(downloadStream, expectedLength, output);
+        //        if (File.Exists(filePath))
+        //        {
+        //            _log.DebugFormat("Requested File for State {0} already exists", state.ToString());
+        //            return true;
+        //        }
 
 
 
-                downloadStream.Close();
-                output.Close();
-                response.Close();
+        //        FileStream output = new FileStream(filePath, FileMode.Create);
+        //        Utilities.CopyToWithProgress(downloadStream, expectedLength, output);
 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Error downloading block group file", ex);
-            }
-            return false;
-        }
+
+
+        //        downloadStream.Close();
+        //        output.Close();
+        //        response.Close();
+
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _log.Error("Error downloading block group file", ex);
+        //    }
+        //    return false;
+        //}
 
         public static string GetStateBlockGroupDataDir(AcsState state)
         {
@@ -152,11 +154,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         }
 
 
-        public static string GetStateBlockGroupGeographyFilename(AcsState state)
+        public static string GetStateWorkingDir(AcsState state)
         {
-            string basePath = GetStateBlockGroupDataDir(state);
+            return FileUtilities.PathEnsure(FileLocator.TempPath, "Working", state.ToString());
+        }
 
-            var files = Directory.GetFiles(basePath, "g*.txt");
+
+        public static string GetStateBlockGroupGeographyFilename(string dataDirectory)
+        {
+            var files = Directory.GetFiles(dataDirectory, "g*.txt");
             if ((files != null) && (files.Length > 0))
             {
                 return files[0];
@@ -168,23 +174,21 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
 
 
 
-        public static bool ExpandStateBlockGroupFile(AcsState state)
+        public static bool ExpandZipFile(string sourceFile, string destPath)
         {
             try
             {
-                string filePath = FileLocator.GetLocalFilename(state);
-                string newPath = GetStateBlockGroupDataDir(state);
-
-                if (Directory.Exists(newPath))
+                if (Directory.Exists(destPath))
                 {
-                    _log.Debug("State file is already expanded");
-                    return true;
+                    var files = Directory.GetFiles(destPath);
+                    if ((files != null) && (files.Length > 0))
+                    {
+                        _log.Debug("State file is already expanded");
+                        return true;
+                    }
                 }
 
-                return FileUtilities.UnzipFileTo(newPath, filePath);
-
-
-                //return true;
+                return FileUtilities.UnzipFileTo(destPath, sourceFile);
             }
             catch (Exception ex)
             {

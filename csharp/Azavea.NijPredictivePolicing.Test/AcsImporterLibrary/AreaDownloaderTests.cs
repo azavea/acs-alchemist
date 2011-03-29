@@ -10,6 +10,7 @@ using Azavea.NijPredictivePolicing.Common;
 using Azavea.NijPredictivePolicing.Test.Helpers;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary;
 using System.Data;
+using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
 
 namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 {
@@ -47,7 +48,7 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
                 try
                 {
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
-                        FileLocator.GetStateBlockGroupFileUrl(state));
+                        FileLocator.GetStateBlockGroupUrl(state));
 
                     request.Credentials = CredentialCache.DefaultCredentials;
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -69,10 +70,12 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
         {
             //Wyoming has smallest file to download
 
-            string filename = FileLocator.GetLocalFilename(AcsState.Wyoming);
-            _log.DebugFormat("Saving file to {0}", filename);
-            if (FileLocator.GetStateBlockGroupFile(AcsState.Wyoming, string.Empty))
+
+            var manager = new AcsDataManager(AcsState.Wyoming);
+            if (manager.CheckBlockGroupFile())
             {
+                string filename = manager.GetLocalBlockGroupZipFileName();
+
                 Assert.IsTrue(File.Exists(filename), "File wasn't downloaded!");
             }
             else

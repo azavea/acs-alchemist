@@ -15,10 +15,9 @@ namespace Azavea.NijPredictivePolicing.Common.DB
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public static IDataClient GetDefaultClient(string filename)
-        {
-            string connString = string.Format("Data Source={0}", filename);
-            return new SqliteDataClient(connString);
+        public static IDataClient GetDefaultClient(string hostname)
+        {            
+            return new SqliteDataClient(hostname);
         }
 
         public static string GenerateTableSQLFromFields(string tablename, List<FixedWidthField> columns)

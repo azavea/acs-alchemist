@@ -7,6 +7,7 @@ using Azavea.NijPredictivePolicing.Common;
 using System.IO;
 using Azavea.NijPredictivePolicing.Common.DB;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats;
+using System.Security.Policy;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
@@ -15,8 +16,34 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public AcsState State = AcsState.None;
-        public string DataPath;
-        public string DBPath;
+
+        protected string _stateFips;
+        public string StateFIPS
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_stateFips))
+                {
+                    using (var reader = DbClient.GetCommand("select STATE from geographies limit 1").ExecuteReader())
+                    {
+                        reader.Read();
+                        _stateFips = reader.GetString(0);
+                    }                   
+                }
+                return _stateFips;
+            }
+            set
+            {
+                _stateFips = value;
+            }
+        }
+
+        public string WorkingPath;
+        public string ShapePath;
+        public string CurrentDataPath;
+        public string DBFilename;
+        
+        
         public IDataClient DbClient;
 
 
@@ -34,26 +61,136 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public void init()
         {
-            this.DataPath = FileLocator.GetStateBlockGroupDataDir(this.State);
-            this.DBPath = FileUtilities.PathCombine(this.DataPath, this.State.ToString() + ".sqlite");
-            this.DbClient = DataClient.GetDefaultClient(this.DBPath);
+            this.WorkingPath = FileLocator.GetStateWorkingDir(this.State);
+            
+            FileUtilities.PathEnsure(this.WorkingPath, "database");
+            this.DBFilename = FileUtilities.PathCombine(this.WorkingPath, "database", Settings.CurrentAcsDirectory + ".sqlite");
 
-            this.CheckDatabase();
+            this.ShapePath = FileUtilities.PathEnsure(this.WorkingPath, "shapes");
+            this.CurrentDataPath = FileUtilities.PathEnsure(this.WorkingPath, Settings.CurrentAcsDirectory);
+
+
+            //this.DataPath = FileLocator.GetStateBlockGroupDataDir(this.State);
+            //this.ShpPath = FileLocator.GetStateBlockGroupDataDir(this.State);            
+            //this.DBPath = FileUtilities.PathCombine(this.DataPath, this.State.ToString() + ".sqlite");
+
+            this.DbClient = DataClient.GetDefaultClient(this.DBFilename);            
         }
 
-        protected void CheckDatabase()
+        public string GetLocalBlockGroupZipFileName()
         {
-            if (!File.Exists(this.DBPath))
+            return FileUtilities.PathCombine(this.WorkingPath, FileLocator.GetStateBlockGroupFileName(this.State));
+        }
+
+        public string GetLocalGeographyFileName()
+        {
+            return FileLocator.GetStateBlockGroupGeographyFilename(this.CurrentDataPath);
+        }
+
+        public string GetRemoteStateShapefileURL()
+        {
+            string url = Settings.StateBlockGroupShapefileRootURL + Settings.StateBlockGroupShapefileFormatURL;
+            url = url.Replace("{FIPS-code}", this.StateFIPS);
+            return url;
+        }
+
+
+        public string GetLocalBlockGroupShapefilename()
+        {
+            string template = Settings.StateBlockGroupShapefileFormatURL;
+            template = template.Replace("{FIPS-code}", this.StateFIPS);
+
+            return FileUtilities.PathCombine(this.WorkingPath, template);
+        }
+
+
+        /// <summary>
+        /// Downloads the DATA FILE
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckBlockGroupFile()
+        {
+            _log.DebugFormat("Downloading block group file for {0}", this.State);
+
+            string desiredUrl = FileLocator.GetStateBlockGroupUrl(this.State);
+            string destFilepath = GetLocalBlockGroupZipFileName();
+
+
+
+            if (FileDownloader.GetFileByURL(desiredUrl, destFilepath))
+            {
+                _log.Debug("Download successful");
+                if (FileLocator.ExpandZipFile(destFilepath, this.CurrentDataPath))
+                {
+                    _log.Debug("State block group file decompressed successfully");
+                    return true;
+                }
+                else
+                {
+                    _log.Error("Error during decompression, TODO: destroy directory");
+                }
+            }
+            else
+            {
+                _log.Error("An error was encountered while downloading block group data, exiting.");
+            }
+            return false;
+        }
+
+        
+
+
+
+        /// <summary>
+        /// Downloads the SHAPE FILE
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckShapefile()
+        {
+             _log.DebugFormat("Downloading shapefile of block groups for {0}", this.State);
+
+            string desiredUrl = this.GetRemoteStateShapefileURL();
+            string destFilepath = GetLocalBlockGroupShapefilename();
+
+
+
+            if (FileDownloader.GetFileByURL(desiredUrl, destFilepath))
+            {
+                _log.Debug("Download successful");
+
+                if (FileLocator.ExpandZipFile(destFilepath, this.ShapePath))
+                {
+                    _log.Debug("State block group file decompressed successfully");
+                    return true;
+                }
+                else
+                {
+                    _log.Error("Error during decompression, TODO: destroy directory");
+                }
+            }
+            else
+            {
+                _log.Error("An error was encountered while downloading block group data, exiting.");
+            }
+            return false;
+        }
+
+
+
+
+        public bool CheckDatabase()
+        {
+            if (!File.Exists(this.DBFilename))
             {
                 _log.DebugFormat("Database not generated for {0}, building...", this.State);
                 this.InitDatabase();
             }
             else
             {
-                _log.DebugFormat("Database already generated for {0}, opening...", this.State);
-
-                //TODO: Open database!
+                _log.DebugFormat("Database already generated for {0}", this.State);
             }
+
+            return (DbClient.TestDatabaseConnection());
         }
 
         protected bool InitDatabase()
@@ -74,7 +211,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             DbClient.GetCommand(createGeographyTable, conn).ExecuteNonQuery();
 
 
-            GeographyFileReader geoReader = new GeographyFileReader(this.State);
+            string geographyFilename = GetLocalGeographyFileName();
+            GeographyFileReader geoReader = new GeographyFileReader(geographyFilename);
             if (geoReader.HasFile)
             {
                 _log.Debug("Importing Geographies File...");
@@ -97,9 +235,17 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     table.Rows.Add(rowData);
                 }
 
-                _log.Debug("Saving...");
-                adapter.Update(table);
-                table.AcceptChanges();
+                if ((table != null) && (table.Rows.Count > 0))
+                {
+                    _log.Debug("Saving...");
+
+                    this.StateFIPS = (table.Rows[0]["STATE"] as string);
+
+                    adapter.Update(table);
+                    table.AcceptChanges();
+                }
+
+
 
                 _log.Debug("Done!");
             }
@@ -124,16 +270,13 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             return true;
         }
 
-        protected void ImportGeographyFile()
-        {
 
-        }
+ 
 
 
 
 
 
-
-
+        
     }
 }

@@ -16,9 +16,9 @@ namespace Azavea.NijPredictivePolicing.Common.DB
 
 
 
-        public SqlDataClient(string connString)
+        public SqlDataClient(string hostname)
         {
-            _connectionString = connString;
+            _connectionString = string.Format("Data Source={0}", hostname);
         }
 
 

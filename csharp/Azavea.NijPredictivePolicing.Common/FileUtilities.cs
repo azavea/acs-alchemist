@@ -30,7 +30,7 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             if ((chunks == null) || (chunks.Length == 0))
             {
-                return string.Empty;
+                return basepath;
             }
             for (int i = 0; i < chunks.Length; i++)
             {

@@ -91,32 +91,49 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             DateTime startTime = DateTime.Now;
             try
             {
-
-
                 if (this.State != AcsState.None)
                 {
-                    _log.DebugFormat("Downloading block group file for {0}", this.State);
-                    if (FileLocator.GetStateBlockGroupFile(this.State))
+                    var manager = new AcsDataManager(this.State);                   
+
+                    if (manager.CheckBlockGroupFile())
                     {
-                        _log.Debug("Download successful");
-
-                        if (FileLocator.ExpandStateBlockGroupFile(this.State))
+                        if (manager.CheckDatabase())
                         {
-                            _log.Debug("State block group file decompressed successfully");
-
-                            var reader = new AcsDataManager(this.State);
-                            
+                            manager.CheckShapefile();
                         }
                         else
                         {
-                            _log.Error("Error during decompression, TODO: destroy directory");
+                            return false;
                         }
                     }
                     else
                     {
-                        _log.Error("An error was encountered while downloading block group data, exiting.");
                         return false;
                     }
+
+
+                    //_log.DebugFormat("Downloading block group file for {0}", this.State);
+                    //if (FileLocator.GetStateBlockGroupFile(this.State))
+                    //{
+                    //    _log.Debug("Download successful");
+
+                    //    if (FileLocator.ExpandStateBlockGroupFile(this.State))
+                    //    {
+                    //        _log.Debug("State block group file decompressed successfully");
+
+                    //        var reader = new AcsDataManager(this.State);
+                            
+                    //    }
+                    //    else
+                    //    {
+                    //        _log.Error("Error during decompression, TODO: destroy directory");
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    _log.Error("An error was encountered while downloading block group data, exiting.");
+                    //    return false;
+                    //}
                 }
 
 

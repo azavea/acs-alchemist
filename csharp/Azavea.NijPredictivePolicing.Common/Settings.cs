@@ -89,6 +89,9 @@ namespace Azavea.NijPredictivePolicing.Common
         public const string BlockGroupsFileTypeExtension = ".zip";
 
 
+        public const string StateBlockGroupShapefileRootURL = "http://www.census.gov/geo/cob/bdy/bg/bg00shp/";
+        public const string StateBlockGroupShapefileFormatURL = "bg{FIPS-code}_d00_shp.zip ";
+
 
 
     }

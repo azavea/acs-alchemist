@@ -73,6 +73,7 @@
     <Compile Include="FileFormats\GeographyFileReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transfer\AcsDataManager.cs" />
+    <Compile Include="Transfer\FileDownloader.cs" />
     <Compile Include="Transfer\FileLocator.cs" />
   </ItemGroup>
   <ItemGroup>
