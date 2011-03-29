@@ -70,7 +70,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AcsState.cs" />
+    <Compile Include="FileFormats\GeographyFileReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Transfer\AcsDataManager.cs" />
     <Compile Include="Transfer\FileLocator.cs" />
   </ItemGroup>
   <ItemGroup>

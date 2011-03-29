@@ -142,6 +142,30 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
             return false;
         }
 
+        public static string GetStateBlockGroupDataDir(AcsState state)
+        {
+            string filePath = FileLocator.GetLocalFilename(state);
+            string basePath = Path.GetDirectoryName(filePath);
+
+            //IMPORTANT!  Don't create this directory on disk, just the path string!
+            return FileUtilities.PathCombine(basePath, state.ToString());
+        }
+
+
+        public static string GetStateBlockGroupGeographyFilename(AcsState state)
+        {
+            string basePath = GetStateBlockGroupDataDir(state);
+
+            var files = Directory.GetFiles(basePath, "g*.txt");
+            if ((files != null) && (files.Length > 0))
+            {
+                return files[0];
+            }
+            return string.Empty;
+            //return FileUtilities.PathCombine(basePath, );
+        }
+
+
 
 
         public static bool ExpandStateBlockGroupFile(AcsState state)
@@ -149,8 +173,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
             try
             {
                 string filePath = FileLocator.GetLocalFilename(state);
-                string basePath = Path.GetDirectoryName(filePath);
-                string newPath = FileUtilities.PathCombine(basePath, state.ToString());
+                string newPath = GetStateBlockGroupDataDir(state);
+
                 if (Directory.Exists(newPath))
                 {
                     _log.Debug("State file is already expanded");

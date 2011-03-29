@@ -80,21 +80,25 @@
     <Compile Include="Config.cs" />
     <Compile Include="Data\CommaSeparatedValueReader.cs" />
     <Compile Include="Data\CommaSeparatedValueWriter.cs" />
+    <Compile Include="Data\FixedWidthColumnReader.cs" />
+    <Compile Include="Data\FixedWidthField.cs" />
     <Compile Include="Data\GenericSeparatedValueReader.cs" />
     <Compile Include="Data\GenericSeparatedValueWriter.cs" />
     <Compile Include="Data\IDataFileReader.cs" />
     <Compile Include="Data\IDataFileWriter.cs" />
     <Compile Include="Data\IRowEnumerator.cs" />
-    <Compile Include="Data\NullSeparatedValueReader.cs" />
     <Compile Include="Data\TabSeparatedValueReader.cs" />
     <Compile Include="Data\TabSeparatedValueWriter.cs" />
+    <Compile Include="DB\DataClient.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DB\SqlDataClient.cs" />
+    <Compile Include="DB\IDataClient.cs" />
+    <Compile Include="DB\SqliteDataClient.cs" />
     <Compile Include="FileUtilities.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DB\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

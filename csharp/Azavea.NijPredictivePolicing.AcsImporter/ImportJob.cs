@@ -5,6 +5,7 @@ using System.Text;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary;
 using Azavea.NijPredictivePolicing.Common;
 using log4net;
+using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
 
 namespace Azavea.NijPredictivePolicing.AcsDataImporter
 {
@@ -88,8 +89,6 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public bool ExecuteJob()
         {
             DateTime startTime = DateTime.Now;
-
-
             try
             {
 
@@ -104,6 +103,9 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         if (FileLocator.ExpandStateBlockGroupFile(this.State))
                         {
                             _log.Debug("State block group file decompressed successfully");
+
+                            var reader = new AcsDataManager(this.State);
+                            
                         }
                         else
                         {
@@ -116,6 +118,9 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         return false;
                     }
                 }
+
+
+
 
 
 
