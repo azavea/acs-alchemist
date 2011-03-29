@@ -1,3 +1,5 @@
 _svn
 bin
 obj
+*.suo
+*.csproj.user

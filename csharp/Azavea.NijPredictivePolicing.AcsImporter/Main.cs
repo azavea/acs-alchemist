@@ -17,8 +17,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         private static ILog _log = null;
         protected static void init()
         {
-            PatternLayout layout = new PatternLayout("%message%newline");
-            ConsoleAppender con = new ConsoleAppender(layout);
+            ConsoleAppender con = new ConsoleAppender();
+            con.Layout = new PatternLayout("%message%newline");
             log4net.Config.BasicConfigurator.Configure(con);
             _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         }
@@ -27,11 +27,20 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         protected static void ShowWelcomeScreen()
         {
             _log.Debug("");
+            _log.Debug("         ,..");
+            _log.Debug("       .'   |");
+            _log.Debug("        |_,,'");
+            _log.Debug("     ,--|   ,--.");
+            _log.Debug("    '   |' |   ''      _____.  _____.: _____`_  /.   :.    __.   _____.");
+            _log.Debug("     -- '   --.|            p|      /       ||      .\' //'  |.       p|");
+            _log.Debug(" ,-^-.  ,-^'.  |'`'.   _,..,||    ,'    `... |   ,| '/  |,...-/  _,..,||");
+            _log.Debug(" [   ,==.   | |.   |  /|   ,'|  ,'     '    /|   `O//    '      /|   .'|");
+            _log.Debug("  `--    --'    --'    '`''--' ^-----'  `''\"`-    \"-     '`''\"'  '`'''-'");
+            _log.Debug("");
             _log.Debug("+--------------------------------------------+");
             _log.Debug("|   Welcome to the Acs Data Importer         |");
-            _log.Debug("|                                            |");
-            _log.Debug("|                                            |");
             _log.Debug("+--------------------------------------------+");
+            _log.Debug("");
             _log.Debug("");
         }
 
@@ -59,6 +68,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             {
                 _log.Debug("Loading arguments...");
                 job.Load(args);
+
+                job.ExecuteJob();
             }
             else
             {
