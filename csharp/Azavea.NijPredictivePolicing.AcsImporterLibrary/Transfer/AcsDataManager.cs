@@ -8,6 +8,9 @@ using System.IO;
 using Azavea.NijPredictivePolicing.Common.DB;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats;
 using System.Security.Policy;
+using System.Data;
+using GisSharpBlog.NetTopologySuite.Geometries;
+using GisSharpBlog.NetTopologySuite.IO;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
@@ -173,6 +176,30 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 _log.Error("An error was encountered while downloading block group data, exiting.");
             }
             return false;
+        }
+
+
+
+        public DataTable GetShapefileData()
+        {
+            DataTable dt = null;
+            try
+            {
+
+
+                var files = Directory.GetFiles(this.ShapePath, "bg*.shp");
+                if ((files != null) && (files.Length > 0))
+                {
+                    string shapeFileName = Path.Combine(this.ShapePath, Path.GetFileNameWithoutExtension(files[0]));
+                    dt = Shapefile.CreateDataTable(shapeFileName, this.State.ToString(), ShapefileHelper.GetGeomFactory());
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Error opening shapefile", ex);
+            }
+
+            return dt;
         }
 
 

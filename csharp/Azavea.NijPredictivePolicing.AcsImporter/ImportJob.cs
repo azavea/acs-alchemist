@@ -100,6 +100,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         if (manager.CheckDatabase())
                         {
                             manager.CheckShapefile();
+
+                            //var dt = manager.GetShapefileData();
                         }
                         else
                         {
