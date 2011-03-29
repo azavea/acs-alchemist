@@ -69,8 +69,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AreaDownloader.cs" />
+    <Compile Include="AcsState.cs" />
+    <Compile Include="FileFormats\GeographyFileReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Transfer\AcsDataManager.cs" />
+    <Compile Include="Transfer\FileDownloader.cs" />
+    <Compile Include="Transfer\FileLocator.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Azavea.NijPredictivePolicing.Common\Azavea.NijPredictivePolicing.Common.csproj">

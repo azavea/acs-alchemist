@@ -4,10 +4,6 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using System.IO;
-using Field = Azavea.NijPredictivePolicing.Common.Data.NullSeparatedValueReader.Field;
-using Positions = Azavea.NijPredictivePolicing.Common.Data.NullSeparatedValueReader.Field.Positions;
-using Types = Azavea.NijPredictivePolicing.Common.Data.NullSeparatedValueReader.Field.Types;
-using Terminators = Azavea.NijPredictivePolicing.Common.Data.NullSeparatedValueReader.Field.Terminators;
 using System.Collections;
 using Azavea.NijPredictivePolicing.Common.Data;
 
@@ -39,15 +35,15 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
         {
             #region Setup
 
-            NullSeparatedValueReader reader = new NullSeparatedValueReader();
+            FixedWidthColumnReader reader = new FixedWidthColumnReader();
             string filename = Path.Combine(InputDirectory, InputFile);
             reader.LoadFile(filename);
 
             var expectedStrings = new List<string[]>();
             var expectedObjects = new List<object[]>();
-            var fields = new List<List<Field>>();
-            List<Field> row;
-            Field temp, template;
+            var fields = new List<List<FixedWidthField>>();
+            List<FixedWidthField> row;
+            FixedWidthField temp, template;
 
             /***********************************************************************************
              * First row tests Seeker = FROM_START, Terminator = LENGTH, types int and float
@@ -71,42 +67,42 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
                 DateTime.Parse("12 November 1978 15:38:24")
                 });
 
-            row = new List<Field>();
-            template = temp = new Field(0, 25, Types.STRING, Positions.FROM_START, Terminators.LENGTH);
+            row = new List<FixedWidthField>();
+            template = temp = new FixedWidthField(0, 25, FixedWidthTypes.STRING, FixedWidthPositions.FROM_START, FixedWidthTerminators.LENGTH);
             row.Add(temp);
 
-            temp = new Field(template);
+            temp = new FixedWidthField(template);
             temp.Start = 25;
             temp.End = 4;
-            temp.Type = Types.INT;
+            temp.Type = FixedWidthTypes.INT;
             row.Add(temp);
 
-            temp = new Field(template);
+            temp = new FixedWidthField(template);
             temp.Start = 29;
             temp.End = 6;
-            temp.Type = Types.FLOAT;
+            temp.Type = FixedWidthTypes.FLOAT;
             row.Add(temp);
 
-            temp = new Field(template);
+            temp = new FixedWidthField(template);
             temp.Start = 35;
             temp.End = 10;
-            temp.Type = Types.DATETIME;
+            temp.Type = FixedWidthTypes.DATETIME;
             row.Add(temp);
 
-            temp = new Field(template);
+            temp = new FixedWidthField(template);
             temp.Start = 45;
             temp.End = 7;
-            temp.Type = Types.DATETIME;
+            temp.Type = FixedWidthTypes.DATETIME;
             row.Add(temp);
 
-            temp = new Field(template);
+            temp = new FixedWidthField(template);
             temp.Start = 52;
             temp.End = 25;
-            temp.Type = Types.DATETIME;
+            temp.Type = FixedWidthTypes.DATETIME;
             row.Add(temp);
 
             fields.Add(row);
-            row = new List<Field>();
+            row = new List<FixedWidthField>();
 
             /****************************************************************************************/
 
@@ -118,16 +114,16 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
             expectedStrings.Add(expectedStrings[0]);
             expectedObjects.Add(expectedObjects[0]);
 
-            foreach (Field f in fields[0])
+            foreach (FixedWidthField f in fields[0])
             {
-                temp = new Field(f);
-                temp.Seeker = Positions.FROM_CURRENT;
+                temp = new FixedWidthField(f);
+                temp.Seeker = FixedWidthPositions.FROM_CURRENT;
                 temp.Start = 0;
                 row.Add(temp);
             }
 
             fields.Add(row);
-            row = new List<Field>();
+            row = new List<FixedWidthField>();
 
             /****************************************************************************************/
 
@@ -147,20 +143,20 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
                 DateTime.Parse("12 November 1978 15:38:24")
                 });
 
-            foreach (Field f in fields[0])
+            foreach (FixedWidthField f in fields[0])
             {
-                temp = new Field(f);
-                temp.Terminator = Terminators.INDEX;
+                temp = new FixedWidthField(f);
+                temp.Terminator = FixedWidthTerminators.INDEX;
 
                //Used to be start index and length, converting to start index and end index
                 temp.End = temp.Start + temp.End;
-                if (temp.Type == Types.FLOAT) temp.Type = Types.DOUBLE;
-                if (temp.Type == Types.INT) temp.Type = Types.LONG;
+                if (temp.Type == FixedWidthTypes.FLOAT) temp.Type = FixedWidthTypes.DOUBLE;
+                if (temp.Type == FixedWidthTypes.INT) temp.Type = FixedWidthTypes.LONG;
                 row.Add(temp);
             }
 
             fields.Add(row);
-            row = new List<Field>();
+            row = new List<FixedWidthField>();
 
             /****************************************************************************************/
 
@@ -173,8 +169,8 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
             expectedStrings.Add(new string[] { "34", "0123456789" });
             expectedObjects.Add(expectedStrings[expectedStrings.Count - 1] as object[]);
 
-            row.Add(new Field(7, 2, Types.STRING, Positions.FROM_END, Terminators.LENGTH));
-            row.Add(new Field(0, 43847283, Types.STRING, Positions.FROM_START, Terminators.NEWLINE));
+            row.Add(new FixedWidthField(7, 2, FixedWidthTypes.STRING, FixedWidthPositions.FROM_END, FixedWidthTerminators.LENGTH));
+            row.Add(new FixedWidthField(0, 43847283, FixedWidthTypes.STRING, FixedWidthPositions.FROM_START, FixedWidthTerminators.NEWLINE));
 
             fields.Add(row);
             row = null;

@@ -9,6 +9,8 @@ using System.IO;
 using Azavea.NijPredictivePolicing.Common;
 using Azavea.NijPredictivePolicing.Test.Helpers;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary;
+using System.Data;
+using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
 
 namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 {
@@ -38,12 +40,15 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
         public void CheckAllStateFiles()
         {
             bool fail = false;
-            foreach (StateList state in Enum.GetValues(typeof(StateList)))
+            foreach (AcsState state in Enum.GetValues(typeof(AcsState)))
             {
+                if (state == AcsState.None)
+                    continue;
+
                 try
                 {
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
-                        Settings.GetStateBlockGroupFileUrl(state));
+                        FileLocator.GetStateBlockGroupUrl(state));
 
                     request.Credentials = CredentialCache.DefaultCredentials;
                     HttpWebResponse response = (HttpWebResponse)request.GetResponse();
@@ -61,15 +66,43 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
         }
 
         [Test]
-        public void CheckDownloaderUtilities()
-        {   
-            string dummy;
+        public void TestFileDownload()
+        {
             //Wyoming has smallest file to download
-            string err = AreaDownloader.GetStateBlockGroupFile(StateList.Wyoming, out dummy);
-            if (!string.IsNullOrEmpty(err))
+
+
+            var manager = new AcsDataManager(AcsState.Wyoming);
+            if (manager.CheckBlockGroupFile())
             {
-                Assert.Fail("Error: Message was: {0}", err);
+                string filename = manager.GetLocalBlockGroupZipFileName();
+
+                Assert.IsTrue(File.Exists(filename), "File wasn't downloaded!");
+            }
+            else
+            {
+                Assert.Fail("Some error was thrown during the download");
             }
         }
+
+
+
+        //[Test]
+        //public void SillyLongDivisionTest()
+        //{
+        //    double progress = 0;
+        //    long max = 100000;
+        //    for (long i = 0; i < max; i++)
+        //    {
+        //        int step = (int)((((double)i) / ((double)max)) * 100.0);
+        //        if (step != progress)
+        //        {
+        //            _log.DebugFormat("progress {0}", progress);
+        //            progress = step;
+        //        }
+                
+        //    }
+        //}
+
+
     }
 }

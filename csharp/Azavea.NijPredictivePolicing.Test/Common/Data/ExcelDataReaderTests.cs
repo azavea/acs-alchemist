@@ -13,7 +13,7 @@ using Excel;
 using System.Data;
 using Azavea.NijPredictivePolicing.Common.Data;
 
-namespace Azavea.NijPredictivePolicing.Test.Data
+namespace Azavea.NijPredictivePolicing.Test.Common.Data
 {
     [TestFixture]
     public class ExcelDataReaderTests

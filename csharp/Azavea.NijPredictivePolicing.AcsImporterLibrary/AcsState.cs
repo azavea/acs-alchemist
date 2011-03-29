@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Azavea.NijPredictivePolicing.Common;
 
-namespace Azavea.NijPredictivePolicing.Common
+namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
 {
-    public enum StateList
+    public enum AcsState
     {
         Alabama = 0,
         Alaska,
@@ -59,7 +60,8 @@ namespace Azavea.NijPredictivePolicing.Common
         WestVirginia,
         Wisconsin,
         Wyoming,
-        UnitedStates        //Not really a state, but ACS includes it as an option
+        UnitedStates,        //Not really a state, but ACS includes it as an option
+        None
     }
 
     public class States
@@ -69,19 +71,32 @@ namespace Azavea.NijPredictivePolicing.Common
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static string StateToCensusName(StateList state)
+        public static string StateToCensusName(AcsState state)
         {
             return state.ToString();
         }
+
+        ///// <summary>
+        ///// Shows how to use the settings
+        ///// </summary>
+        ///// <param name="state"></param>
+        ///// <returns></returns>
+        //public static string StateToCurrentBlockGroupFilename(AcsState state)
+        //{
+        //    return string.Concat(state.ToString(), Settings.BlockGroupsDataTableSuffix);
+        //}
+
 
         /// <summary>
         /// Get's a pretty name for a state
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static string StateToRealName(StateList state)
+        public static string StateToRealName(AcsState state)
         {
             throw new NotImplementedException("This function will be implemented at a later date");
         }
     }
+
+
 }
