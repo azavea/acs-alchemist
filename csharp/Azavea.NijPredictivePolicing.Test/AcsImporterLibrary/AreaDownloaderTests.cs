@@ -41,6 +41,9 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
             bool fail = false;
             foreach (AcsState state in Enum.GetValues(typeof(AcsState)))
             {
+                if (state == AcsState.None)
+                    continue;
+
                 try
                 {
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
