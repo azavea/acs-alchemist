@@ -15,7 +15,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
     public class FileLocator
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        public static string TempPath = FileUtilities.SafePathEnsure(Settings.AppTempPath);
+
+        public static readonly string TempPath = FileUtilities.SafePathEnsure(Settings.AppTempPath);
 
 
         /// <summary>
@@ -37,116 +38,29 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         /// <returns></returns>
         public static string GetStateBlockGroupFileName(AcsState state)
         {
-            return States.StateToCensusName(state) + Settings.BlockGroupsDataTableSuffix + Settings.BlockGroupsFileTypeExtension;
+            return States.StateToCensusName(state) + Settings.BlockGroupsDataTableSuffix + 
+                Settings.BlockGroupsFileTypeExtension;
         }
 
-
-        public static string GetLocalFilename(AcsState state)
+        /// <summary>
+        /// Gets the local path of the zip file containing all the raw blockgroup/tract data
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public static string GetStateBlockGroupDataFilePath(AcsState state)
         {
             string basePath = FileUtilities.PathEnsure(FileLocator.TempPath, Settings.CurrentAcsDirectory);
             return Path.Combine(basePath, state.ToString() + Settings.BlockGroupsFileTypeExtension);
         }
 
-
-
-
-        ///// <summary>
-        ///// Given a state, downloads it's block group file to the default location and returns the path to it
-        ///// </summary>
-        ///// <param name="state">The name of the state to get the file for</param>
-        ///// <param name="path">The path where the file was stored locally</param>
-        ///// <returns>null on success, error message on failure</returns>
-        //public static string GetStateBlockGroupFile(StateList state, out string path)
-        //{
-        //    path = Path.GetFullPath(Path.Combine(Settings.LocalTempDirectory, Settings.GetStateBlockGroupFileName(state)));
-        //    string result = GetStateBlockGroupFile(state, path);
-        //    if (!string.IsNullOrEmpty(result)) path = null;
-        //    return result;
-        //}
-
-
-
-
-
-
-        ///// <summary>
-        ///// Downloads current block group file for a given state
-        ///// </summary>
-        ///// <param name="state">desired state</param>
-        ///// <returns></returns>
-        //public static bool GetStateBlockGroupFile(AcsState state)
-        //{
-        //    return GetStateBlockGroupFile(state, string.Empty);
-        //}
-
-
-        ///// <summary>
-        ///// Downloads current block group file for a given state
-        ///// </summary>
-        ///// <param name="state">desired state</param>
-        ///// <param name="path">Optional location to save the file</param>
-        ///// <returns></returns>
-        //public static bool GetStateBlockGroupFile(AcsState state, string filePath)
-        //{
-        //    try
-        //    {
-        //        if (string.IsNullOrEmpty(filePath))
-        //        {
-        //            filePath = GetLocalFilename(state);
-        //        }
-
-        //        //if (File.Exists(filePath))
-        //        //{
-        //        //    _log.DebugFormat("Requested File for State {0} already exists", state.ToString());
-        //        //    return true;
-        //        //}
-
-
-
-        //        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(
-        //            FileLocator.GetStateBlockGroupUrl(state));                
-
-        //        request.KeepAlive = false;  //We're only doing this once
-        //        request.Credentials = CredentialCache.DefaultCredentials;
-        //        HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-        //        Stream downloadStream = response.GetResponseStream();
-        //        long expectedLength = response.ContentLength;
-
-
-        //        DateTime lastModified = response.LastModified;
-
-
-
-        //        if (File.Exists(filePath))
-        //        {
-        //            _log.DebugFormat("Requested File for State {0} already exists", state.ToString());
-        //            return true;
-        //        }
-
-
-
-        //        FileStream output = new FileStream(filePath, FileMode.Create);
-        //        Utilities.CopyToWithProgress(downloadStream, expectedLength, output);
-
-
-
-        //        downloadStream.Close();
-        //        output.Close();
-        //        response.Close();
-
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _log.Error("Error downloading block group file", ex);
-        //    }
-        //    return false;
-        //}
-
+        /// <summary>
+        /// Returns the path to the directory where the raw data files for a given should be extracted/read from
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
         public static string GetStateBlockGroupDataDir(AcsState state)
         {
-            string filePath = FileLocator.GetLocalFilename(state);
+            string filePath = FileLocator.GetStateBlockGroupDataFilePath(state);
             string basePath = Path.GetDirectoryName(filePath);
 
             //IMPORTANT!  Don't create this directory on disk, just the path string!
@@ -154,12 +68,22 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         }
 
 
+        /// <summary>
+        /// Gets the working directory for a given state
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
         public static string GetStateWorkingDir(AcsState state)
         {
             return FileUtilities.PathEnsure(FileLocator.TempPath, "Working", state.ToString());
         }
 
-
+        /// <summary>
+        /// Returns the path to the local copy of the geography file for a given state.  
+        /// Returns string.Empty if the file doesn't exist.
+        /// </summary>
+        /// <param name="dataDirectory"></param>
+        /// <returns></returns>
         public static string GetStateBlockGroupGeographyFilename(string dataDirectory)
         {
             var files = Directory.GetFiles(dataDirectory, "g*.txt");
@@ -170,7 +94,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
             return string.Empty;
             //return FileUtilities.PathCombine(basePath, );
         }
-
 
 
 

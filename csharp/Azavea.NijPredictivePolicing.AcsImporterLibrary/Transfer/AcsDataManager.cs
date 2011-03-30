@@ -11,6 +11,8 @@ using System.Security.Policy;
 using System.Data;
 using GisSharpBlog.NetTopologySuite.Geometries;
 using GisSharpBlog.NetTopologySuite.IO;
+using System.Data.Common;
+using System.Text.RegularExpressions;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
@@ -52,17 +54,17 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public AcsDataManager()
         {
-            init();
+            Init();
         }
 
         public AcsDataManager(AcsState aState)
         {
             this.State = aState;
-            init();
+            Init();
         }
 
 
-        public void init()
+        public void Init()
         {
             this.WorkingPath = FileLocator.GetStateWorkingDir(this.State);
             
@@ -92,7 +94,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public string GetRemoteStateShapefileURL()
         {
-            string url = Settings.StateBlockGroupShapefileRootURL + Settings.StateBlockGroupShapefileFormatURL;
+            string url = Settings.StateBlockGroupShapefileRootURL + 
+                Settings.StateBlockGroupShapefileFormatURL;
             url = url.Replace("{FIPS-code}", this.StateFIPS);
             return url;
         }
@@ -103,7 +106,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             string template = Settings.StateBlockGroupShapefileFormatURL;
             template = template.Replace("{FIPS-code}", this.StateFIPS);
 
-            return FileUtilities.PathCombine(this.WorkingPath, template);
+            return Path.Combine(this.WorkingPath, template);
+        }
+
+        public string GetLocalColumnMappingsDirectory()
+        {
+            return FileUtilities.PathCombine(FileLocator.TempPath, Settings.ColumnMappingsFileName);
         }
 
 
@@ -136,6 +144,34 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             else
             {
                 _log.Error("An error was encountered while downloading block group data, exiting.");
+            }
+            return false;
+        }
+
+        public bool CheckColumnMappingsFile()
+        {
+            _log.DebugFormat("Downloading column mappings file ({0})", Settings.ColumnMappingsFileName);
+
+            string desiredUrl = Settings.CurrentColumnMappingsFileUrl;
+            string destFilepath = FileUtilities.PathCombine(FileLocator.TempPath, 
+                Settings.ColumnMappingsFileName + Settings.ColumnMappingsFileExtension);
+
+            if (FileDownloader.GetFileByURL(desiredUrl, destFilepath))
+            {
+                _log.Debug("Download successful");
+                if (FileLocator.ExpandZipFile(destFilepath, GetLocalColumnMappingsDirectory()))
+                {
+                    _log.Debug("Column Mappings file decompressed successfully");
+                    return true;
+                }
+                else
+                {
+                    _log.Error("Error during decompression, TODO: destroy directory");
+                }
+            }
+            else
+            {
+                _log.Error("An error was encountered while downloading column mappings file, exiting.");
             }
             return false;
         }
@@ -220,23 +256,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             return (DbClient.TestDatabaseConnection());
         }
 
-        protected bool InitDatabase()
+        public void CreateGeographiesTable(DbConnection conn)
         {
-            if (!DbClient.TestDatabaseConnection())
-            {
-                _log.Error("Unable to connect to database");
-                return false;
-            }
-
-            var conn = DbClient.GetConnection();
-            string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, "libspatialite-2.dll");
-            DbClient.GetCommand("SELECT load_extension('" + spatialitePath + "');", conn).ExecuteNonQuery();
-            DbClient.GetCommand("SELECT InitSpatialMetaData()", conn).ExecuteNonQuery();
-
             string geographyTablename = "geographies";
-            string createGeographyTable = DataClient.GenerateTableSQLFromFields(geographyTablename, GeographyFileReader.Columns);
+            string createGeographyTable = DataClient.GenerateTableSQLFromFields(geographyTablename, 
+                GeographyFileReader.Columns);
             DbClient.GetCommand(createGeographyTable, conn).ExecuteNonQuery();
-
 
             string geographyFilename = GetLocalGeographyFileName();
             GeographyFileReader geoReader = new GeographyFileReader(geographyFilename);
@@ -280,7 +305,116 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             {
                 _log.Debug("Could not find geographies file, table not initialized!");
             }
+        }
 
+        public void CreateColumnMappingsTable(DbConnection conn)
+        {
+            string tableName = "columnMappings";
+            string createSql = DataClient.GenerateTableSQLFromFields(tableName, SequenceFileReader.Columns);
+            DbClient.GetCommand(createSql).ExecuteNonQuery();
+
+            string tableSelect = string.Format("select * from {0}", tableName);
+            var adapter = DataClient.GetMagicAdapter(conn, DbClient, tableSelect);
+            var table = DataClient.GetMagicTable(conn, DbClient, tableSelect);
+
+            string colMapDir = GetLocalColumnMappingsDirectory();
+            if (Directory.Exists(colMapDir))
+            {
+                _log.Debug("Importing Sequence Files...");
+
+                int ixid = 0;
+                foreach (string file in Directory.GetFiles(colMapDir, "Seq*.xls", SearchOption.TopDirectoryOnly))
+                {
+                    //Extract sequence number from filename
+                    string localFilename = Path.GetFileName(file);
+                    Regex sequenceFormat = new Regex(@"^Seq(\d{1,4})\.xls$");
+                    Match match = sequenceFormat.Match(localFilename);
+                    if (!match.Groups[0].Success)
+                    {
+                        _log.Warn("Malformed filename found in sequence files folder; skipping\n\t" + file);
+                        continue;
+                    }
+                    int seqNo = int.Parse(match.Groups[1].Value);
+
+                    //Read data from file
+                    var reader = new SequenceFileReader(file).GetReader();
+                    if (reader == null)
+                    {
+                        _log.Error("One of the sequence files is missing; skipping\n\t" + file);
+                        continue;
+                    }
+
+                    DataSet fileData = reader.AsDataSet(false);
+                    if (fileData.Tables == null || fileData.Tables.Count == 0)
+                    {
+                        _log.Error("One of the sequence files contained no readable worksheets; skipping\n\t" + 
+                            file);
+                        continue;
+                    }
+                    else if (fileData.Tables.Count > 1)
+                        _log.Warn("One of the sequence files had multiple worksheets; using the first one\n\t" + 
+                            file);
+
+                    DataTable firstWorksheet = fileData.Tables[0];
+                    if (firstWorksheet.Rows == null || firstWorksheet.Rows.Count < 2)
+                    {
+                        _log.Error("One of the sequence files did not have enough rows to read; skipping\n\t" + 
+                            file);
+                        continue;
+                    }
+                    else if (firstWorksheet.Rows.Count > 2)
+                        _log.Warn("One of the sequence files had too many rows\n\t" + file);
+
+                    //Expected values of row: FILEID,FILETYPE,STUSAB,CHARITER,SEQUENCE,LOGRECNO,...
+                    DataRow row = firstWorksheet.Rows[1];   //First row is useless
+                    if (row.ItemArray == null || row.ItemArray.Length < 7)
+                    {
+                        _log.Error("One of the sequence files had bad data, skipping\n\t" + file);
+                        continue;
+                    }
+
+                    //Add data to database
+                    for (int i = 6; i < row.ItemArray.Length; i++)
+                    {
+                        //                         ixid,   COLNAME,          COLNO, SEQNO
+                        var toAdd = new object[] { ixid++, row.ItemArray[i], i + 1, seqNo };
+                        table.Rows.Add(toAdd);
+                    }
+
+                }
+
+                if ((table != null) && (table.Rows.Count > 0))
+                {
+                    _log.Debug("Saving...");
+                    adapter.Update(table);
+                    table.AcceptChanges();
+                }
+                else
+                    _log.Error("Could not read any of the sequence files!");
+
+                _log.Debug("Done!");
+            }
+            else
+            {
+                _log.Error("Could not find column mappings directory file, table not initialized!");
+            }
+        }
+
+        protected bool InitDatabase()
+        {
+            if (!DbClient.TestDatabaseConnection())
+            {
+                _log.Error("Unable to connect to database");
+                return false;
+            }
+
+            var conn = DbClient.GetConnection();
+            string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, "libspatialite-2.dll");
+            DbClient.GetCommand("SELECT load_extension('" + spatialitePath + "');", conn).ExecuteNonQuery();
+            DbClient.GetCommand("SELECT InitSpatialMetaData()", conn).ExecuteNonQuery();
+
+            CreateGeographiesTable(conn);
+            CreateColumnMappingsTable(conn);
 
 
             ////-- Spatial Reference System
@@ -289,9 +423,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             ////EXAMPLE:
             ////-- Lakes
             //nonQueryDB(conn, "CREATE TABLE lakes (fid INTEGER NOT NULL PRIMARY KEY,name VARCHAR(64)); ");
-
-
-
 
 
             return true;

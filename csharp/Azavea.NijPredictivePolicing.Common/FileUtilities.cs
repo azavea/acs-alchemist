@@ -13,6 +13,11 @@ namespace Azavea.NijPredictivePolicing.Common
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 
+        /// <summary>
+        /// Delete without exceptions.  Returns true on success, false on failure.
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         public static bool TryDelete(string filename)
         {
             try
@@ -26,6 +31,12 @@ namespace Azavea.NijPredictivePolicing.Common
             return false;
         }
 
+        /// <summary>
+        /// Given a basepath and a list of names of subdirectories, creates the subdirectories if necessary.  Throws exceptions on error.
+        /// </summary>
+        /// <param name="basepath">A path to a directory that already exists</param>
+        /// <param name="chunks">Subdirectories to create (chunks[i + 1] is a subdirectory of chunks[i]</param>
+        /// <returns>The path to the deepest subdirectory</returns>
         public static string PathEnsure(string basepath, params string[] chunks)
         {
             if ((chunks == null) || (chunks.Length == 0))
@@ -44,12 +55,19 @@ namespace Azavea.NijPredictivePolicing.Common
             return basepath;
         }
 
+        /// <summary>
+        /// Wrapper around PathEnsure() that doesn't throw exceptions.  Returns "" on error and prints an error message to _log
+        /// </summary>
+        /// <param name="basepath"></param>
+        /// <param name="chunks"></param>
+        /// <returns></returns>
         public static string SafePathEnsure(string basepath, params string[] chunks)
         {
             try
             {
                 //I'd rather do this here, than directly in the constructor or class definition.
                 //The file system loves to throw exceptions, and I'd rather see em than a app 'exit'!
+                //In Soviet Russia, computer throws things at YOU!
 
                 return FileUtilities.PathEnsure(basepath, chunks);
             }
@@ -60,17 +78,25 @@ namespace Azavea.NijPredictivePolicing.Common
             return string.Empty;
         }
 
-        public static string PathCombine(string basepath, params string[] chunks)
+        /// <summary>
+        /// Like Path.Combine(), only works for an arbitrary number of arguments
+        /// </summary>
+        /// <param name="chunks"></param>
+        /// <returns></returns>
+        public static string PathCombine(params string[] chunks)
         {
             if ((chunks == null) || (chunks.Length == 0))
             {
                 return string.Empty;
             }
-            for (int i = 0; i < chunks.Length; i++)
+
+            string result = chunks[0];
+            for (int i = 1; i < chunks.Length; i++)
             {
-                basepath = Path.Combine(basepath, chunks[i]);
+                result = Path.Combine(result, chunks[i]);
             }
-            return basepath;
+
+            return result;
         }
 
         //public static bool UnzipFileTo(string basePath, string zipFileName)

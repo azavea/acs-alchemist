@@ -47,6 +47,10 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Excel, Version=2.0.1.0, Culture=neutral, PublicKeyToken=93517dbe6a4012fa, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\excelDataReader\Excel.dll</HintPath>
+    </Reference>
     <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\geoapi\GeoAPI.dll</HintPath>
@@ -75,6 +79,7 @@
   <ItemGroup>
     <Compile Include="AcsState.cs" />
     <Compile Include="FileFormats\GeographyFileReader.cs" />
+    <Compile Include="FileFormats\SequenceFileReader.cs" />
     <Compile Include="FileFormats\ShapefileHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transfer\AcsDataManager.cs" />

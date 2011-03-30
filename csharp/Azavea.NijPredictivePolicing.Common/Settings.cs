@@ -19,7 +19,11 @@ namespace Azavea.NijPredictivePolicing.Common
         public const string ApplicationName = "ACSImporter";
 
 
+#if DEBUG
+        private static string _tempPath = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\ACSImporter";
+#else
         private static string _tempPath;
+#endif
 
         /// <summary>
         /// Gets (and creates) the path to the Applications Temporary Folder
@@ -59,9 +63,32 @@ namespace Azavea.NijPredictivePolicing.Common
         public const string SummaryFileDirectory = "summaryfile";
 
         /// <summary>
+        /// Directory containing the zip file with files mapping column names to sequence numbers, relative to SummaryFileDirectory
+        /// </summary>
+        public const string ColumnMappingsFileDirectory = "UserTools";
+
+        /// <summary>
+        /// The name of the zip file containing files mapping column names to sequence numbers
+        /// </summary>
+        public const string ColumnMappingsFileName = "2005-2009_SummaryFileXLS";
+
+        public const string ColumnMappingsFileExtension = ".zip";
+
+        /// <summary>
+        /// Full URL of the zip file containing files mapping column names to sequence numbers
+        /// </summary>
+        public const string CurrentColumnMappingsFileUrl = 
+            CensusFtpRoot + "/" +
+            CurrentAcsDirectory + "/" +
+            SummaryFileDirectory + "/" +
+            ColumnMappingsFileDirectory + "/" +
+            ColumnMappingsFileName + ColumnMappingsFileExtension;
+
+        /// <summary>
         /// Directory containing the raw data tables by state, relative to SummaryFileDirectory
         /// </summary>
         public const string CurrentAcsAllStateTablesDirectory = "2005-2009_ACSSF_By_State_All_Tables";
+
 
         /// <summary>
         /// URL pointing to the folder containing all the ACS state tables

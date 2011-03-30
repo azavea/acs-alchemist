@@ -95,18 +95,12 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 {
                     var manager = new AcsDataManager(this.State);                   
 
-                    if (manager.CheckBlockGroupFile())
+                    if (manager.CheckColumnMappingsFile() && 
+                        manager.CheckBlockGroupFile() && 
+                        manager.CheckDatabase() && 
+                        manager.CheckShapefile())
                     {
-                        if (manager.CheckDatabase())
-                        {
-                            manager.CheckShapefile();
-
                             //var dt = manager.GetShapefileData();
-                        }
-                        else
-                        {
-                            return false;
-                        }
                     }
                     else
                     {

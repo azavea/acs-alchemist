@@ -3,3 +3,5 @@ bin
 obj
 *.suo
 *.csproj.user
+
+/csharp/Azavea.NijPredictivePolicing.AcsImporter/ACSImporter

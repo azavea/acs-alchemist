@@ -15,7 +15,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
     class Program
     {
         private static ILog _log = null;
-        protected static void init()
+        protected static void Init()
         {
             ConsoleAppender con = new ConsoleAppender();
             con.Layout = new PatternLayout("%message%newline");
@@ -59,7 +59,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         static void Main(string[] args)
         {
-            init();
+            Init();
             ShowWelcomeScreen();
 
 

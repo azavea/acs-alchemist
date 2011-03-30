@@ -82,8 +82,7 @@
     <Compile Include="Common\Data\CommaSeparatedValueTests.cs" />
     <Compile Include="Common\Data\FixedWidthColumnFileTests.cs" />
     <Compile Include="Common\DB\SpatialiteTests.cs" />
-
-    <Compile Include="Common\DB\TableCreationTests.cs" />    
+    <Compile Include="Common\DB\TableCreationTests.cs" />
     <Compile Include="Common\Data\ExcelDataReaderTests.cs" />
     <Compile Include="Helpers\Utilities.cs" />
     <Compile Include="Helpers\LogHelpers.cs" />
@@ -100,6 +99,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="TestData\ParserTests\Seq10.csv" />
+    <None Include="TestData\ParserTests\Seq10.xls" />
     <None Include="TestData\ParserTests\wellFormed.csv" />
   </ItemGroup>
   <ItemGroup>
