@@ -191,8 +191,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             string desiredUrl = this.GetRemoteStateShapefileURL();
             string destFilepath = GetLocalBlockGroupShapefilename();
 
-
-
             if (FileDownloader.GetFileByURL(desiredUrl, destFilepath))
             {
                 _log.Debug("Download successful");
@@ -215,19 +213,26 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         }
 
 
+        public string GetLocalShapefileName()
+        {
+            var files = Directory.GetFiles(this.ShapePath, "bg*.shp");
+            if ((files != null) && (files.Length > 0))
+            {
+                return Path.Combine(this.ShapePath, Path.GetFileNameWithoutExtension(files[0]));
+            }
+            return null;
+        }
+
 
         public DataTable GetShapefileData()
         {
             DataTable dt = null;
             try
             {
-
-
-                var files = Directory.GetFiles(this.ShapePath, "bg*.shp");
-                if ((files != null) && (files.Length > 0))
+                string filename = GetLocalShapefileName();
+                if (!string.IsNullOrEmpty(filename))
                 {
-                    string shapeFileName = Path.Combine(this.ShapePath, Path.GetFileNameWithoutExtension(files[0]));
-                    dt = Shapefile.CreateDataTable(shapeFileName, this.State.ToString(), ShapefileHelper.GetGeomFactory());
+                    dt = Shapefile.CreateDataTable(filename, this.State.ToString(), ShapefileHelper.GetGeomFactory());
                 }
             }
             catch (Exception ex)

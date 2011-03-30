@@ -23,6 +23,12 @@ namespace Azavea.NijPredictivePolicing.Common.DB
             _connectionString = string.Format("Synchronous=Off;Cache Size=64000000;Max Pool Size=100;Data Source={0};", filename);
         }
 
+        public SqliteDataClient(string filename, string connectionString)
+        {
+            //Synchronous=Full
+            _connectionString = string.Format(connectionString, filename);
+        }
+
 
 
         /// <summary>

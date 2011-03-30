@@ -6,6 +6,8 @@ using Azavea.NijPredictivePolicing.AcsImporterLibrary;
 using Azavea.NijPredictivePolicing.Common;
 using log4net;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
+using Azavea.NijPredictivePolicing.Common.DB;
+using Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats;
 
 namespace Azavea.NijPredictivePolicing.AcsDataImporter
 {
@@ -16,6 +18,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public static ImportArg[] Arguments = new ImportArg[] {
             new ImportArg() { Flag = "f", Description = "Optional filename containing WellKnownTexts of desired output polygons", DataType=typeof(string), PropertyName="ShapeFilename"},
             new ImportArg() { Flag = "s", Description = "State Code (specifying this will download that state's data)", DataType=typeof(AcsState), PropertyName="State"},
+            //new ImportArg() { Flag = "t", Description = "Run Tests", PropertyName="RunTests"},
             new ImportArg() { Flag = "a", Description = "Optional thing that a", PropertyName="PropA"},
             new ImportArg() { Flag = "b", Description = "Optional thing that b", PropertyName="PropB"},
             new ImportArg() { Flag = "c", Description = "Optional thing that c", PropertyName="PropC"}
@@ -23,7 +26,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         public AcsState State { get; set; }
 
-        public string ShapeFilename { get; set; }        
+        public string ShapeFilename { get; set; }
+        //public string RunTests { get; set; }
         public string PropA { get; set; }
         public string PropB { get; set; }
         public string PropC { get; set; }
@@ -131,6 +135,16 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     //    return false;
                     //}
                 }
+
+                //if (!string.IsNullOrEmpty(this.RunTests))
+                //{
+                //    AcsDataManager manager = new AcsDataManager(AcsState.Wyoming);
+                //    string filename = manager.GetLocalShapefileName();
+                //    ShapefileHelper helper = new ShapefileHelper();
+                //    helper.OpenShapefile(filename);                    
+                //    var schemaDT = helper.GetSchema();
+                //    _log.DebugFormat("Here");
+                //}
 
 
 

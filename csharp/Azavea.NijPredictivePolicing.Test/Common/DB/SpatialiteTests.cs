@@ -5,6 +5,9 @@ using System.Text;
 using System.Data.SQLite;
 using System.Data;
 using NUnit.Framework;
+using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
+using Azavea.NijPredictivePolicing.AcsImporterLibrary;
+using Azavea.NijPredictivePolicing.Common.DB;
 
 namespace Azavea.NijPredictivePolicing.Test.Common.DB
 {
@@ -97,6 +100,16 @@ namespace Azavea.NijPredictivePolicing.Test.Common.DB
             sda.Fill(dt);
             return dt;
         }
+
+        //[Test]
+        //public void TestOpenShapefile()
+        //{
+        //    AcsDataManager manager = new AcsDataManager(AcsState.Wyoming);
+        //    string filename = manager.GetLocalShapefileName();
+        //    SqliteDataClient client = new SqliteDataClient(filename);
+//
+       //     Assert.IsTrue(client.TestDatabaseConnection(), "Couldn't connect to Shapefile");
+       // }
 
 
 

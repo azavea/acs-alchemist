@@ -16,7 +16,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         public static bool GetFileByURL(string desiredURL, string filePath)
         {
             try
-            {                
+            {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(desiredURL);
 
                 request.KeepAlive = false;  //We're only doing this once
@@ -27,7 +27,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 long expectedLength = response.ContentLength;
                 DateTime lastModified = response.LastModified;
 
-                
+
                 if (File.Exists(filePath))
                 {
                     string srcDate = response.LastModified.ToShortDateString();
@@ -57,7 +57,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             {
                 _log.Error("Error downloading block group file", ex);
             }
-            return false;
+            return (File.Exists(filePath));
         }
 
     }
