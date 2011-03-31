@@ -52,6 +52,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         public string SummaryLevel;
         public string WKTFilterFilename;
         public string IncludedVariableFile;
+        public bool ReplaceTable = false;
 
 
         
@@ -569,7 +570,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 {
                     if (DataClient.HasTable(conn, DbClient, tableName))
                     {
-                        return true;
+                        if (ReplaceTable)
+                        {
+                            DbClient.GetCommand(string.Format("DROP TABLE IF EXISTS {0};", tableName), conn).ExecuteNonQuery();
+                        }
+                        else
+                        {
+                            _log.DebugFormat("Table {0} was already built", tableName);
+                            return true;
+                        }
                     }
 
                     //get a list of LRUs we want
@@ -642,6 +651,17 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         }
                         reader.Close();
                     }
+
+                    _log.DebugFormat("Creating Table {0}", tableName);
+                    string createTableSQL = SqliteDataClient.GenerateTableSQLFromTable(tableName, newTable, "LOGRECNO");
+                    DbClient.GetCommand(createTableSQL, conn).ExecuteNonQuery();
+
+                    _log.DebugFormat("Saving Table {0}...", tableName);
+                    var dba = DataClient.GetMagicAdapter(conn, DbClient, "select * from " + tableName);
+                    dba.Update(newTable);
+                    _log.Debug("Done!");
+
+
 
                     _log.Debug("Import complete!");
 

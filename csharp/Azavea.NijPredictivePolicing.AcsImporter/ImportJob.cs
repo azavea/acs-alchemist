@@ -20,6 +20,9 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new ImportArg() { Flag = "v", Description = "Provide a file containing variables to export", DataType=typeof(string), PropertyName="IncludedVariableFile"},
             new ImportArg() { Flag = "e", Description = "Summary Level", DataType=typeof(string), PropertyName="SummaryLevel"},
             new ImportArg() { Flag = "j", Description = "Table name for this job", DataType=typeof(string), PropertyName="JobName"},
+            new ImportArg() { Flag = "r", Description = "Replace existing table", DataType=typeof(string), PropertyName="ReplaceTable"},
+
+            new ImportArg() { Flag = "exportToShape", Description = "Export results to shapefile", DataType=typeof(string), PropertyName="ExportToShapefile"},
 
             new ImportArg() { Flag = "f", Description = "Optional filename containing WellKnownTexts of desired output polygons", DataType=typeof(string), PropertyName="WKTFilterFilename"},
             new ImportArg() { Flag = "l", Description = "List variables", DataType=typeof(string), PropertyName="DoListVariables"},
@@ -37,6 +40,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public string IncludedVariableFile { get; set; }
         public string JobName { get; set; }
         public string SummaryLevel { get; set; }
+        public string ReplaceTable { get; set; }
+        public string ExportToShapefile { get; set; }
+        
+        
         
         //public string RunTests { get; set; }
         public string PropA { get; set; }
@@ -65,10 +72,12 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             int idx = line.IndexOf(delim);
             while (idx >= 0)
             {
-                string flag = line.Substring(idx + 1, 1);
+                int nextSpace = line.IndexOf(' ', idx + 1);
+
+                string flag = line.Substring(idx + 1, nextSpace - (idx + 1));
                 string contents = string.Empty;
 
-                idx += 2;
+                idx += 1 + flag.Length;
                 int end = line.IndexOf(delim, idx);
                 if (end == -1)
                 {
@@ -127,20 +136,22 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         }
 
 
+                        
                         manager.SummaryLevel = this.SummaryLevel;
                         manager.WKTFilterFilename = this.SummaryLevel;
                         manager.IncludedVariableFile = IncludedVariableFile;
+                        manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
 
                         if (!string.IsNullOrEmpty(IncludedVariableFile))
                         {
                             manager.CheckBuildVariableTable(this.JobName);
-
-
                         }
 
 
-
-                        
+                        if (!string.IsNullOrEmpty(ExportToShapefile))
+                        {
+                            _log.Debug("Exporting!");
+                        }                        
                     }
                     else
                     {

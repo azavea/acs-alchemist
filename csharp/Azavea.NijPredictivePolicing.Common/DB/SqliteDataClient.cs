@@ -7,11 +7,14 @@ using System.Data;
 using System.Data.SQLite;
 using Azavea.NijPredictivePolicing.Common.Data;
 using System.IO;
+using log4net;
 
 namespace Azavea.NijPredictivePolicing.Common.DB
 {
     public class SqliteDataClient : IDataClient
     {
+        private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         protected string _connectionString;
         protected int _queryTimeout = 30;
         public int _connsOpened = 0, _connsClosed = 0;
@@ -261,6 +264,57 @@ namespace Azavea.NijPredictivePolicing.Common.DB
 
 
                 sql.AppendFormat("{0} {1}", col.ColumnName, dataType);
+            }
+
+
+            sql.Append(" ); ");
+            return sql.ToString();
+        }
+
+        public static string GenerateTableSQLFromTable(string tablename, DataTable dt, string primaryCol)
+        {
+            StringBuilder sql = new StringBuilder(512);
+            sql.AppendFormat("CREATE TABLE {0} ( ", tablename);
+            
+            var columns = dt.Columns;
+            for (int i = 0; i < columns.Count; i++)
+            {
+                var col = columns[i];
+                if (i > 0)
+                    sql.Append(", ");
+
+                
+
+                var colType = col.DataType;
+
+                string dataType = string.Empty;
+                if ((colType == typeof(float)) || (colType == typeof(double)))
+                {
+                    dataType = "REAL";
+                }
+                else if ((colType == typeof(int)) || (colType == typeof(long)))
+                {
+                    dataType = "INTEGER";
+                }
+                if (colType == typeof(string))
+                {
+                    dataType = "TEXT";
+                }
+
+                if (string.IsNullOrEmpty(dataType))
+                {
+                    _log.WarnFormat("Couldn't create column {0}", col.ColumnName);
+                    continue;
+                }
+
+                if (col.ColumnName == primaryCol)
+                {
+                    sql.AppendFormat("\"{0}\" {1} NOT NULL PRIMARY KEY", col.ColumnName, dataType);
+                }
+                else
+                {
+                    sql.AppendFormat("\"{0}\" {1}", col.ColumnName, dataType);
+                }
             }
 
 
