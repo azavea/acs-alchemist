@@ -181,7 +181,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
 
         /// <summary>
-        /// Downloads the SHAPE FILE
+        /// Downloads the SHAPE FILE, must be run before initializing the database!  
+        /// Since this will be imported into the database!
         /// </summary>
         /// <returns></returns>
         public bool CheckShapefile()
@@ -198,6 +199,22 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 if (FileLocator.ExpandZipFile(destFilepath, this.ShapePath))
                 {
                     _log.Debug("State block group file decompressed successfully");
+
+
+                    var client = DbClient;
+                    using (var conn = client.GetConnection())
+                    {
+                        if (!DataClient.HasTable(conn, client, "shapefile"))
+                        {
+                            _log.Debug("Shapefile table not found, importing...");
+                            CreateShapefileTable(conn, "shapefile");
+                        }
+                    }
+
+
+
+
+
                     return true;
                 }
                 else
@@ -210,6 +227,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 _log.Error("An error was encountered while downloading block group data, exiting.");
             }
             return false;
+        }
+
+        public bool CreateShapefileTable(DbConnection conn, string tableName)
+        {
+            string filename = GetLocalBlockGroupShapefilename();
+            return ShapefileHelper.ImportShapefile(conn, this.DbClient, filename, tableName);
         }
 
 
@@ -250,16 +273,19 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         {
             if (!File.Exists(this.DBFilename))
             {
-                _log.DebugFormat("Database not generated for {0}, building...", this.State);
-                this.InitDatabase();
+                _log.DebugFormat("Database not generated for {0}, building...", this.State);                
             }
             else
             {
                 _log.DebugFormat("Database already generated for {0}", this.State);
             }
 
+            this.InitDatabase();
+
             return (DbClient.TestDatabaseConnection());
         }
+
+        
 
         public void CreateGeographiesTable(DbConnection conn)
         {
@@ -405,6 +431,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             }
         }
 
+        /// <summary>
+        /// Call this anyway, should only execute code inside safe blocks
+        /// </summary>
+        /// <returns></returns>
         protected bool InitDatabase()
         {
             if (!DbClient.TestDatabaseConnection())
@@ -413,28 +443,29 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 return false;
             }
 
-            var conn = DbClient.GetConnection();
-            string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, "libspatialite-2.dll");
-            DbClient.GetCommand("SELECT load_extension('" + spatialitePath + "');", conn).ExecuteNonQuery();
-            DbClient.GetCommand("SELECT InitSpatialMetaData()", conn).ExecuteNonQuery();
+            using (var conn = DbClient.GetConnection())
+            {
+                _log.Debug("Checking for geographies table...");
+                if (!DataClient.HasTable(conn, DbClient, "geographies"))
+                {
+                    CreateGeographiesTable(conn);
+                }
 
-            CreateGeographiesTable(conn);
-            CreateColumnMappingsTable(conn);
-
-
-            ////-- Spatial Reference System
-            //nonQueryDB(conn, "INSERT INTO spatial_ref_sys (srid, auth_name, auth_srid, ref_sys_name, proj4text) VALUES(101, 'POSC', 32214, 'WGS 72 / UTM zone 14N', '+proj=utm +zone=14 +ellps=WGS72 +units=m +no_defs');");
-
-            ////EXAMPLE:
-            ////-- Lakes
-            //nonQueryDB(conn, "CREATE TABLE lakes (fid INTEGER NOT NULL PRIMARY KEY,name VARCHAR(64)); ");
+                _log.Debug("Checking for columnMappings table...");
+                if (!DataClient.HasTable(conn, DbClient, "columnMappings"))
+                {
+                    CreateColumnMappingsTable(conn);
+                }
+            }
 
 
             return true;
         }
 
 
- 
+
+
+
 
 
 

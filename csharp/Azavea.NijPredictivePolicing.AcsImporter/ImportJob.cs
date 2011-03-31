@@ -102,7 +102,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     if ((manager.CheckColumnMappingsFile())
                         && (manager.CheckBlockGroupFile())
                         && (manager.CheckDatabase())
-                        && (manager.CheckShapefile()))
+                        && (manager.CheckShapefile())
+                        )
                     {
                         //var dt = manager.GetShapefileData();
                     }

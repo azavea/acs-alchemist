@@ -20,20 +20,32 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
         public bool OpenShapefile(string filename, string tableName)
         {
+            string databaseFileName = Path.Combine(Path.GetDirectoryName(filename), "shape.dat");
+            this.Client = new SqliteDataClient(databaseFileName);
+
+            using (DbConnection conn = Client.GetConnection())
+            {
+                return ShapefileHelper.ImportShapefile(conn, Client, filename, tableName);
+            }
+        }
+
+        public static bool ImportShapefile(DbConnection conn, IDataClient client, string filename, string tableName)
+        {
             try
             {
                 string databaseFileName = Path.Combine(Path.GetDirectoryName(filename), "shape.dat");
-                this.Client = new SqliteDataClient(databaseFileName);
 
-                using (DbConnection conn = Client.GetConnection())
-                {
-                    //trim off the '.shp' from the end
-                    filename = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename));
-                    string sql = string.Format("CREATE VIRTUAL TABLE " + tableName + " USING VirtualShape('{0}', CP1252, 4269);", filename);
-                    Client.GetCommand(sql, conn).ExecuteNonQuery();
+                //trim off the '.shp' from the end
+                filename = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename));
+                string sql = string.Format("CREATE VIRTUAL TABLE " + tableName + " USING VirtualShape('{0}', CP1252, 4269);", filename);
+                client.GetCommand(sql, conn).ExecuteNonQuery();
+                
+                _log.DebugFormat("Imported Shapefile {0} into table {1}",
+                    Path.GetFileNameWithoutExtension(filename),
+                    tableName);
 
-                    return true;
-                }                
+                return true;
+
             }
             catch (Exception ex)
             {
@@ -41,6 +53,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             }
             return false;
         }
+
 
         public DataTable GetSchema()
         {

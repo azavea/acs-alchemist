@@ -69,7 +69,25 @@ namespace Azavea.NijPredictivePolicing.Common.DB
             return null;
         }
 
-
+        public static bool HasTable(DbConnection conn, IDataClient client, string tablename)
+        {
+            try
+            {
+                var dt = conn.GetSchema("Tables");
+                foreach (DataRow row in dt.Rows)
+                {
+                    if ((row["TABLE_NAME"] as string) == (string)tablename)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Error while looking for table", ex);
+            }
+            return false;
+        }
 
     }
 }
