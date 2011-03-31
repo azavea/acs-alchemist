@@ -13,6 +13,7 @@ using GisSharpBlog.NetTopologySuite.Geometries;
 using GisSharpBlog.NetTopologySuite.IO;
 using System.Data.Common;
 using System.Text.RegularExpressions;
+using Azavea.NijPredictivePolicing.Common.Data;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
@@ -47,7 +48,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         public string ShapePath;
         public string CurrentDataPath;
         public string DBFilename;
-        
+
+        public string SummaryLevel;
+        public string WKTFilterFilename;
+        public string IncludedVariableFile;
+
+
         
         public IDataClient DbClient;
 
@@ -490,6 +496,166 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             return allvars;
         }
 
+
+        public HashSet<string> GetFilteredLRUs(DbConnection conn)
+        {
+            _log.Debug("Filtering requested LRUs");
+            HashSet<string> results = new HashSet<string>();
+            if (!string.IsNullOrEmpty(this.SummaryLevel))
+            {
+                //sql-injection here: fix maybe?
+                string sql = string.Format("select LOGRECNO from geographies where SUMLEVEL = '{0}'", this.SummaryLevel);
+                using (var reader = DbClient.GetCommand(sql, conn).ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string lrn = reader.GetString(0);
+                        if (!results.Contains(lrn))
+                            results.Add(lrn);
+                    }
+                }
+            }
+            else if (!string.IsNullOrEmpty(this.WKTFilterFilename))
+            {
+                //TODO: implement
+                _log.Warn("Not Yet Implemented");
+            }
+            return results;
+        }
+
+        public DataTable GetRequestedVariables(DbConnection conn)
+        {
+            DataTable dt = new DataTable();
+            _log.Debug("Filtering requested variables");
+
+            if (!string.IsNullOrEmpty(IncludedVariableFile))
+            {
+                var lines = File.ReadAllLines(this.IncludedVariableFile);
+                if ((lines == null) || (lines.Length == 0))
+                {
+                    _log.Error("**Provided variable file had no contents");
+                    return null;
+                }
+
+                HashSet<string> variables = new HashSet<string>(lines);
+
+                dt = DataClient.GetMagicTable(conn, DbClient, "select COLNAME, COLNO, SEQNO from columnMappings");
+                foreach (DataRow row in dt.Rows)
+                {
+                    string varName = row[0] as string;
+                    if (!variables.Contains(varName))
+                    {
+                        row.Delete();
+                    }
+                }
+                dt.AcceptChanges();
+            }
+
+
+
+            //other ways to specify variables?
+
+
+
+            return dt;
+        }
+
+
+        public bool CheckBuildVariableTable(string tableName)
+        {
+            try
+            {
+                using (var conn = DbClient.GetConnection())
+                {
+                    if (DataClient.HasTable(conn, DbClient, tableName))
+                    {
+                        return true;
+                    }
+
+                    //get a list of LRUs we want
+
+                    HashSet<string> includedIDs = GetFilteredLRUs(conn);
+
+                    //get all the variable mapping information we want
+                    DataTable reqVariablesDT = GetRequestedVariables(conn);
+
+                    //get the respective files
+                    DataTable newTable = new DataTable();
+                    newTable.Columns.Add("LOGRECNO", typeof(string));
+
+                    Dictionary<string, DataRow> allRows = new Dictionary<string, DataRow>(includedIDs.Count);
+
+                    foreach (var id in includedIDs)
+                    {
+                        var row = newTable.NewRow();
+                        row[0] = id;
+                        newTable.Rows.Add(row);
+
+                        allRows[id] = row;
+                    }
+
+                    int varNum = 0;
+
+
+                    _log.Debug("Importing Columns");
+                    foreach (DataRow variableRow in reqVariablesDT.Rows)
+                    {
+                        varNum++;
+
+                        var sequenceNo = Utilities.GetAs<int>(variableRow["SEQNO"] as string, -1);
+                        var seqFile = Directory.GetFiles(this.CurrentDataPath, "e*" + sequenceNo.ToString("0000") + "000.txt");    //0001000
+                        if ((seqFile == null) || (seqFile.Length == 0))
+                        {
+                            _log.DebugFormat("Couldn't find sequence file {0}", sequenceNo);
+                            continue;
+                        }
+
+                        //TODO: alternate column naming?
+                        var newColumnName = variableRow["COLNAME"] as string;
+                        int columnIDX = Utilities.GetAs<int>(variableRow["COLNO"] as string, -1);
+
+                        _log.DebugFormat("Importing {0}...", newColumnName);
+
+                        if (newTable.Columns.Contains(newColumnName))
+                        {
+                            newColumnName = newColumnName + varNum;
+                        }
+                        newTable.Columns.Add(newColumnName, typeof(double));
+
+                        CommaSeparatedValueReader reader = new CommaSeparatedValueReader(seqFile[0], false);
+                        foreach (List<string> values in reader)
+                        {
+                            string lru = values[5];
+                            if (!includedIDs.Contains(lru))
+                                continue;
+
+                            //_log.Debug("Found one!");
+
+                            if (columnIDX < values.Count)
+                            {
+                                double val = Utilities.GetAs<double>(values[columnIDX], double.NaN);
+                                if (!double.IsNaN(val))
+                                {
+                                    allRows[lru][newColumnName] = val;
+                                }
+                            }
+                        }
+                        reader.Close();
+                    }
+
+                    _log.Debug("Import complete!");
+
+                    //TODO: save the table to the database
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Error while building table", ex);
+            }
+
+            return false;
+        }
 
 
 

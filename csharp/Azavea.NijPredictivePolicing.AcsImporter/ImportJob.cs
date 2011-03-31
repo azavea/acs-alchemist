@@ -15,10 +15,15 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public static ImportArg[] Arguments = new ImportArg[] {
-            new ImportArg() { Flag = "f", Description = "Optional filename containing WellKnownTexts of desired output polygons", DataType=typeof(string), PropertyName="ShapeFilename"},
-            new ImportArg() { Flag = "s", Description = "State Code (specifying this will download that state's data)", DataType=typeof(AcsState), PropertyName="State"},
-            new ImportArg() { Flag = "l", Description = "List variables ", DataType=typeof(string), PropertyName="DoListVariables"},
+        public static ImportArg[] Arguments = new ImportArg[] {            
+            new ImportArg() { Flag = "s", Description = "State Code (specifying this will download that state's data)", DataType=typeof(AcsState), PropertyName="State"},            
+            new ImportArg() { Flag = "v", Description = "Provide a file containing variables to export", DataType=typeof(string), PropertyName="IncludedVariableFile"},
+            new ImportArg() { Flag = "e", Description = "Summary Level", DataType=typeof(string), PropertyName="SummaryLevel"},
+            new ImportArg() { Flag = "j", Description = "Table name for this job", DataType=typeof(string), PropertyName="JobName"},
+
+            new ImportArg() { Flag = "f", Description = "Optional filename containing WellKnownTexts of desired output polygons", DataType=typeof(string), PropertyName="WKTFilterFilename"},
+            new ImportArg() { Flag = "l", Description = "List variables", DataType=typeof(string), PropertyName="DoListVariables"},
+
             //new ImportArg() { Flag = "t", Description = "Run Tests", PropertyName="RunTests"},
             new ImportArg() { Flag = "a", Description = "Optional thing that a", PropertyName="PropA"},
             new ImportArg() { Flag = "b", Description = "Optional thing that b", PropertyName="PropB"},
@@ -27,8 +32,12 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         public AcsState State { get; set; }
 
-        public string ShapeFilename { get; set; }
+        public string WKTFilterFilename { get; set; }
         public string DoListVariables { get; set; }
+        public string IncludedVariableFile { get; set; }
+        public string JobName { get; set; }
+        public string SummaryLevel { get; set; }
+        
         //public string RunTests { get; set; }
         public string PropA { get; set; }
         public string PropB { get; set; }
@@ -118,8 +127,20 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         }
 
 
+                        manager.SummaryLevel = this.SummaryLevel;
+                        manager.WKTFilterFilename = this.SummaryLevel;
+                        manager.IncludedVariableFile = IncludedVariableFile;
 
-                        //var dt = manager.GetShapefileData();
+                        if (!string.IsNullOrEmpty(IncludedVariableFile))
+                        {
+                            manager.CheckBuildVariableTable(this.JobName);
+
+
+                        }
+
+
+
+                        
                     }
                     else
                     {
