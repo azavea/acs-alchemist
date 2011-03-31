@@ -25,12 +25,15 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new ImportArg() { Flag = "exportToShape", Description = "Export results to shapefile", DataType=typeof(string), PropertyName="ExportToShapefile"},
 
             new ImportArg() { Flag = "f", Description = "Optional filename containing WellKnownTexts of desired output polygons", DataType=typeof(string), PropertyName="WKTFilterFilename"},
-            new ImportArg() { Flag = "l", Description = "List variables", DataType=typeof(string), PropertyName="DoListVariables"},
+            new ImportArg() { Flag = "l", Description = "List variables", DataType=typeof(string), PropertyName="DoListVariables"}
+
+            //TODO: add option for fishnet config file?  spatial output config file?  something?
+
 
             //new ImportArg() { Flag = "t", Description = "Run Tests", PropertyName="RunTests"},
-            new ImportArg() { Flag = "a", Description = "Optional thing that a", PropertyName="PropA"},
-            new ImportArg() { Flag = "b", Description = "Optional thing that b", PropertyName="PropB"},
-            new ImportArg() { Flag = "c", Description = "Optional thing that c", PropertyName="PropC"}
+            //new ImportArg() { Flag = "a", Description = "Optional thing that a", PropertyName="PropA"},
+            //new ImportArg() { Flag = "b", Description = "Optional thing that b", PropertyName="PropB"},
+            //new ImportArg() { Flag = "c", Description = "Optional thing that c", PropertyName="PropC"}
         };
 
         public AcsState State { get; set; }
@@ -151,7 +154,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         if (!string.IsNullOrEmpty(ExportToShapefile))
                         {
                             _log.Debug("Exporting!");
-                        }                        
+                            manager.ExportShapefile(this.JobName);
+                        }
                     }
                     else
                     {

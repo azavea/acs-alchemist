@@ -14,6 +14,8 @@ using GisSharpBlog.NetTopologySuite.IO;
 using System.Data.Common;
 using System.Text.RegularExpressions;
 using Azavea.NijPredictivePolicing.Common.Data;
+using GisSharpBlog.NetTopologySuite.Features;
+using GeoAPI.Geometries;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
@@ -211,10 +213,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     var client = DbClient;
                     using (var conn = client.GetConnection())
                     {
-                        if (!DataClient.HasTable(conn, client, "shapefile"))
+                        if (!DataClient.HasTable(conn, client, "shapetable"))
                         {
                             _log.Debug("Shapefile table not found, importing...");
-                            CreateShapefileTable(conn, "shapefile");
+                            CreateShapefileTable(conn, "shapetable");
                         }
                     }
 
@@ -238,7 +240,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public bool CreateShapefileTable(DbConnection conn, string tableName)
         {
-            string filename = GetLocalBlockGroupShapefilename();
+            string filename = Directory.GetFiles(this.ShapePath, "*.shp")[0];
             return ShapefileHelper.ImportShapefile(conn, this.DbClient, filename, tableName);
         }
 
@@ -677,6 +679,104 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             return false;
         }
 
+
+
+
+        public bool ExportShapefile(string tableName)
+        {
+            try
+            {
+                bool shouldRun = false;
+                if (!shouldRun)
+                {
+                    _log.Warn("**NOT YET COMPLETED**");
+                    return false;
+                }
+
+                using (var conn = DbClient.GetConnection())
+                {
+                    //begin...
+                    //string destFilepath = GetLocalBlockGroupShapefilename();
+                    //string sql = string.Format(".dumpshp(\"Testshp.shp\", \"{0}\");", tableName);
+                    //DbClient.GetCommand(sql, conn).ExecuteNonQuery();
+
+
+                    //FeatureCollection
+
+
+                    //shapefile
+                    if (!DataClient.HasTable(conn, DbClient, "shapetable"))
+                    {
+                        this.CreateShapefileTable(conn, "shapetable");
+                    }
+
+                    //string shapeSQL = @"select s.pkuid, s.Geometry, g.LOGRECNO from shapetable s, geographies g where g.COUNTY = s.COUNTY and g.TRACT = '00' || s.TRACT and g.BLKGRP = s.BLKGROUP";
+                    
+
+                    var features = new List<Feature>();
+
+
+                    var wholeShapeTable = DataClient.GetMagicTable(conn, DbClient, "select * from shapetable");
+                    var wholeGeomTable = DataClient.GetMagicTable(conn, DbClient, "select * from geographies");
+
+
+                    //TODO: figure out way to join against shapefile by LOGRECNO, so we can tie variables to geometries,
+                    //TODO: then finish this function
+
+
+
+                    string shapeSQL = @"
+select s.pkuid, s.Geometry, g.LOGRECNO from shapetable s, geographies g 
+where g.COUNTY || '' = s.COUNTY || ''
+";
+
+//                    string shapeSQL = @"
+//select s.pkuid, s.Geometry, g.LOGRECNO from shapetable s, geographies g 
+//where g.COUNTY || '' = s.COUNTY || ''
+//and g.TRACT || '' = '00' || s.TRACT || '' 
+//and g.BLKGRP || ''  = s.BLKGROUP|| '' ";
+
+                    var shapesDT = DataClient.GetMagicTable(conn, DbClient, shapeSQL);
+                    Dictionary<string, DataRow> shapeDict = new Dictionary<string, DataRow>();
+                    foreach (DataRow row in shapesDT.Rows)
+                    {
+                        var id = row["LOGRECNO"] as string;
+
+                        if (shapeDict.ContainsKey(id))
+                        {
+                            _log.Warn("The query returned multiple copies of this row!");
+                        }
+
+                        shapeDict[id] = row;
+                    }
+
+                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName);
+                    foreach (DataRow row in variablesDT.Rows)
+                    {
+                        var id = row["LOGRECNO"] as string;
+                        IGeometry geom = (IGeometry)shapeDict[id]["Geometry"];
+
+                        AttributesTable t = new AttributesTable();
+                        foreach (DataColumn col in variablesDT.Columns)
+                        {
+                            t.AddAttribute(col.ColumnName, row[col.Ordinal]);
+                        }
+
+                        features.Add(new Feature(geom, t));
+                    }
+
+                    var writer = new ShapefileDataWriter("testshp", ShapefileHelper.GetGeomFactory());
+                    writer.Write(features);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Error while exporting shapefile", ex);
+            }
+            return false;
+        }
 
 
     }

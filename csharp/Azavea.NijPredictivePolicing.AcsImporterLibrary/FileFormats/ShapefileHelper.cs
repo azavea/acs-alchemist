@@ -33,7 +33,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         {
             try
             {
-                string databaseFileName = Path.Combine(Path.GetDirectoryName(filename), "shape.dat");
+                if (DataClient.HasTable(conn, client, tableName))
+                {
+                    client.GetCommand("DROP TABLE " + tableName).ExecuteNonQuery();
+                }
+
+                //string databaseFileName = Path.Combine(Path.GetDirectoryName(filename), "shape.dat");
 
                 //trim off the '.shp' from the end
                 filename = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename));

@@ -27,4 +27,3 @@ Owner-occupied housing units% $100,000 or more:
 Owner-occupied housing units% $100,000 or more:% Less than 30.0 percent
 Owner-occupied housing units% $100,000 or more:% 30.0 percent or more
 Owner-occupied housing units% $100,000 or more:% Not computed
-
