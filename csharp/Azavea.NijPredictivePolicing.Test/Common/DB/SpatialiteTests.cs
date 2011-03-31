@@ -126,24 +126,24 @@ namespace Azavea.NijPredictivePolicing.Test.Common.DB
         //    Assert.IsTrue(client.TestDatabaseConnection(), "Couldn't connect to Shapefile");
         //}
 
-        [Test]
-        public void TestOpenShapefile()
-        {
-            AcsDataManager manager = new AcsDataManager(AcsState.Wyoming);
-            string filename = manager.GetLocalShapefileName();
+        //[Test]
+        //public void TestOpenShapefile()
+        //{
+        //    AcsDataManager manager = new AcsDataManager(AcsState.Wyoming);
+        //    string filename = manager.GetLocalShapefileName();
 
-            ShapefileHelper helper = new ShapefileHelper();
-            string tableName = "testShape";
-            if (helper.OpenShapefile(filename, tableName))
-            {
-                using (DbConnection conn = helper.Client.GetConnection())
-                {
-                    var dt = DataClient.GetMagicTable(conn, helper.Client, "select * from " + tableName);
-                    Assert.IsNotNull(dt, "couldn't get table");
-                    Assert.Greater(dt.Rows.Count, 0, "didn't have any rows!");
-                }
-            }
-        }
+        //    ShapefileHelper helper = new ShapefileHelper();
+        //    string tableName = "testShape";
+        //    if (helper.OpenShapefile(filename, tableName))
+        //    {
+        //        using (DbConnection conn = helper.Client.GetConnection())
+        //        {
+        //            var dt = DataClient.GetMagicTable(conn, helper.Client, "select * from " + tableName);
+        //            Assert.IsNotNull(dt, "couldn't get table");
+        //            Assert.Greater(dt.Rows.Count, 0, "didn't have any rows!");
+        //        }
+        //    }
+        //}
 
 
         //[Test]
