@@ -97,43 +97,19 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             {
                 if (this.State != AcsState.None)
                 {
-                    var manager = new AcsDataManager(this.State);                   
+                    var manager = new AcsDataManager(this.State);
 
-                    if (manager.CheckColumnMappingsFile() && 
-                        manager.CheckBlockGroupFile() && 
-                        manager.CheckDatabase() && 
-                        manager.CheckShapefile())
+                    if ((manager.CheckColumnMappingsFile())
+                        && (manager.CheckBlockGroupFile())
+                        && (manager.CheckDatabase())
+                        && (manager.CheckShapefile()))
                     {
-                            //var dt = manager.GetShapefileData();
+                        //var dt = manager.GetShapefileData();
                     }
                     else
                     {
                         return false;
                     }
-
-
-                    //_log.DebugFormat("Downloading block group file for {0}", this.State);
-                    //if (FileLocator.GetStateBlockGroupFile(this.State))
-                    //{
-                    //    _log.Debug("Download successful");
-
-                    //    if (FileLocator.ExpandStateBlockGroupFile(this.State))
-                    //    {
-                    //        _log.Debug("State block group file decompressed successfully");
-
-                    //        var reader = new AcsDataManager(this.State);
-                            
-                    //    }
-                    //    else
-                    //    {
-                    //        _log.Error("Error during decompression, TODO: destroy directory");
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    _log.Error("An error was encountered while downloading block group data, exiting.");
-                    //    return false;
-                    //}
                 }
 
                 //if (!string.IsNullOrEmpty(this.RunTests))

@@ -18,32 +18,22 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
         public SqliteDataClient Client;
 
-        public bool OpenShapefile(string filename)
+        public bool OpenShapefile(string filename, string tableName)
         {
-            //TODO: in memory?
             try
             {
-                string databaseFileName = Path.Combine(Path.GetDirectoryName(filename), "shape.sqlite");
+                string databaseFileName = Path.Combine(Path.GetDirectoryName(filename), "shape.dat");
                 this.Client = new SqliteDataClient(databaseFileName);
-                if (Client.TestDatabaseConnection())
+
+                using (DbConnection conn = Client.GetConnection())
                 {
-                    using (DbConnection conn = Client.GetConnection())
-                    {
-                        string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, "libspatialite-2.dll");
-                        int result = Client.GetCommand("SELECT load_extension('" + spatialitePath + "');").ExecuteNonQuery();
-                        _log.DebugFormat("spatialite loaded? {0}", result);
+                    //trim off the '.shp' from the end
+                    filename = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename));
+                    string sql = string.Format("CREATE VIRTUAL TABLE " + tableName + " USING VirtualShape('{0}', CP1252, 4269);", filename);
+                    Client.GetCommand(sql, conn).ExecuteNonQuery();
 
-                        //result = Client.GetCommand("SELECT InitSpatialMetaData();").ExecuteNonQuery();
-                        //_log.DebugFormat("InitSpatialMetaData loaded? {0}", result);
-
-                        //string sql = string.Format(".loadshp {0} shapetable CP1252", filename);
-                        string sql = string.Format("CREATE VIRTUAL TABLE test_shape USING VirtualShape(\"{0}\");", filename);
-                        
-                        result = Client.GetCommand(sql).ExecuteNonQuery();
-                        _log.DebugFormat("Shapefile loaded? {0}", result);
-                        return true;
-                    }
-                }
+                    return true;
+                }                
             }
             catch (Exception ex)
             {

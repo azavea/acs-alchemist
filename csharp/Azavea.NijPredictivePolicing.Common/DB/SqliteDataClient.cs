@@ -6,6 +6,7 @@ using System.Data.Common;
 using System.Data;
 using System.Data.SQLite;
 using Azavea.NijPredictivePolicing.Common.Data;
+using System.IO;
 
 namespace Azavea.NijPredictivePolicing.Common.DB
 {
@@ -15,20 +16,41 @@ namespace Azavea.NijPredictivePolicing.Common.DB
         protected int _queryTimeout = 30;
         public int _connsOpened = 0, _connsClosed = 0;
 
-
+        public string[] defaultSpatialRefs = new string[] {
+            "INSERT INTO spatial_ref_sys (srid, auth_name, auth_srid, ref_sys_name, proj4text) VALUES (4269, 'epgs', 4269, 'NAD83', '+proj=longlat +ellps=GRS80 +datum=NAD83 +no_defs ');",
+            "INSERT INTO spatial_ref_sys (srid, auth_name, auth_srid, ref_sys_name, proj4text) VALUES (4326, 'epgs', 4326, 'WGS 84', '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ');"
+        };
 
         public SqliteDataClient(string filename)
         {
             //Synchronous=Full
             _connectionString = string.Format("Synchronous=Off;Cache Size=64000000;Max Pool Size=100;Data Source={0};", filename);
+
+            if (!File.Exists(filename))
+            {
+                InitializeNewSpatialDatabase();
+            }
         }
 
-        public SqliteDataClient(string filename, string connectionString)
+        //public SqliteDataClient(string filename, string connectionString)
+        //{
+        //    //Synchronous=Full
+        //    _connectionString = string.Format(connectionString, filename);
+        //}
+
+
+        public void InitializeNewSpatialDatabase()
         {
-            //Synchronous=Full
-            _connectionString = string.Format(connectionString, filename);
-        }
+            using (var conn = GetConnection())
+            {
+                this.GetCommand("SELECT InitSpatialMetaData();", conn).ExecuteNonQuery();
 
+                foreach (string spatRef in defaultSpatialRefs)
+                {
+                    this.GetCommand(spatRef, conn).ExecuteNonQuery();
+                }
+            }
+        }
 
 
         /// <summary>
@@ -41,6 +63,9 @@ namespace Azavea.NijPredictivePolicing.Common.DB
             conn.Open();
             _connsOpened++;
 
+            string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, "libspatialite-2.dll");
+            this.GetCommand("SELECT load_extension('" + spatialitePath + "');", conn).ExecuteNonQuery();
+
             return conn;
         }
 
@@ -49,6 +74,9 @@ namespace Azavea.NijPredictivePolicing.Common.DB
             DbConnection conn = new SQLiteConnection(connString);
             conn.Open();
             _connsOpened++;
+
+            string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, "libspatialite-2.dll");
+            this.GetCommand("SELECT load_extension('" + spatialitePath + "');", conn).ExecuteNonQuery();
 
             return conn;
         }

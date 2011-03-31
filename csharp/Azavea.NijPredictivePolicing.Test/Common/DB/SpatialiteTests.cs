@@ -8,12 +8,27 @@ using NUnit.Framework;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary;
 using Azavea.NijPredictivePolicing.Common.DB;
+using Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats;
+using Azavea.NijPredictivePolicing.Test.Helpers;
+using log4net;
+using System.Data.Common;
+using System.IO;
 
 namespace Azavea.NijPredictivePolicing.Test.Common.DB
 {
     [TestFixture]
     public class SpatialiteTests
     {
+        private static ILog _log = null;
+
+        [TestFixtureSetUp]
+        public void Init()
+        {
+            _log = LogHelpers.ResetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        }
+
+
+
         [Test]
         public void TestSpatialite()
         {
@@ -83,11 +98,11 @@ namespace Azavea.NijPredictivePolicing.Test.Common.DB
             }
         }
 
-        public static void nonQueryDB(SQLiteConnection conn, string sql)
+        public static int nonQueryDB(SQLiteConnection conn, string sql)
         {
             SQLiteCommand cmd = conn.CreateCommand();
             cmd.CommandText = sql;
-            cmd.ExecuteNonQuery();
+            return cmd.ExecuteNonQuery();
         }
 
         public static DataTable queryDB(SQLiteConnection conn, string sql)
@@ -107,10 +122,84 @@ namespace Azavea.NijPredictivePolicing.Test.Common.DB
         //    AcsDataManager manager = new AcsDataManager(AcsState.Wyoming);
         //    string filename = manager.GetLocalShapefileName();
         //    SqliteDataClient client = new SqliteDataClient(filename);
-//
-       //     Assert.IsTrue(client.TestDatabaseConnection(), "Couldn't connect to Shapefile");
-       // }
 
+        //    Assert.IsTrue(client.TestDatabaseConnection(), "Couldn't connect to Shapefile");
+        //}
+
+        [Test]
+        public void TestOpenShapefile()
+        {
+            AcsDataManager manager = new AcsDataManager(AcsState.Wyoming);
+            string filename = manager.GetLocalShapefileName();
+
+            ShapefileHelper helper = new ShapefileHelper();
+            string tableName = "testShape";
+            if (helper.OpenShapefile(filename, tableName))
+            {
+                using (DbConnection conn = helper.Client.GetConnection())
+                {
+                    var dt = DataClient.GetMagicTable(conn, helper.Client, "select * from " + tableName);
+                    Assert.IsNotNull(dt, "couldn't get table");
+                    Assert.Greater(dt.Rows.Count, 0, "didn't have any rows!");
+                }
+            }
+        }
+
+
+        //[Test]
+        //public void WTF()
+        //{
+        //    if (System.IO.File.Exists("test.dat"))
+        //        System.IO.File.Delete("test.dat");
+
+        //    SQLiteConnection conn = new SQLiteConnection("Data Source=test.dat");
+        //    conn.Open();
+
+        //    string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, "libspatialite-2.dll");
+
+        //    int loaded = nonQueryDB(conn, "SELECT load_extension('" + spatialitePath + "');");
+        //    _log.Debug("spatialite loaded? " + loaded);
+
+        //    nonQueryDB(conn, "SELECT InitSpatialMetaData()");
+
+        //    string filename = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\ACSImporter\Working\Wyoming\shapes\bg56_d00";
+        //    string sql = string.Format("CREATE VIRTUAL TABLE test_shape USING VirtualShape('{0}', CP1252, 4269);", filename);
+        //    nonQueryDB(conn, sql);
+
+        //    var cmd = conn.CreateCommand();
+        //    cmd.CommandText = "select * from test_shape";
+        //    var dba = new SQLiteDataAdapter(cmd);
+        //    var dt = new DataTable();
+        //    dba.Fill(dt);
+
+        //    _log.Debug("here");
+        //}
+
+        //[Test]
+        //public void WTFTwo()
+        //{
+        //    if (System.IO.File.Exists("test.dat"))
+        //        System.IO.File.Delete("test.dat");
+
+        //    var client = new SqliteDataClient("test.dat");            
+        //    using (DbConnection conn = client.GetConnection())
+        //    {
+        //        //string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, "libspatialite-2.dll");
+        //        //int loaded = client.GetCommand("SELECT load_extension('" + spatialitePath + "');", conn).ExecuteNonQuery();
+        //        //_log.Debug("spatialite loaded? " + loaded);
+        //        //client.GetCommand("SELECT InitSpatialMetaData()", conn).ExecuteNonQuery();
+
+        //        string shapefilename = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\ACSImporter\Working\Wyoming\shapes\bg56_d00.shp";
+        //        string filename = Path.Combine(Path.GetDirectoryName(shapefilename), Path.GetFileNameWithoutExtension(shapefilename));
+        //        string sql = string.Format("CREATE VIRTUAL TABLE test_shape USING VirtualShape('{0}', CP1252, 4269);", filename);
+        //        client.GetCommand(sql, conn).ExecuteNonQuery();
+
+        //        var dt = DataClient.GetMagicTable(conn, client, "SELECT * from test_shape");
+
+
+        //        _log.Debug("here");
+        //    }
+        //}
 
 
 

@@ -316,7 +316,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         {
             string tableName = "columnMappings";
             string createSql = DataClient.GenerateTableSQLFromFields(tableName, SequenceFileReader.Columns);
-            DbClient.GetCommand(createSql).ExecuteNonQuery();
+            DbClient.GetCommand(createSql, conn).ExecuteNonQuery();
 
             string tableSelect = string.Format("select * from {0}", tableName);
             var adapter = DataClient.GetMagicAdapter(conn, DbClient, tableSelect);
