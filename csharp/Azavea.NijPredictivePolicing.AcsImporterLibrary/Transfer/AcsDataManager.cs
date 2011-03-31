@@ -471,6 +471,27 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
 
 
-        
+
+        /// <summary>
+        /// Returns all the variable names in the columnMappings table
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetAllSequenceVariableNames()
+        {
+            var allvars = new List<string>(1024);
+            using (var conn = DbClient.GetConnection())
+            {
+                var dt = DataClient.GetMagicTable(conn, DbClient, "select COLNAME from columnMappings");
+                foreach (DataRow row in dt.Rows)
+                {
+                    allvars.Add(row[0] as string);
+                }
+            }
+            return allvars;
+        }
+
+
+
+
     }
 }
