@@ -101,15 +101,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         {
             try
             {
-                if (Directory.Exists(destPath))
-                {
-                    var files = Directory.GetFiles(destPath);
-                    if ((files != null) && (files.Length > 0))
-                    {
-                        _log.Debug("State file is already expanded");
-                        return true;
-                    }
-                }
+                //if (Directory.Exists(destPath))
+                //{
+                //    //var files = Directory.GetFiles(destPath);
+                //    //if ((files != null) && (files.Length > 0))
+                //    //{
+                //    //    _log.Debug("State file is already expanded");
+                //    //    return true;
+                //    //}
+                //}
 
                 return FileUtilities.UnzipFileTo(destPath, sourceFile);
             }

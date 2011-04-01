@@ -53,8 +53,9 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         {
             foreach (var arg in ImportJob.Arguments)
             {
-                _log.DebugFormat("  -{0}:\t{1}", arg.Flag, arg.Description);
+                _log.DebugFormat("  -{0, -15}: {1}", arg.Flag, arg.Description);
             }
+            _log.Debug("");
         }
 
         static void Main(string[] args)

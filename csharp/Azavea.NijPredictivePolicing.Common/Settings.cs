@@ -77,7 +77,7 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <summary>
         /// Full URL of the zip file containing files mapping column names to sequence numbers
         /// </summary>
-        public const string CurrentColumnMappingsFileUrl = 
+        public const string CurrentColumnMappingsFileUrl =
             CensusFtpRoot + "/" +
             CurrentAcsDirectory + "/" +
             SummaryFileDirectory + "/" +
@@ -116,9 +116,30 @@ namespace Azavea.NijPredictivePolicing.Common
         public const string BlockGroupsFileTypeExtension = ".zip";
 
 
-        public const string StateBlockGroupShapefileRootURL = "http://www.census.gov/geo/cob/bdy/bg/bg00shp/";
-        public const string StateBlockGroupShapefileFormatURL = "bg{FIPS-code}_d00_shp.zip";
+        public const string ShapeFileBlockGroupURL = "http://www.census.gov/geo/cob/bdy/bg/bg00shp/";
+        public const string ShapeFileBlockGroupFilename = "bg{FIPS-code}_d00_shp.zip";
 
+        public const string ShapeFileTractURL = "http://www.census.gov/geo/cob/bdy/tr/tr00shp/";
+        public const string ShapeFileTractFilename = "tr{FIPS-code}_d00_shp.zip";
+
+        public const string ShapeFileCountySubdivisionsURL = "http://www.census.gov/geo/cob/bdy/cs/cs00shp/";
+        public const string ShapeFileCountySubdivisionsFilename = "cs{FIPS-code}_d00_shp.zip";
+
+        //3 digit zips
+        public const string ShapeFileThreeDigitZipsURL = "http://www.census.gov/geo/cob/bdy/zt/z300shp/";
+        public const string ShapeFileThreeDigitZipsFilename = "z3{FIPS-code}_d00_shp.zip";
+
+        //5 digit zips
+        public const string ShapeFileFiveDigitZipsURL = "http://www.census.gov/geo/cob/bdy/zt/z500shp/";
+        public const string ShapeFileFiveDigitZipsFilename = "zt{FIPS-code}_d00_shp.zip";
+
+        //voting
+        public const string ShapeFileVotingURL = "http://www.census.gov/geo/cob/bdy/vt/vt00shp/";
+        public const string ShapeFileVotingFilename = "vt{FIPS-code}_d00_shp.zip";
+
+        //counties
+        public const string ShapeFileCountiesURL = "http://www.census.gov/geo/cob/bdy/co/co00shp/";
+        public const string ShapeFileCountiesFilename = "co{FIPS-code}_d00_shp.zip";
 
 
     }
