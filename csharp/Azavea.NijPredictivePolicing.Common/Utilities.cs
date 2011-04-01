@@ -134,6 +134,10 @@ namespace Azavea.NijPredictivePolicing.Common
                     {
                         return (T)value;
                     }
+                    else if ((srcType == typeof(string)) && (string.IsNullOrEmpty(value as string)))
+                    {
+                        return ifEmpty;
+                    }
                     else if ((srcType == typeof(double)) && (destType == typeof(string)))
                     {
                         //this is a special case for preserving as much precision on doubles as possible.

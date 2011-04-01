@@ -138,8 +138,8 @@ namespace Azavea.NijPredictivePolicing.Common
                 _log.DebugFormat("Unzipping {0}", zipFileName);
                 FileUtilities.SafePathEnsure(basePath);
 
-                var zipFile = new ZipFile(zipFileName);
-                zipFile.ExtractAll(basePath, ExtractExistingFileAction.OverwriteSilently);
+                var zipFile = new ZipFile(zipFileName);                
+                zipFile.ExtractAll(basePath, ExtractExistingFileAction.DoNotOverwrite);
 
                 _log.Debug("Unzipping... Done!");
 
@@ -150,6 +150,19 @@ namespace Azavea.NijPredictivePolicing.Common
                 _log.Error("Error while unzipping file", ex);
             }
             return false;
+        }
+
+        public static List<string> FindFileNameInZipLike(string zipFileName, string pattern)
+        {
+            var zipFile = new ZipFile(zipFileName);
+            var coll = zipFile.SelectEntries(pattern);
+
+            var results = new List<string>();
+            foreach (ZipEntry entry in coll)
+            {
+                results.Add(entry.FileName);
+            }
+            return results;
         }
 
 

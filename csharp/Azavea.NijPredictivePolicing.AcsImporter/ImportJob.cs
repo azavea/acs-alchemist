@@ -15,6 +15,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        #region Command Line Stuff
+
         public static ImportArg[] Arguments = new ImportArg[] {            
             new ImportArg() { Flag = "s", Description = "State Code (specifying this will download that state's data)", DataType=typeof(AcsState), PropertyName="State"},            
             new ImportArg() { Flag = "v", Description = "Provide a file containing variables to export", DataType=typeof(string), PropertyName="IncludedVariableFile"},
@@ -109,8 +111,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         break;
                     }
                 }
-            }        
+            }
         }
+
+        #endregion Command Line Stuff
 
 
         public bool ExecuteJob()
@@ -125,7 +129,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     if ((manager.CheckColumnMappingsFile())
                         && (manager.CheckBlockGroupFile())
                         && (manager.CheckDatabase())
-                        && (manager.CheckShapefile())
+                        && (manager.CheckShapefiles())
                         )
                     {
 

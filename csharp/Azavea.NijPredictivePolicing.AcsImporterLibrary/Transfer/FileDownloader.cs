@@ -15,6 +15,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public static bool GetFileByURL(string desiredURL, string filePath)
         {
+            if (File.Exists(filePath))
+            {
+                //don't keep harassing the server if the file is less than one week old, for Pete's sake.
+                TimeSpan elapsed = (DateTime.Now - File.GetCreationTime(filePath));
+                if (elapsed.TotalDays < 7)
+                    return true;
+            }
+
+
             try
             {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(desiredURL);

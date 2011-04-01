@@ -9,6 +9,7 @@ using System.Data;
 using System.Data.Common;
 using log4net;
 using System.IO;
+using Azavea.NijPredictivePolicing.Common;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 {
@@ -89,7 +90,84 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         }
 
 
+        public static DbaseFileHeader SetupHeader(DataTable table)
+        {
+            DbaseFileHeader header = new DbaseFileHeader();
+            foreach (DataColumn col in table.Columns)
+            {
+                Type t = col.DataType;
+                //string columnName = col.ColumnName;
+                string columnName = "col" + col.Ordinal;
 
+                if (t == typeof(bool))
+                {
+                    header.AddColumn(columnName, 'L', 1, 0);
+                }
+                else if (t == typeof(string))
+                {
+                    header.AddColumn(columnName, 'C', 254, 0);
+                }
+                else if (t == typeof(DateTime))
+                {
+                    // D stores only the date
+                    //retVal.AddColumn(shapefileColumnName, 'D', 8, 0);
+                    header.AddColumn(columnName, 'C', 22, 0);
+                }
+                else if (t == typeof(float) || t == typeof(double) || t == typeof(decimal))
+                {
+                    header.AddColumn(columnName, 'N', 18, 10);
+                }
+                else if (t == typeof(short) || t == typeof(int) || t == typeof(long)
+                    || t == typeof(ushort) || t == typeof(uint) || t == typeof(ulong))
+                {
+                    header.AddColumn(columnName, 'N', 18, 0);
+                }
+            }
+
+            return header;
+        }
+
+        public static string GetRemoteShapefileURL(string level, string stateFips)
+        {
+            string url = string.Empty;
+            switch (level)
+            {
+                case "census_blockgroups":
+                    url = Settings.ShapeFileBlockGroupURL + Settings.ShapeFileBlockGroupFilename;
+                    break;
+                case "census_tracts":
+                    url = Settings.ShapeFileTractURL + Settings.ShapeFileTractFilename;
+                    break;
+                case "county_subdivisions":
+                    url = Settings.ShapeFileCountySubdivisionsURL + Settings.ShapeFileCountySubdivisionsFilename;
+                    break;
+                case "voting":
+                    url = Settings.ShapeFileVotingURL + Settings.ShapeFileVotingFilename;
+                    break;
+                case "zipthree":
+                    url = Settings.ShapeFileThreeDigitZipsURL + Settings.ShapeFileThreeDigitZipsFilename;
+                    break;
+                case "zipfive":
+                    url = Settings.ShapeFileFiveDigitZipsURL + Settings.ShapeFileFiveDigitZipsFilename;
+                    break;
+                case "counties":
+                    url = Settings.ShapeFileCountiesURL + Settings.ShapeFileCountiesFilename;
+                    break;
+
+                case "states":
+                case "census_regions":
+                case "census_divisions":
+                default:
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(url))
+            {
+                url = url.Replace("{FIPS-code}", stateFips);
+            }
+
+            return url;
+        }
 
 
     }
