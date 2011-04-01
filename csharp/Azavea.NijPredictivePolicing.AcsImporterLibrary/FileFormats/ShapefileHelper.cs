@@ -127,36 +127,36 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             return header;
         }
 
-        public static string GetRemoteShapefileURL(string level, string stateFips)
+        public static string GetRemoteShapefileURL(BoundaryLevels level, string stateFips)
         {
             string url = string.Empty;
             switch (level)
             {
-                case "census_blockgroups":
+                case BoundaryLevels.census_blockgroups:
                     url = Settings.ShapeFileBlockGroupURL + Settings.ShapeFileBlockGroupFilename;
                     break;
-                case "census_tracts":
+                case BoundaryLevels.census_tracts:
                     url = Settings.ShapeFileTractURL + Settings.ShapeFileTractFilename;
                     break;
-                case "county_subdivisions":
+                case BoundaryLevels.county_subdivisions:
                     url = Settings.ShapeFileCountySubdivisionsURL + Settings.ShapeFileCountySubdivisionsFilename;
                     break;
-                case "voting":
+                case BoundaryLevels.voting:
                     url = Settings.ShapeFileVotingURL + Settings.ShapeFileVotingFilename;
                     break;
-                case "zipthree":
+                case BoundaryLevels.zipthree:
                     url = Settings.ShapeFileThreeDigitZipsURL + Settings.ShapeFileThreeDigitZipsFilename;
                     break;
-                case "zipfive":
+                case BoundaryLevels.zipfive:
                     url = Settings.ShapeFileFiveDigitZipsURL + Settings.ShapeFileFiveDigitZipsFilename;
                     break;
-                case "counties":
+                case BoundaryLevels.counties:
                     url = Settings.ShapeFileCountiesURL + Settings.ShapeFileCountiesFilename;
                     break;
 
-                case "states":
-                case "census_regions":
-                case "census_divisions":
+                case BoundaryLevels.states:
+                case BoundaryLevels.census_regions:
+                case BoundaryLevels.census_divisions:
                 default:
                     break;
             }
@@ -168,6 +168,20 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
             return url;
         }
+
+
+        //public static void DisplayBoundaryLevels()
+        //{
+        //    Type enumType = typeof(BoundaryLevels);
+        //    var levels = Enum.GetValues(enumType);
+
+        //    _log.Debug("Boundary Levels: ");
+        //    foreach (var value in levels)
+        //    {
+        //        _log.Debug(value);
+        //    }
+        //}
+
 
 
     }

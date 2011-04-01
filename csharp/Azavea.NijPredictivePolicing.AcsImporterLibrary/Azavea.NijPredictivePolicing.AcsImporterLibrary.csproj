@@ -82,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AcsState.cs" />
+    <Compile Include="FileFormats\BoundaryLevels.cs" />
     <Compile Include="FileFormats\GeographyFileReader.cs" />
     <Compile Include="FileFormats\SequenceFileReader.cs" />
     <Compile Include="FileFormats\ShapefileHelper.cs" />

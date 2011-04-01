@@ -18,16 +18,25 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         #region Command Line Stuff
 
         public static ImportArg[] Arguments = new ImportArg[] {            
-            new ImportArg() { Flag = "s", Description = "State Code (specifying this will download that state's data)", DataType=typeof(AcsState), PropertyName="State"},            
-            new ImportArg() { Flag = "v", Description = "Provide a file containing variables to export", DataType=typeof(string), PropertyName="IncludedVariableFile"},
-            new ImportArg() { Flag = "e", Description = "Summary Level", DataType=typeof(string), PropertyName="SummaryLevel"},
-            new ImportArg() { Flag = "j", Description = "Table name for this job", DataType=typeof(string), PropertyName="JobName"},
-            new ImportArg() { Flag = "r", Description = "Replace existing table", DataType=typeof(string), PropertyName="ReplaceTable"},
+            
+            new ImportArg() { Flag = "s", Description = "State Code", DataType=typeof(AcsState), PropertyName="State"},
+            new ImportArg() { Flag = "v", Description = "Filter data by variable name file", DataType=typeof(string), PropertyName="IncludedVariableFile"},
+            
+            new ImportArg() { Flag = "e", Description = "Filter Spatially by Census Summary Level", DataType=typeof(string), PropertyName="SummaryLevel"},
+            new ImportArg() { Flag = "f", Description = "Filter Spatially by optional filename of WKT geometries", DataType=typeof(string), PropertyName="WKTFilterFilename"},
+
+            new ImportArg() { Flag = "jobName", Description = "Specify a name for this job / shapefile", DataType=typeof(string), PropertyName="JobName"},
+            new ImportArg() { Flag = "replaceJob", Description = "Replace an existing job / shapefile", DataType=typeof(string), PropertyName="ReplaceTable"},
+            
 
             new ImportArg() { Flag = "exportToShape", Description = "Export results to shapefile", DataType=typeof(string), PropertyName="ExportToShapefile"},
+            
 
-            new ImportArg() { Flag = "f", Description = "Optional filename containing WellKnownTexts of desired output polygons", DataType=typeof(string), PropertyName="WKTFilterFilename"},
-            new ImportArg() { Flag = "l", Description = "List variables", DataType=typeof(string), PropertyName="DoListVariables"}
+            new ImportArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
+            new ImportArg() { Flag = "listBoundaryLevels", Description = "Displays a list of available boundary levels", DataType=typeof(string), PropertyName="DisplayBoundaryLevels"},
+            new ImportArg() { Flag = "listVariables", Description = "Displays a list of all available variables", DataType=typeof(string), PropertyName="DoListVariables"}
+
+
 
             //TODO: add option for fishnet config file?  spatial output config file?  something?
 
@@ -47,6 +56,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public string SummaryLevel { get; set; }
         public string ReplaceTable { get; set; }
         public string ExportToShapefile { get; set; }
+        public string DisplayBoundaryLevels { get; set; }
+        public string DisplayStateCodes { get; set; }
+        
+        
         
         
         
@@ -122,6 +135,17 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             DateTime startTime = DateTime.Now;
             try
             {
+                if (!string.IsNullOrEmpty(DisplayBoundaryLevels))
+                {
+                    Utilities.DisplayEnum("Boundary Levels:", typeof(BoundaryLevels));
+                }
+                if (!string.IsNullOrEmpty(DisplayStateCodes))
+                {
+                    Utilities.DisplayEnum("State Codes:", typeof(AcsState));
+                }
+                
+
+
                 if (this.State != AcsState.None)
                 {
                     var manager = new AcsDataManager(this.State);

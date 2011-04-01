@@ -181,5 +181,15 @@ namespace Azavea.NijPredictivePolicing.Common
             return ifEmpty;
         }
 
+        public static void DisplayEnum(string label, Type enumType)
+        {           
+            var levels = Enum.GetValues(enumType);
+            _log.Debug(label);
+            foreach (var value in levels)
+            {
+                _log.Debug(value);
+            }
+        }
+
     }
 }

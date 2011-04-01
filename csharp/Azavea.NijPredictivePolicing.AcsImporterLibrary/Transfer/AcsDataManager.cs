@@ -192,22 +192,21 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         /// <returns></returns>
         public bool CheckShapefiles()
         {
-            string[] shapeFileLevels = new string[] {
-                "census_blockgroups",
-                "census_tracts",
-                "county_subdivisions",                
-                "zipthree",
-                "zipfive",
-                "counties"
+            BoundaryLevels[] shapeFileLevels = new BoundaryLevels[] {
+                BoundaryLevels.census_blockgroups,
+                BoundaryLevels.census_tracts,
+                BoundaryLevels.county_subdivisions,
+                BoundaryLevels.zipthree,
+                BoundaryLevels.zipfive,
+                BoundaryLevels.counties
             };
 
-            foreach (string level in shapeFileLevels)
+            foreach (BoundaryLevels level in shapeFileLevels)
             {
                 string url = ShapefileHelper.GetRemoteShapefileURL(level, this.StateFIPS);
                 string localPath = Path.Combine(this.WorkingPath, Path.GetFileName(url));
 
-
-                GetAndBuildShapefile(url, localPath, level, level);
+                GetAndBuildShapefile(url, localPath, level.ToString(), level.ToString());
             }
 
             return true;
