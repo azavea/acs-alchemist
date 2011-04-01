@@ -131,7 +131,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
                         if (!string.IsNullOrEmpty(DoListVariables))
                         {
-                            var allVars = manager.GetAllSequenceVariableNames();
+                            var allVars = manager.GetAllSequenceVariableTableIds();
                             foreach (string varname in allVars)
                             {
                                 _log.Debug(" " + varname);

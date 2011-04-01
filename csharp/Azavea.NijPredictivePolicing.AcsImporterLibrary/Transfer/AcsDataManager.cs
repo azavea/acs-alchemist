@@ -19,11 +19,13 @@ using GeoAPI.Geometries;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
-    public class AcsDataManager
+    public class AcsDataManager : IDisposable
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public AcsState State = AcsState.None;
+
+        public const string DesiredColumnsTableName = "desiredColumns";
 
         protected string _stateFips;
         public string StateFIPS
@@ -406,7 +408,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         _log.Warn("One of the sequence files had too many rows\n\t" + file);
 
                     //Expected values of row: FILEID,FILETYPE,STUSAB,CHARITER,SEQUENCE,LOGRECNO,...
-                    DataRow row = firstWorksheet.Rows[1];   //First row is useless
+                    DataRow row = firstWorksheet.Rows[0];   
                     if (row.ItemArray == null || row.ItemArray.Length < 7)
                     {
                         _log.Error("One of the sequence files had bad data, skipping\n\t" + file);
@@ -416,8 +418,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     //Add data to database
                     for (int i = 6; i < row.ItemArray.Length; i++)
                     {
-                        //                         ixid,   COLNAME,          COLNO, SEQNO
-                        var toAdd = new object[] { ixid++, row.ItemArray[i], i + 1, seqNo };
+                        //This file has _ separating Table Number and offset, everywhere else doesn't
+                        string scrubbedTableId = row.ItemArray[i].ToString().Trim().Replace("_", "");
+                        //                         ixid,   CENSUS_TABLE_ID,         COLNO, SEQNO
+                        var toAdd = new object[] { ixid++, scrubbedTableId, i + 1, seqNo };
                         table.Rows.Add(toAdd);
                     }
 
@@ -439,6 +443,79 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 _log.Error("Could not find column mappings directory file, table not initialized!");
             }
         }
+
+        /// <summary>
+        /// Given a csv file containing a list of TABLEIDs and optional Names, create a table from it
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="filename"></param>
+        public void CreateDesiredColumnsTable(DbConnection conn)
+        {
+            int line = 0;
+            try
+            {
+                using (var reader = new DesiredColumnsReader(this.IncludedVariableFile))
+                {
+                    string createSql = reader.TableGenerationSql;
+                    DbClient.GetCommand(createSql, conn).ExecuteNonQuery();
+                    reader.TableName = AcsDataManager.DesiredColumnsTableName;
+
+                    string tableSelect = string.Format("select * from {0}", reader.TableName);
+                    var adapter = DataClient.GetMagicAdapter(conn, DbClient, tableSelect);
+                    var table = DataClient.GetMagicTable(conn, DbClient, tableSelect);
+
+                    //Helps us catch errors
+                    table.Constraints.Add("CENSUS_TABLE_ID Primary Key", table.Columns["CENSUS_TABLE_ID"], true);
+                    table.Constraints.Add("CUSTOM_COLUMN_NAME Unique", table.Columns["CUSTOM_COLUMN_NAME"], false);
+
+                    foreach (List<string> row in reader.GetReader())
+                    {
+                        line++;
+                        if (row.Count == 0 || string.IsNullOrEmpty(row[0])) continue;
+                        else if (row.Count == 1 || string.IsNullOrEmpty(row[1]))
+                        {
+                            var toAdd = new object[] { row[0], row[0] };
+                            table.Rows.Add(toAdd);
+                        }
+                        else
+                        {
+                            if (row.Count > 2)
+                                _log.Warn(string.Format("Too many fields in file {0}, line {1}",
+                                    IncludedVariableFile, line.ToString()));
+
+                            //Shapefiles have a 10 character column name limit :(
+                            string name = row[1];
+                            if (name.Length > 10)
+                            {
+                                _log.Warn(string.Format("On line {0}, table name {1} is more than 10 characters, truncating",
+                                    line, name));
+                                name = name.Substring(0, 10);
+                            }
+
+                            var toAdd = new object[] { row[0], name };
+                            table.Rows.Add(toAdd);
+                        }
+                    }
+
+                    if ((table != null) && (table.Rows.Count > 0))
+                    {
+                        _log.Debug("Saving...");
+                        adapter.Update(table);
+                        table.AcceptChanges();
+                    }
+                    else
+                    {
+                        throw new InvalidDataException("**Provided variable file had no valid Table Ids");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(string.Format("Failed to create table for included variable file {0}.  " +
+                    "Made it to line {1}.", IncludedVariableFile, line), ex);
+            }
+        }
+
 
         /// <summary>
         /// Call this anyway, should only execute code inside safe blocks
@@ -485,12 +562,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         /// Returns all the variable names in the columnMappings table
         /// </summary>
         /// <returns></returns>
-        public List<string> GetAllSequenceVariableNames()
+        public List<string> GetAllSequenceVariableTableIds()
         {
             var allvars = new List<string>(1024);
             using (var conn = DbClient.GetConnection())
             {
-                var dt = DataClient.GetMagicTable(conn, DbClient, "select COLNAME from columnMappings");
+                var dt = DataClient.GetMagicTable(conn, DbClient, "select CENSUS_TABLE_ID from columnMappings");
                 foreach (DataRow row in dt.Rows)
                 {
                     allvars.Add(row[0] as string);
@@ -533,32 +610,18 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
             if (!string.IsNullOrEmpty(IncludedVariableFile))
             {
-                var lines = File.ReadAllLines(this.IncludedVariableFile);
-                if ((lines == null) || (lines.Length == 0))
+                CreateDesiredColumnsTable(conn);
+                dt = DataClient.GetMagicTable(conn, DbClient,
+                    string.Format(@"SELECT columnMappings.CENSUS_TABLE_ID, COLNO, SEQNO, {0}.CUSTOM_COLUMN_NAME AS COLNAME 
+                                    FROM columnMappings, {0} 
+                                    WHERE columnMappings.CENSUS_TABLE_ID = {0}.CENSUS_TABLE_ID;", 
+                                    AcsDataManager.DesiredColumnsTableName));
+                if ((dt.Rows == null) || (dt.Rows.Count == 0))
                 {
-                    _log.Error("**Provided variable file had no contents");
+                    _log.Error("**Provided variable file had no valid Table Ids");
                     return null;
                 }
-
-                HashSet<string> variables = new HashSet<string>(lines);
-
-                dt = DataClient.GetMagicTable(conn, DbClient, "select COLNAME, COLNO, SEQNO from columnMappings");
-                foreach (DataRow row in dt.Rows)
-                {
-                    string varName = row[0] as string;
-                    if (!variables.Contains(varName))
-                    {
-                        row.Delete();
-                    }
-                }
-                dt.AcceptChanges();
             }
-
-
-
-            //other ways to specify variables?
-
-
 
             return dt;
         }
@@ -589,6 +652,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                     //get all the variable mapping information we want
                     DataTable reqVariablesDT = GetRequestedVariables(conn);
+                    if (reqVariablesDT == null || reqVariablesDT.Rows.Count == 0)
+                    {
+                        throw new InvalidDataException("No requested columns found");
+                    }
 
                     //get the respective files
                     DataTable newTable = new DataTable();
@@ -779,5 +846,15 @@ where g.COUNTY || '' = s.COUNTY || ''
         }
 
 
+        public void Dispose()
+        {
+            if (DbClient != null)
+            {
+                //Don't need this hanging around...
+                DbClient.
+                    GetCommand(string.Format("DROP TABLE IF EXISTS {0};", AcsDataManager.DesiredColumnsTableName)).
+                    ExecuteNonQuery();
+            }
+        }
     }
 }

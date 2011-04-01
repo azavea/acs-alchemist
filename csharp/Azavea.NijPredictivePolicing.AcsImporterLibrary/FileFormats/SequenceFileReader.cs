@@ -9,7 +9,7 @@ using Azavea.NijPredictivePolicing.Common.Data;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 {
-    public class SequenceFileReader
+    public class SequenceFileReader : IDisposable
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -48,13 +48,19 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                     //We're not actually using FixedWidthFields for this, but we have a GenerateTableSQLFromFields()
                     //function, so might as well use it
                     _columns = new List<FixedWidthField>(new FixedWidthField[] {
-                        new FixedWidthField("COLNAME", "Column Name", 0, 0),
+                        new FixedWidthField("CENSUS_TABLE_ID", "Census Table ID", 0, 0),
                         new FixedWidthField("COLNO", "Column Number (1 indexed)", 0, 0),
                         new FixedWidthField("SEQNO", "Sequence Number", 0, 0)
                         });
                 }
                 return _columns;
             }
+        }
+
+        public void Dispose()
+        {
+            _reader.Close();
+            _columns = null;
         }
     }
 }

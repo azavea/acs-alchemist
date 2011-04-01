@@ -8,7 +8,7 @@ using System.IO;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 {
-    public class GeographyFileReader
+    public class GeographyFileReader : IDisposable
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         protected FixedWidthColumnReader _reader;
@@ -111,7 +111,11 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         #endregion Columns
 
 
-
+        public void Dispose()
+        {
+            _reader.Close();
+            _columns = null;
+        }
 
 
 
