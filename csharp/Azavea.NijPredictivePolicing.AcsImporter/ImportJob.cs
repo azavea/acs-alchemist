@@ -18,7 +18,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         #region Command Line Stuff
 
-        public static ImportArg[] Arguments = new ImportArg[] {            
+        public static ImportArg[] Arguments = new ImportArg[] {
             
             new ImportArg() { Flag = "s", Description = "State Code", DataType=typeof(AcsState), PropertyName="State"},
             new ImportArg() { Flag = "v", Description = "Filter data by variable name file", DataType=typeof(string), PropertyName="IncludedVariableFile"},
@@ -26,15 +26,17 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new ImportArg() { Flag = "e", Description = "Filter Spatially by Census Summary Level", DataType=typeof(string), PropertyName="SummaryLevel"},
             new ImportArg() { Flag = "f", Description = "Filter Spatially by optional filename of WKT geometries", DataType=typeof(string), PropertyName="WKTFilterFilename"},
 
+            new ImportArg() { Flag = "j", Display=false, DataType=typeof(string), PropertyName="JobName"},
             new ImportArg() { Flag = "jobName", Description = "Specify a name for this job / shapefile", DataType=typeof(string), PropertyName="JobName"},
+
+            new ImportArg() { Flag = "r", Display=false,  DataType=typeof(string), PropertyName="ReplaceTable"},
             new ImportArg() { Flag = "replaceJob", Description = "Replace an existing job / shapefile", DataType=typeof(string), PropertyName="ReplaceTable"},
             
-
             new ImportArg() { Flag = "exportToShape", Description = "Export results to shapefile", DataType=typeof(string), PropertyName="ExportToShapefile"},
+            new ImportArg() { Flag = "exportToGrid", Description = "Export results to fishnetted shapefile where value = # feet", DataType=typeof(string), PropertyName="ExportToGrid"},
             
-
             new ImportArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
-            new ImportArg() { Flag = "listBoundaryLevels", Description = "Displays a list of available boundary levels", DataType=typeof(string), PropertyName="DisplayBoundaryLevels"},
+            new ImportArg() { Flag = "listSummaryLevels", Description = "Displays a list of available boundary levels", DataType=typeof(string), PropertyName="DisplaySummaryLevels"},
             new ImportArg() { Flag = "exportVariables", Description = "Exports a CSV of all variables to allVariables.csv", DataType=typeof(string), PropertyName="ExportVariables"}
 
 
@@ -57,7 +59,9 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public string SummaryLevel { get; set; }
         public string ReplaceTable { get; set; }
         public string ExportToShapefile { get; set; }
-        public string DisplayBoundaryLevels { get; set; }
+        public string ExportToGrid { get; set; }
+        
+        public string DisplaySummaryLevels { get; set; }
         public string DisplayStateCodes { get; set; }
         
         
@@ -136,13 +140,15 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             DateTime startTime = DateTime.Now;
             try
             {
-                if (!string.IsNullOrEmpty(DisplayBoundaryLevels))
+                if (!string.IsNullOrEmpty(DisplaySummaryLevels))
                 {
-                    Utilities.DisplayEnum("Boundary Levels:", typeof(BoundaryLevels));
+                    Utilities.DisplayEnum("Summary Levels:", typeof(BoundaryLevels));
+                    return true;
                 }
                 if (!string.IsNullOrEmpty(DisplayStateCodes))
                 {
                     Utilities.DisplayEnum("State Codes:", typeof(AcsState));
+                    return true;
                 }
 
                 if (this.State != AcsState.None)
@@ -153,6 +159,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         _log.DebugFormat("Jobname was empty, using {0}", this.JobName);
                     }
 
+                    _log.Debug("");
+                    _log.Debug("Loading Prerequisites...");
 
                     var manager = new AcsDataManager(this.State);
                     if ((manager.CheckColumnMappingsFile())
@@ -161,20 +169,26 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         && (manager.CheckShapefiles())
                         )
                     {
+                        _log.Debug("Done!");
+                        _log.Debug("");
+
+
 
                         if (!string.IsNullOrEmpty(ExportVariables))
                         {
+                            _log.Debug("Exporting table of all available variables to allVariables.csv");
+
                             var variablesDT = manager.GetAllSequenceVariables();
 
                             CommaSeparatedValueWriter writer = new CommaSeparatedValueWriter("allVariables.csv");
                             FileWriterHelpers.WriteDataTable(writer, variablesDT);
 
-                            _log.Debug("Variables Exported!");
+                            _log.Debug("Done!");
                             return true;
                         }
 
 
-                        
+
                         manager.SummaryLevel = this.SummaryLevel;
                         manager.WKTFilterFilename = this.SummaryLevel;
                         manager.IncludedVariableFile = IncludedVariableFile;
@@ -182,19 +196,32 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
                         if (!string.IsNullOrEmpty(IncludedVariableFile) && !string.IsNullOrEmpty(this.JobName))
                         {
+                            _log.Debug("Importing all requested variables...");
+
                             if (!manager.CheckBuildVariableTable(this.JobName))
                             {
                                 _log.Error("There was a problem building the variable table, exiting");
                                 return false;
                             }
+                            _log.Debug("Done!");
                         }
-
 
                         if (!string.IsNullOrEmpty(ExportToShapefile))
                         {
-                            _log.Debug("Exporting!");
+                            _log.Debug("Exporting all requested variables to shapefile");
                             manager.ExportShapefile(this.JobName);
+                            _log.Debug("Done!");
                         }
+
+                        if (!string.IsNullOrEmpty(ExportToGrid))
+                        {
+                            _log.DebugFormat("Exporting all requested variables to fishnet shapefile with grid cell size {0} ", ExportToGrid);
+                            manager.ExportGriddedShapefile(this.JobName);
+                            _log.Debug("Done!");
+                        }
+
+                        
+
                     }
                     else
                     {

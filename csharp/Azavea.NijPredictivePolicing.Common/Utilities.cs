@@ -5,6 +5,10 @@ using System.Text;
 using System.IO;
 using Newtonsoft.Json;
 using log4net;
+using GeoAPI.Geometries;
+using GisSharpBlog.NetTopologySuite.Geometries;
+using SharpMap.CoordinateSystems.Transformations;
+using SharpMap.CoordinateSystems;
 
 namespace Azavea.NijPredictivePolicing.Common
 {
@@ -182,12 +186,12 @@ namespace Azavea.NijPredictivePolicing.Common
         }
 
         public static void DisplayEnum(string label, Type enumType)
-        {           
+        {
             var levels = Enum.GetValues(enumType);
             _log.Debug(label);
             foreach (var value in levels)
             {
-                _log.Debug(value);
+                _log.DebugFormat("{0}:{1}", value.ToString(), (int)value);
             }
         }
 
@@ -195,6 +199,42 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             return (str.Length <= maxlen) ? str : str.Substring(0, maxlen);
         }
+
+
+        public static IGeometry IEnvToIGeometry(IEnvelope env)
+        {
+            ICoordinate[] coords = new Coordinate[5];
+            coords[0] = new Coordinate(env.MinX, env.MinY);
+            coords[1] = new Coordinate(env.MaxX, env.MinY);
+            coords[2] = new Coordinate(env.MaxX, env.MaxY);
+            coords[3] = new Coordinate(env.MinX, env.MaxY);
+            coords[4] = new Coordinate(env.MinX, env.MinY);
+            var poly = new Polygon(new LinearRing(coords));
+
+            return poly;
+        }
+
+        public static Point GetCellFeetForProjection(double feet)
+        {
+            const double FEET_PER_METER = 3.2808399;
+            const string webMercator1984 = "PROJCS[\"WGS_1984_Web_Mercator\", GEOGCS[\"GCS_WGS_1984_Major_Auxiliary_Sphere\", DATUM[\"WGS_1984_Major_Auxiliary_Sphere\", SPHEROID[\"WGS_1984_Major_Auxiliary_Sphere\",6378137.0,0.0]], PRIMEM[\"Greenwich\",0.0], UNIT[\"Degree\",0.0174532925199433]], PROJECTION[\"Mercator_1SP\"], PARAMETER[\"False_Easting\",0.0], PARAMETER[\"False_Northing\",0.0], PARAMETER[\"Central_Meridian\",0.0], PARAMETER[\"latitude_of_origin\",0.0], UNIT[\"Meter\",1.0]]";
+
+            var meters = (feet / FEET_PER_METER);
+
+            CoordinateSystemFactory csf = new CoordinateSystemFactory();
+            var webMercatorCS = csf.CreateFromWkt(webMercator1984);
+
+            var f = new CoordinateTransformationFactory();
+            var proj = f.CreateFromCoordinateSystems(webMercatorCS, GeographicCoordinateSystem.WGS84);
+
+            var xStep = proj.MathTransform.Transform(new double[] { meters, 0 });
+            var yStep = proj.MathTransform.Transform(new double[] { 0, meters });
+
+            return new Point(xStep[0], yStep[1]);
+        }
+
+
+
 
     }
 }

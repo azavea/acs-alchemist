@@ -20,7 +20,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 //don't keep harassing the server if the file is less than one week old, for Pete's sake.
                 TimeSpan elapsed = (DateTime.Now - File.GetCreationTime(filePath));
                 if (elapsed.TotalDays < 7)
+                {
+                    _log.DebugFormat("File {0} is less than 7 days old, skipping", Path.GetFileName(filePath));
                     return true;
+                }
             }
 
 
@@ -43,22 +46,20 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     string localDate = File.GetLastWriteTime(filePath).ToShortDateString();
                     if (localDate == srcDate)
                     {
-                        _log.Debug("Requested File already exists, and date stamps match");
+                        _log.DebugFormat("File {0} already exists, and date stamps match, skipping", Path.GetFileName(filePath));
                         return true;
                     }
                 }
 
-
                 FileStream output = new FileStream(filePath, FileMode.Create);
                 Utilities.CopyToWithProgress(downloadStream, expectedLength, output);
-
 
                 downloadStream.Close();
                 output.Close();
                 response.Close();
 
-
                 File.SetLastWriteTime(filePath, response.LastModified);
+                _log.DebugFormat("Downloaded {0} successfully", Path.GetFileName(filePath));
 
                 return true;
             }

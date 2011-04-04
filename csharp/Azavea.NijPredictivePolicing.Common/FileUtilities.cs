@@ -135,7 +135,7 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             try
             {
-                _log.DebugFormat("Unzipping {0}", zipFileName);
+                _log.DebugFormat("Unzipping {0}", Path.GetFileName(zipFileName));
                 FileUtilities.SafePathEnsure(basePath);
 
                 var zipFile = new ZipFile(zipFileName);                

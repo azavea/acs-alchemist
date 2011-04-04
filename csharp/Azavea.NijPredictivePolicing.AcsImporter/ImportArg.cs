@@ -11,6 +11,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public string PropertyName;
         public string Description;
         public Type DataType;
+        public bool Display = true;
     }
 
 

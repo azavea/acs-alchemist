@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using Azavea.NijPredictivePolicing.Common.Data;
 using GisSharpBlog.NetTopologySuite.Features;
 using GeoAPI.Geometries;
+using System.Collections;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
@@ -27,33 +28,58 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public const string DesiredColumnsTableName = "desiredColumns";
 
-        protected string _stateFips;
+        ////protected string _stateFips;
+        //public string StateFIPS
+        //{
+        //    get
+        //    {
+        //        //if (string.IsNullOrEmpty(_stateFips))
+        //        //{
+        //        //    using (var reader = DbClient.GetCommand("select STATE from geographies limit 1").ExecuteReader())
+        //        //    {
+        //        //        reader.Read();
+        //        //        _stateFips = reader.GetString(0);
+        //        //    }
+        //        //}
+        //        //return _stateFips;
+        //    }
+        //    set
+        //    {
+        //        _stateFips = value;
+        //    }
+        //}
+
         public string StateFIPS
         {
             get
             {
-                if (string.IsNullOrEmpty(_stateFips))
-                {
-                    using (var reader = DbClient.GetCommand("select STATE from geographies limit 1").ExecuteReader())
-                    {
-                        reader.Read();
-                        _stateFips = reader.GetString(0);
-                    }                   
-                }
-                return _stateFips;
-            }
-            set
-            {
-                _stateFips = value;
+                return ((int)(this.State)).ToString("00");
             }
         }
+
 
         public string WorkingPath;
         public string ShapePath;
         public string CurrentDataPath;
         public string DBFilename;
 
-        public string SummaryLevel;
+        protected string _summaryLevel;
+        public string SummaryLevel
+        {
+            get
+            {
+                return _summaryLevel;
+            }
+            set
+            {
+                _summaryLevel = value;
+                if (_summaryLevel.Length != 3)
+                {
+                    _summaryLevel = Utilities.GetAs<int>(value, -1).ToString("000");
+                }
+            }
+        }
+
         public string WKTFilterFilename;
         public string IncludedVariableFile;
         public bool ReplaceTable = false;
@@ -137,14 +163,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             string desiredUrl = FileLocator.GetStateBlockGroupUrl(this.State);
             string destFilepath = GetLocalBlockGroupZipFileName();
 
-
-
             if (FileDownloader.GetFileByURL(desiredUrl, destFilepath))
-            {
-                _log.Debug("Download successful");
+            {                
                 if (FileLocator.ExpandZipFile(destFilepath, this.CurrentDataPath))
-                {
-                    _log.Debug("State block group file decompressed successfully");
+                {                    
                     return true;
                 }
                 else
@@ -168,11 +190,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 Settings.ColumnMappingsFileName + Settings.ColumnMappingsFileExtension);
 
             if (FileDownloader.GetFileByURL(desiredUrl, destFilepath))
-            {
-                _log.Debug("Download successful");
+            {                
                 if (FileLocator.ExpandZipFile(destFilepath, GetLocalColumnMappingsDirectory()))
                 {
-                    _log.Debug("Column Mappings file decompressed successfully");
                     return true;
                 }
                 else
@@ -221,8 +241,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
             if (FileDownloader.GetFileByURL(desiredUrl, destFilepath))
             {
-                _log.Debug("Download successful");
-
                 if (FileLocator.ExpandZipFile(destFilepath, this.ShapePath))
                 {
                     _log.DebugFormat("State {0} decompressed successfully", niceName);
@@ -401,7 +419,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 {
                     _log.Debug("Saving...");
 
-                    this.StateFIPS = (table.Rows[0]["STATE"] as string);
+                    //this.StateFIPS = (table.Rows[0]["STATE"] as string);
 
                     adapter.Update(table);
                     table.AcceptChanges();
@@ -870,13 +888,6 @@ order by county, tract, blkgroup";
         {
             try
             {
-                //bool shouldRun = false;
-                //if (!shouldRun)
-                //{
-                _log.Warn("**NOT YET COMPLETED**");
-                //    return false;
-                //}
-
                 using (var conn = DbClient.GetConnection())
                 {
                     Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
@@ -923,10 +934,10 @@ order by county, tract, blkgroup";
                     string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
                     var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
                     writer.Header = header;
-                    writer.Write(features);                    
+                    writer.Write(features);
                 }
 
-                _log.Debug("Shapefile exported successfully...");
+                _log.Debug("Shapefile exported successfully");
                 return true;
             }
             catch (Exception ex)
@@ -935,6 +946,177 @@ order by county, tract, blkgroup";
             }
             return false;
         }
+
+
+        public bool ExportGriddedShapefile(string tableName)
+        {
+            try
+            {
+                using (var conn = DbClient.GetConnection())
+                {
+                    Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
+                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName);
+                    if ((variablesDT == null) || (variablesDT.Rows.Count == 0))
+                    {
+                        _log.Fatal("Nothing to export, data table is empty");
+                        return false;
+                    }
+
+
+                    GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
+                    
+                    var header = ShapefileHelper.SetupHeader(variablesDT);
+                    
+                    
+                    Envelope env = new Envelope();
+                    var index = new GisSharpBlog.NetTopologySuite.Index.Strtree.STRtree(variablesDT.Rows.Count);
+
+                    foreach (DataRow row in variablesDT.Rows)
+                    {
+                        var id = row["LOGRECNO"] as string;
+                        if (!shapeDict.ContainsKey(id))
+                            continue;
+
+                        AttributesTable t = new AttributesTable();
+                        foreach (DataColumn col in variablesDT.Columns)
+                        {
+                            //produces more sane results.
+                            t.AddAttribute(
+                                Utilities.EnsureMaxLength(col.ColumnName, 10),
+                                Utilities.GetAsType(col.DataType, row[col.Ordinal], null)
+                                );
+                        }
+
+                        byte[] geomBytes = (byte[])shapeDict[id]["Geometry"];
+                        IGeometry geom = binReader.Read(geomBytes);
+                        if (geom == null)
+                        {
+                            _log.WarnFormat("Geometry for LRN {0} was empty!", id);
+                            continue;
+                        }
+                        var f = new Feature(geom, t);
+                        env.ExpandToInclude(geom.EnvelopeInternal);
+                        index.Insert(geom.EnvelopeInternal, f);
+                    }
+                    index.Build();
+
+                    //int xkey = (int)Math.Round((x - Envelope.MinX) / _cellWidth, 10, MidpointRounding.AwayFromZero);
+                    //int ykey = (int)Math.Round((y - Envelope.MinY) / _cellHeight, 10, MidpointRounding.AwayFromZero);
+                    //Dictionary<string, Feature> featuresByCell = new Dictionary<string, Feature>();
+
+                    //progress tracking stuff
+                    DateTime start = DateTime.Now, lastCheck = DateTime.Now;
+                    int lastProgress = 0;
+
+
+                    var features = new List<Feature>(variablesDT.Rows.Count);
+
+
+                    var cellStepPoint = Utilities.GetCellFeetForProjection(10000);
+
+                    double cellWidth = cellStepPoint.X;
+                    double cellHeight = cellStepPoint.Y;
+
+
+                    int numRows = (int)Math.Ceiling(env.Height / cellHeight);
+                    int numCols = (int)Math.Ceiling(env.Width / cellWidth);
+                    int expectedCells = numRows * numCols;
+
+                    if (expectedCells > 1000000)
+                    {
+                        _log.Warn("**********************");
+                        _log.Warn("Your current settings will cause a shapefile to be generated with over a million cells, is that a good idea?");
+                        _log.Warn("**********************");
+                    }
+
+
+                    header.AddColumn("CELLID", 'C', 254, 0);
+                    int cellCount = 0;
+                    int xidx = 0;
+                    for (double x = env.MinX; x < env.MaxX; x += cellWidth)
+                    {
+                        xidx++;
+
+                        int yidx = 0;
+                        for (double y = env.MinY; y < env.MaxY; y += cellHeight)
+                        {
+                            yidx++;
+                            cellCount++;
+                            string cellID = string.Format("{0}_{1}", xidx, yidx);
+
+                            Envelope cellEnv = new Envelope(x, x + cellWidth, y, y + cellHeight);
+                            IGeometry cellCenter = new Point(cellEnv.Centre);
+                            IGeometry cellGeom = Utilities.IEnvToIGeometry(cellEnv);                            
+                            
+                            Feature found = null;
+                            IList mightMatch = index.Query(cellGeom.EnvelopeInternal);
+                            foreach (Feature f in mightMatch)
+                            {
+                                if (f.Geometry.Contains(cellCenter))
+                                {
+                                    found = f;
+                                    break;
+                                }
+                            }
+
+                            if (found == null)
+                            {
+                                //_log.DebugFormat("No feature found for cell {0}", cellID);
+                                continue;
+                            }
+
+
+                            if ((cellCount % 1000) == 0)
+                            {
+                                int step = (int)((((double)cellCount) / ((double)expectedCells)) * 100.0);
+                                TimeSpan elapsed = (DateTime.Now - lastCheck);
+                                if ((step != lastProgress) && (elapsed.TotalSeconds > 1))
+                                {
+                                    _log.DebugFormat("{0:###.##}% complete, {1:#0.0#} seconds elapsed, {2} cells created, {3} cells checked",
+                                       step, (DateTime.Now - start).TotalSeconds,
+                                       features.Count,
+                                       cellCount
+                                       );
+                                    lastCheck = DateTime.Now;
+                                    lastProgress = step;
+                                }
+                            }
+
+                            //this is a lot of work just to add an id...
+                            AttributesTable t = new AttributesTable();
+                            foreach (string name in found.Attributes.GetNames())
+                            {
+                                t.AddAttribute(name, found.Attributes[name]);
+                            }
+                            t.AddAttribute("CELLID", cellID);
+
+                            features.Add(new Feature(cellGeom, found.Attributes));
+                        }
+                    }
+                    header.NumRecords = features.Count;
+
+                    string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
+                    var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
+                    writer.Header = header;
+                    writer.Write(features);
+                }
+
+                _log.Debug("Shapefile exported successfully");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Error while exporting shapefile", ex);
+            }
+            return false;
+        }
+
+
+
+
+
+
+
 
 
         public void Dispose()

@@ -63,6 +63,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\nettopologysuite\NetTopologySuite.dll</HintPath>
     </Reference>
+    <Reference Include="ProjNET, Version=1.1.2854.24700, Culture=neutral, PublicKeyToken=a1f5bdcd9c6f5740, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\nettopologysuite\ProjNET.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -82,7 +86,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AcsState.cs" />
-    <Compile Include="FileFormats\BoundaryLevels.cs" />    <Compile Include="FileFormats\DesiredColumnsReader.cs" />    <Compile Include="FileFormats\GeographyFileReader.cs" />
+    <Compile Include="FileFormats\BoundaryLevels.cs" />
+    <Compile Include="FileFormats\DesiredColumnsReader.cs" />
+    <Compile Include="FileFormats\GeographyFileReader.cs" />
     <Compile Include="FileFormats\SequenceFileReader.cs" />
     <Compile Include="FileFormats\ShapefileHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
