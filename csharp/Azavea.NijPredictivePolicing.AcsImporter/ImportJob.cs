@@ -25,6 +25,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             
             new ImportArg() { Flag = "e", Description = "Filter Spatially by Census Summary Level", DataType=typeof(string), PropertyName="SummaryLevel"},
             new ImportArg() { Flag = "f", Description = "Filter Spatially by optional filename of WKT geometries", DataType=typeof(string), PropertyName="WKTFilterFilename"},
+            
 
             new ImportArg() { Flag = "j", Display=false, DataType=typeof(string), PropertyName="JobName"},
             new ImportArg() { Flag = "jobName", Description = "Specify a name for this job / shapefile", DataType=typeof(string), PropertyName="JobName"},
@@ -34,6 +35,9 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             
             new ImportArg() { Flag = "exportToShape", Description = "Export results to shapefile", DataType=typeof(string), PropertyName="ExportToShapefile"},
             new ImportArg() { Flag = "exportToGrid", Description = "Export results to fishnetted shapefile where value = # feet", DataType=typeof(string), PropertyName="ExportToGrid"},
+
+            new ImportArg() { Flag = "gridEnvelope", Description = "Align the grid cells to a WKT envelope in a file", DataType=typeof(string), PropertyName="WKTEnvelope"},
+
             
             new ImportArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
             new ImportArg() { Flag = "listSummaryLevels", Description = "Displays a list of available boundary levels", DataType=typeof(string), PropertyName="DisplaySummaryLevels"},
@@ -190,7 +194,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
 
                         manager.SummaryLevel = this.SummaryLevel;
-                        manager.WKTFilterFilename = this.SummaryLevel;
+                        manager.WKTFilterFilename = this.WKTFilterFilename;
                         manager.IncludedVariableFile = IncludedVariableFile;
                         manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
 
@@ -215,6 +219,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
                         if (!string.IsNullOrEmpty(ExportToGrid))
                         {
+                            manager.SetGridParam(ExportToGrid);
+
                             _log.DebugFormat("Exporting all requested variables to fishnet shapefile with grid cell size {0} ", ExportToGrid);
                             manager.ExportGriddedShapefile(this.JobName);
                             _log.Debug("Done!");

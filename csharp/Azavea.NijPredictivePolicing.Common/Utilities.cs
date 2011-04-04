@@ -214,12 +214,10 @@ namespace Azavea.NijPredictivePolicing.Common
             return poly;
         }
 
-        public static Point GetCellFeetForProjection(double feet)
+        public static Point GetCellFeetForProjection(double widthFeet, double heightFeet)
         {
             const double FEET_PER_METER = 3.2808399;
             const string webMercator1984 = "PROJCS[\"WGS_1984_Web_Mercator\", GEOGCS[\"GCS_WGS_1984_Major_Auxiliary_Sphere\", DATUM[\"WGS_1984_Major_Auxiliary_Sphere\", SPHEROID[\"WGS_1984_Major_Auxiliary_Sphere\",6378137.0,0.0]], PRIMEM[\"Greenwich\",0.0], UNIT[\"Degree\",0.0174532925199433]], PROJECTION[\"Mercator_1SP\"], PARAMETER[\"False_Easting\",0.0], PARAMETER[\"False_Northing\",0.0], PARAMETER[\"Central_Meridian\",0.0], PARAMETER[\"latitude_of_origin\",0.0], UNIT[\"Meter\",1.0]]";
-
-            var meters = (feet / FEET_PER_METER);
 
             CoordinateSystemFactory csf = new CoordinateSystemFactory();
             var webMercatorCS = csf.CreateFromWkt(webMercator1984);
@@ -227,8 +225,11 @@ namespace Azavea.NijPredictivePolicing.Common
             var f = new CoordinateTransformationFactory();
             var proj = f.CreateFromCoordinateSystems(webMercatorCS, GeographicCoordinateSystem.WGS84);
 
-            var xStep = proj.MathTransform.Transform(new double[] { meters, 0 });
-            var yStep = proj.MathTransform.Transform(new double[] { 0, meters });
+            var widthMeters = (widthFeet / FEET_PER_METER);
+            var heightMeters = (heightFeet / FEET_PER_METER);
+
+            var xStep = proj.MathTransform.Transform(new double[] { widthMeters, 0 });
+            var yStep = proj.MathTransform.Transform(new double[] { 0, heightMeters });
 
             return new Point(xStep[0], yStep[1]);
         }

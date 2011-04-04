@@ -84,6 +84,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         public string IncludedVariableFile;
         public bool ReplaceTable = false;
 
+        public double GridCellWidthFeet = 10000;
+        public double GridCellHeightFeet = 10000;
+
 
         
         public IDataClient DbClient;
@@ -617,11 +620,11 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     }
                 }
             }
-            else if (!string.IsNullOrEmpty(this.WKTFilterFilename))
-            {
-                //TODO: implement
-                _log.Warn("Not Yet Implemented");
-            }
+            //else if (!string.IsNullOrEmpty(this.WKTFilterFilename))
+            //{
+            //    //TODO: implement
+            //    _log.Warn("Not Yet Implemented");
+            //}
             return results;
         }
 
@@ -658,6 +661,34 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
             return dt;
         }
+
+
+        public List<IGeometry> GetFilteringGeometries()
+        {
+            List<IGeometry> results = null;
+            if (!string.IsNullOrEmpty(this.WKTFilterFilename))
+            {
+                if (!File.Exists(this.WKTFilterFilename))
+                {
+                    _log.Error("Provided WKT file doesn't exist");
+                    return null;
+                }
+
+                WKTReader reader = new WKTReader(ShapefileHelper.GetGeomFactory());
+                string[] lines = File.ReadAllLines(this.WKTFilterFilename);
+                results = new List<IGeometry>(lines.Length);
+
+                foreach (string line in lines)
+                {
+                    if (string.IsNullOrEmpty(line) || line.StartsWith("#") || line.StartsWith("//"))
+                        continue;
+
+                    results.Add(reader.Read(line));
+                }
+            }
+            return results;
+        }
+
 
 
         /// <summary>
@@ -898,6 +929,8 @@ order by county, tract, blkgroup";
                         return false;
                     }
 
+                    List<IGeometry> filteringGeoms = GetFilteringGeometries();
+
 
                     GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
                     var features = new List<Feature>(variablesDT.Rows.Count);
@@ -926,6 +959,23 @@ order by county, tract, blkgroup";
                             _log.WarnFormat("Geometry for LRN {0} was empty!", id);
                             continue;
                         }
+
+                        if ((filteringGeoms != null) && (filteringGeoms.Count > 0))
+                        {
+                            bool included = false;
+                            for (int i = 0; i < filteringGeoms.Count; i++)
+                            {
+                                if (filteringGeoms[i].Intersects(geom))
+                                {
+                                    included = true;
+                                    break;
+                                }
+                            }
+
+                            if (!included)
+                                continue;
+                        }
+
 
                         features.Add(new Feature(geom, t));
                     }
@@ -964,10 +1014,10 @@ order by county, tract, blkgroup";
 
 
                     GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
-                    
+
                     var header = ShapefileHelper.SetupHeader(variablesDT);
-                    
-                    
+
+
                     Envelope env = new Envelope();
                     var index = new GisSharpBlog.NetTopologySuite.Index.Strtree.STRtree(variablesDT.Rows.Count);
 
@@ -1010,12 +1060,20 @@ order by county, tract, blkgroup";
 
 
                     var features = new List<Feature>(variablesDT.Rows.Count);
-
-
-                    var cellStepPoint = Utilities.GetCellFeetForProjection(10000);
-
+                    var cellStepPoint = Utilities.GetCellFeetForProjection(GridCellWidthFeet, GridCellHeightFeet);
                     double cellWidth = cellStepPoint.X;
                     double cellHeight = cellStepPoint.Y;
+
+                    ///adjust envelope to only scan area inside filtering geometries
+                    List<IGeometry> filteringGeoms = GetFilteringGeometries();
+                    if ((filteringGeoms != null) && (filteringGeoms.Count > 0))
+                    {
+                        env = new Envelope();
+                        for (int i = 0; i < filteringGeoms.Count; i++)
+                        {
+                            env.ExpandToInclude(filteringGeoms[i].EnvelopeInternal);
+                        }
+                    }
 
 
                     int numRows = (int)Math.Ceiling(env.Height / cellHeight);
@@ -1025,7 +1083,8 @@ order by county, tract, blkgroup";
                     if (expectedCells > 1000000)
                     {
                         _log.Warn("**********************");
-                        _log.Warn("Your current settings will cause a shapefile to be generated with over a million cells, is that a good idea?");
+                        _log.Warn("Your selected area will produce a shapefile with over a million cells, is that a good idea?");
+                        _log.WarnFormat("Area of {0}, Expected Cell Count of {1}", env.Area, expectedCells);
                         _log.Warn("**********************");
                     }
 
@@ -1037,6 +1096,28 @@ order by county, tract, blkgroup";
                     {
                         xidx++;
 
+                        ////if we have filtering geometries, try to skip a whole row if we can.
+                        //if ((filteringGeoms != null) && (filteringGeoms.Count > 0))
+                        //{
+                        //    Envelope colEnv = new Envelope(x, x + cellWidth, env.MinY, env.MaxY);
+                        //    IGeometry colGeom = Utilities.IEnvToIGeometry(colEnv);
+                        //
+                        //    bool included = false;
+                        //    for (int i = 0; i < filteringGeoms.Count; i++)
+                        //    {
+                        //        if (filteringGeoms[i].Intersects(colGeom))
+                        //        {
+                        //            included = true;
+                        //            break;
+                        //        }
+                        //    }
+                        //
+                        //    if (!included)
+                        //        continue;
+                        //}
+
+
+
                         int yidx = 0;
                         for (double y = env.MinY; y < env.MaxY; y += cellHeight)
                         {
@@ -1046,8 +1127,8 @@ order by county, tract, blkgroup";
 
                             Envelope cellEnv = new Envelope(x, x + cellWidth, y, y + cellHeight);
                             IGeometry cellCenter = new Point(cellEnv.Centre);
-                            IGeometry cellGeom = Utilities.IEnvToIGeometry(cellEnv);                            
-                            
+                            IGeometry cellGeom = Utilities.IEnvToIGeometry(cellEnv);
+
                             Feature found = null;
                             IList mightMatch = index.Query(cellGeom.EnvelopeInternal);
                             foreach (Feature f in mightMatch)
@@ -1066,16 +1147,35 @@ order by county, tract, blkgroup";
                             }
 
 
+                            //if we have filtering geometries, skip a cell if it isn't included
+                            if ((filteringGeoms != null) && (filteringGeoms.Count > 0))
+                            {
+                                bool included = false;
+                                for (int i = 0; i < filteringGeoms.Count; i++)
+                                {
+                                    if (filteringGeoms[i].Intersects(cellGeom))
+                                    {
+                                        included = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!included)
+                                    continue;
+                            }
+
+
                             if ((cellCount % 1000) == 0)
                             {
                                 int step = (int)((((double)cellCount) / ((double)expectedCells)) * 100.0);
                                 TimeSpan elapsed = (DateTime.Now - lastCheck);
                                 if ((step != lastProgress) && (elapsed.TotalSeconds > 1))
                                 {
-                                    _log.DebugFormat("{0:###.##}% complete, {1:#0.0#} seconds elapsed, {2} cells created, {3} cells checked",
+                                    _log.DebugFormat("{0:###.##}% complete, {1:#0.0#} seconds, {2} built, {3} checked, {4} left",
                                        step, (DateTime.Now - start).TotalSeconds,
                                        features.Count,
-                                       cellCount
+                                       cellCount,
+                                       expectedCells - cellCount
                                        );
                                     lastCheck = DateTime.Now;
                                     lastProgress = step;
@@ -1083,25 +1183,26 @@ order by county, tract, blkgroup";
                             }
 
                             //this is a lot of work just to add an id...
-                            AttributesTable t = new AttributesTable();
+                            AttributesTable attribs = new AttributesTable();
                             foreach (string name in found.Attributes.GetNames())
                             {
-                                t.AddAttribute(name, found.Attributes[name]);
+                                attribs.AddAttribute(name, found.Attributes[name]);
                             }
-                            t.AddAttribute("CELLID", cellID);
+                            attribs.AddAttribute("CELLID", cellID);
 
-                            features.Add(new Feature(cellGeom, found.Attributes));
+                            features.Add(new Feature(cellGeom, attribs));
                         }
                     }
-                    header.NumRecords = features.Count;
+                    _log.Debug("Done building cells, Saving Shapefile...");
 
+                    header.NumRecords = features.Count;
                     string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
                     var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
                     writer.Header = header;
                     writer.Write(features);
                 }
 
-                _log.Debug("Shapefile exported successfully");
+                _log.Debug("Done! Shapefile exported successfully");
                 return true;
             }
             catch (Exception ex)
@@ -1129,5 +1230,32 @@ order by county, tract, blkgroup";
                     ExecuteNonQuery();
             }
         }
+
+        public void SetGridParam(string gridArgs)
+        {
+            if (string.IsNullOrEmpty(gridArgs))
+                return;
+
+            //"100 100", "100x100", "200_300", "100:100"
+            var chunks = gridArgs.Split("x_:, ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (chunks.Length > 0)
+            {
+                //only provided the one, make em square!
+                this.GridCellWidthFeet = Utilities.GetAs<double>(chunks[0], 10000);
+                this.GridCellHeightFeet = this.GridCellWidthFeet;
+            }
+            if (chunks.Length > 1)
+            {
+                //they provided both
+                this.GridCellHeightFeet = Utilities.GetAs<double>(chunks[0], 10000);
+            }
+
+            _log.DebugFormat("Set Grid cell width to {0}ft, and height to {1}ft ",
+                this.GridCellWidthFeet,
+                this.GridCellHeightFeet);
+        }
+
+
+
     }
 }
