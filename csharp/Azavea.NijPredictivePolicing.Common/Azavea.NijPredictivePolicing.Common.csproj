@@ -89,6 +89,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="Data\CommaSeparatedValueReader.cs" />
     <Compile Include="Data\CommaSeparatedValueWriter.cs" />
+    <Compile Include="Data\FileWriterHelpers.cs" />
     <Compile Include="Data\FixedWidthColumnReader.cs" />
     <Compile Include="Data\FixedWidthField.cs" />
     <Compile Include="Data\GenericSeparatedValueReader.cs" />

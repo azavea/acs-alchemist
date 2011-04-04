@@ -8,6 +8,7 @@ using log4net;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
 using Azavea.NijPredictivePolicing.Common.DB;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats;
+using Azavea.NijPredictivePolicing.Common.Data;
 
 namespace Azavea.NijPredictivePolicing.AcsDataImporter
 {
@@ -34,7 +35,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
             new ImportArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
             new ImportArg() { Flag = "listBoundaryLevels", Description = "Displays a list of available boundary levels", DataType=typeof(string), PropertyName="DisplayBoundaryLevels"},
-            new ImportArg() { Flag = "listVariables", Description = "Displays a list of all available variables", DataType=typeof(string), PropertyName="DoListVariables"}
+            new ImportArg() { Flag = "exportVariables", Description = "Exports a CSV of all variables to allVariables.csv", DataType=typeof(string), PropertyName="ExportVariables"}
 
 
 
@@ -50,7 +51,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public AcsState State { get; set; }
 
         public string WKTFilterFilename { get; set; }
-        public string DoListVariables { get; set; }
+        public string ExportVariables { get; set; }
         public string IncludedVariableFile { get; set; }
         public string JobName { get; set; }
         public string SummaryLevel { get; set; }
@@ -161,13 +162,15 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         )
                     {
 
-                        if (!string.IsNullOrEmpty(DoListVariables))
+                        if (!string.IsNullOrEmpty(ExportVariables))
                         {
-                            var allVars = manager.GetAllSequenceVariableTableIds();
-                            foreach (string varname in allVars)
-                            {
-                                _log.Debug(" " + varname);
-                            }
+                            var variablesDT = manager.GetAllSequenceVariables();
+
+                            CommaSeparatedValueWriter writer = new CommaSeparatedValueWriter("allVariables.csv");
+                            FileWriterHelpers.WriteDataTable(writer, variablesDT);
+
+                            _log.Debug("Variables Exported!");
+                            return true;
                         }
 
 

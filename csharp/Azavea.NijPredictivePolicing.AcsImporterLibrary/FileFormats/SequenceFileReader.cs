@@ -49,6 +49,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                     //function, so might as well use it
                     _columns = new List<FixedWidthField>(new FixedWidthField[] {
                         new FixedWidthField("CENSUS_TABLE_ID", "Census Table ID", 0, 0),
+                        new FixedWidthField("COLNAME", "Census Variable Name", 0, 0),
                         new FixedWidthField("COLNO", "Column Number (1 indexed)", 0, 0),
                         new FixedWidthField("SEQNO", "Sequence Number", 0, 0)
                         });

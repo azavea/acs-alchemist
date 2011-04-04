@@ -457,42 +457,46 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     DataSet fileData = reader.AsDataSet(false);
                     if (fileData.Tables == null || fileData.Tables.Count == 0)
                     {
-                        _log.Error("One of the sequence files contained no readable worksheets; skipping\n\t" + 
-                            file);
+                        _log.ErrorFormat("Sequence File had no readable variables: {0} ", file);
                         continue;
                     }
                     else if (fileData.Tables.Count > 1)
-                        _log.Warn("One of the sequence files had multiple worksheets; using the first one\n\t" + 
-                            file);
+                    {
+                        _log.WarnFormat("Sequence File had multiple worksheets : {0} ", file);
+                    }
 
                     DataTable firstWorksheet = fileData.Tables[0];
                     if (firstWorksheet.Rows == null || firstWorksheet.Rows.Count < 2)
                     {
-                        _log.Error("One of the sequence files did not have enough rows to read; skipping\n\t" + 
-                            file);
+                        _log.ErrorFormat("Sequence File didn't have enough rows: {0} ", file);
                         continue;
                     }
                     else if (firstWorksheet.Rows.Count > 2)
-                        _log.Warn("One of the sequence files had too many rows\n\t" + file);
+                    {
+                        _log.WarnFormat("Sequence File had too many rows: {0} ", file);
+                    }
 
                     //Expected values of row: FILEID,FILETYPE,STUSAB,CHARITER,SEQUENCE,LOGRECNO,...
-                    DataRow row = firstWorksheet.Rows[0];   
-                    if (row.ItemArray == null || row.ItemArray.Length < 7)
+                    DataRow columnIDRow = firstWorksheet.Rows[0];
+                    DataRow columnNameRow = firstWorksheet.Rows[1];
+
+                    if (columnIDRow.ItemArray == null || columnIDRow.ItemArray.Length < 7)
                     {
                         _log.Error("One of the sequence files had bad data, skipping\n\t" + file);
                         continue;
                     }
 
                     //Add data to database
-                    for (int i = 6; i < row.ItemArray.Length; i++)
+                    for (int i = 6; i < columnIDRow.ItemArray.Length; i++)
                     {
                         //This file has _ separating Table Number and offset, everywhere else doesn't
-                        string scrubbedTableId = row.ItemArray[i].ToString().Trim().Replace("_", "");
-                        //                         ixid,   CENSUS_TABLE_ID,         COLNO, SEQNO
-                        var toAdd = new object[] { ixid++, scrubbedTableId, i + 1, seqNo };
+                        string columnID = columnIDRow[i].ToString().Trim().Replace("_", "");
+                        string columnName = (columnNameRow[i] as string);
+
+                        //                         ixid, CENSUS_TABLE_ID, NAME, COLNO, SEQNO
+                        var toAdd = new object[] { ixid++, columnID, columnName, i + 1, seqNo };
                         table.Rows.Add(toAdd);
                     }
-
                 }
 
                 if ((table != null) && (table.Rows.Count > 0))
@@ -568,19 +572,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         /// Returns all the variable names in the columnMappings table
         /// </summary>
         /// <returns></returns>
-        public List<string> GetAllSequenceVariableTableIds()
+        public DataTable GetAllSequenceVariables()
         {
-            List<string> variableNames = null;
             using (var conn = DbClient.GetConnection())
             {
-                var dt = DataClient.GetMagicTable(conn, DbClient, "select CENSUS_TABLE_ID from columnMappings");
-                variableNames = new List<string>(dt.Rows.Count);
-                foreach (DataRow row in dt.Rows)
-                {
-                    variableNames.Add(row[0] as string);
-                }
+                return DataClient.GetMagicTable(conn, DbClient, "select CENSUS_TABLE_ID, COLNAME from columnMappings");
             }
-            return variableNames;
         }
 
 

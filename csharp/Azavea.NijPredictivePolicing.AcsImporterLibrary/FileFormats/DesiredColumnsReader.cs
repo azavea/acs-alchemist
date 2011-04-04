@@ -54,7 +54,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                
                 //we're enumerable!
 
-                if (string.IsNullOrEmpty(_filename))
+               if (string.IsNullOrEmpty(_filename))
                 {
                     this.LoadFile(filename);
                 }
