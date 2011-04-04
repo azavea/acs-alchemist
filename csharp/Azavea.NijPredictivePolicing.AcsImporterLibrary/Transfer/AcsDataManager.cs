@@ -512,77 +512,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             }
         }
 
-        /// <summary>
-        /// Given a csv file containing a list of TABLEIDs and optional Names, create a table from it
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="filename"></param>
-        public void CreateDesiredColumnsTable(DbConnection conn)
-        {
-            int line = 0;
-            try
-            {
-                using (var reader = new DesiredColumnsReader(this.IncludedVariableFile))
-                {
-                    string createSql = reader.TableGenerationSql;
-                    DbClient.GetCommand(createSql, conn).ExecuteNonQuery();
-                    reader.TableName = AcsDataManager.DesiredColumnsTableName;
+        ///// <summary>
+        ///// Given a csv file containing a list of TABLEIDs and optional Names, create a table from it
+        ///// </summary>
+        ///// <param name="conn"></param>
+        ///// <param name="filename"></param>
+        //public void CreateDesiredColumnsTable(DbConnection conn)
+        //{
 
-                    string tableSelect = string.Format("select * from {0}", reader.TableName);
-                    var adapter = DataClient.GetMagicAdapter(conn, DbClient, tableSelect);
-                    var table = DataClient.GetMagicTable(conn, DbClient, tableSelect);
-
-                    //Helps us catch errors
-                    table.Constraints.Add("CENSUS_TABLE_ID Primary Key", table.Columns["CENSUS_TABLE_ID"], true);
-                    table.Constraints.Add("CUSTOM_COLUMN_NAME Unique", table.Columns["CUSTOM_COLUMN_NAME"], false);
-
-                    foreach (List<string> row in reader.GetReader())
-                    {
-                        line++;
-                        if (row.Count == 0 || string.IsNullOrEmpty(row[0])) continue;
-                        else if (row.Count == 1 || string.IsNullOrEmpty(row[1]))
-                        {
-                            var toAdd = new object[] { row[0], row[0] };
-                            table.Rows.Add(toAdd);
-                        }
-                        else
-                        {
-                            if (row.Count > 2)
-                                _log.Warn(string.Format("Too many fields in file {0}, line {1}",
-                                    IncludedVariableFile, line.ToString()));
-
-                            //Shapefiles have a 10 character column name limit :(
-                            string name = row[1];
-                            if (name.Length > 10)
-                            {
-                                _log.Warn(string.Format("On line {0}, table name {1} is more than 10 characters, truncating",
-                                    line, name));
-                                name = name.Substring(0, 10);
-                            }
-
-                            var toAdd = new object[] { row[0], name };
-                            table.Rows.Add(toAdd);
-                        }
-                    }
-
-                    if ((table != null) && (table.Rows.Count > 0))
-                    {
-                        _log.Debug("Saving...");
-                        adapter.Update(table);
-                        table.AcceptChanges();
-                    }
-                    else
-                    {
-                        throw new InvalidDataException("**Provided variable file had no valid Table Ids");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error(string.Format("Failed to create table for included variable file {0}.  " +
-                    "Made it to line {1}.", IncludedVariableFile, line), ex);
-            }
-        }
+        //}
 
 
         /// <summary>
@@ -632,16 +570,17 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         /// <returns></returns>
         public List<string> GetAllSequenceVariableTableIds()
         {
-            var allvars = new List<string>(1024);
+            List<string> variableNames = null;
             using (var conn = DbClient.GetConnection())
             {
                 var dt = DataClient.GetMagicTable(conn, DbClient, "select CENSUS_TABLE_ID from columnMappings");
+                variableNames = new List<string>(dt.Rows.Count);
                 foreach (DataRow row in dt.Rows)
                 {
-                    allvars.Add(row[0] as string);
+                    variableNames.Add(row[0] as string);
                 }
             }
-            return allvars;
+            return variableNames;
         }
 
 
@@ -671,23 +610,34 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             return results;
         }
 
+
+        /// <summary>
+        /// Currently rebuilds the requested variables table every time
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <returns></returns>
         public DataTable GetRequestedVariables(DbConnection conn)
         {
-            DataTable dt = new DataTable();
             _log.Debug("Filtering requested variables");
 
+            DataTable dt = null;
             if (!string.IsNullOrEmpty(IncludedVariableFile))
             {
-                CreateDesiredColumnsTable(conn);
-                dt = DataClient.GetMagicTable(conn, DbClient,
-                    string.Format(@"SELECT columnMappings.CENSUS_TABLE_ID, COLNO, SEQNO, {0}.CUSTOM_COLUMN_NAME AS COLNAME 
-                                    FROM columnMappings, {0} 
-                                    WHERE columnMappings.CENSUS_TABLE_ID = {0}.CENSUS_TABLE_ID;", 
-                                    AcsDataManager.DesiredColumnsTableName));
-                if ((dt.Rows == null) || (dt.Rows.Count == 0))
+                DesiredColumnsReader fileReader = new DesiredColumnsReader();
+                if (fileReader.CreateTemporaryTable(conn, DbClient, this.IncludedVariableFile, AcsDataManager.DesiredColumnsTableName))
                 {
-                    _log.Error("**Provided variable file had no valid Table Ids");
-                    return null;
+                    _log.DebugFormat("Variable file {0} imported successfully", this.IncludedVariableFile);
+                    string getRequestedVariablesSQL = string.Format(
+                        @"SELECT columnMappings.CENSUS_TABLE_ID, columnMappings.COLNO, columnMappings.SEQNO, {0}.CUSTOM_COLUMN_NAME AS COLNAME 
+                        FROM columnMappings, {0} 
+                        WHERE columnMappings.CENSUS_TABLE_ID = {0}.CENSUS_TABLE_ID;",
+                            AcsDataManager.DesiredColumnsTableName);
+
+                    dt = DataClient.GetMagicTable(conn, DbClient, getRequestedVariablesSQL);
+                }
+                else
+                {
+                    _log.Warn("Unable to read/build requested variables list");
                 }
             }
 
@@ -714,36 +664,35 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         }
                     }
 
-                    //get a list of LRUs we want
 
-                    HashSet<string> includedIDs = GetFilteredLRUs(conn);
+                    //gets a list of the LRUs we want
+                    HashSet<string> requestedLRNs = GetFilteredLRUs(conn);
 
-                    //get all the variable mapping information we want
+                    //gets all the variable mapping information we need
                     DataTable reqVariablesDT = GetRequestedVariables(conn);
-                    if (reqVariablesDT == null || reqVariablesDT.Rows.Count == 0)
+                    if ((reqVariablesDT == null) || (reqVariablesDT.Rows.Count == 0))
                     {
-                        throw new InvalidDataException("No requested columns found");
+                        _log.Fatal("No variables requested");
+                        return false;
                     }
 
-                    //get the respective files
+
+
                     DataTable newTable = new DataTable();
                     newTable.Columns.Add("LOGRECNO", typeof(string));
-
-                    Dictionary<string, DataRow> allRows = new Dictionary<string, DataRow>(includedIDs.Count);
-
-                    foreach (var id in includedIDs)
+                    Dictionary<string, DataRow> rowsByLRN = new Dictionary<string, DataRow>(requestedLRNs.Count);                                        
+                    foreach (var id in requestedLRNs)
                     {
                         var row = newTable.NewRow();
                         row[0] = id;
                         newTable.Rows.Add(row);
 
-                        allRows[id] = row;
+                        rowsByLRN[id] = row;
                     }
 
-                    int varNum = 0;
-
-
+                    
                     _log.Debug("Importing Columns");
+                    int varNum = 0;
                     foreach (DataRow variableRow in reqVariablesDT.Rows)
                     {
                         varNum++;
@@ -761,7 +710,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         int columnIDX = Utilities.GetAs<int>(variableRow["COLNO"] as string, -1);
 
                         _log.DebugFormat("Importing {0}...", newColumnName);
-
                         if (newTable.Columns.Contains(newColumnName))
                         {
                             newColumnName = newColumnName + varNum;
@@ -771,18 +719,16 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         CommaSeparatedValueReader reader = new CommaSeparatedValueReader(seqFile[0], false);
                         foreach (List<string> values in reader)
                         {
-                            string lru = values[5];
-                            if (!includedIDs.Contains(lru))
+                            string lrn = values[5];
+                            if (!requestedLRNs.Contains(lrn))
                                 continue;
-
-                            //_log.Debug("Found one!");
 
                             if (columnIDX < values.Count)
                             {
                                 double val = Utilities.GetAs<double>(values[columnIDX], double.NaN);
                                 if (!double.IsNaN(val))
                                 {
-                                    allRows[lru][newColumnName] = val;
+                                    rowsByLRN[lrn][newColumnName] = val;
                                 }
                             }
                         }
@@ -837,7 +783,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
 
             string geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGRP) as blkgrp from geographies order by county, tract, blkgrp ";
-            string shapeSQL = @"
+            string shapeSQL = 
+@"
 select trim(COUNTY) as county, trim(TRACT) || '00' as tract, trim(BLKGROUP) as blkgroup, AsBinary(Geometry) as Geometry from census_blockgroups
 UNION
 select trim(COUNTY) as county, trim(TRACT) || '00' as tract, '' as blkgroup, AsBinary(Geometry) as Geometry from census_tracts 
@@ -847,7 +794,6 @@ order by county, tract, blkgroup";
             var wholeShapeTable = DataClient.GetMagicTable(conn, DbClient, shapeSQL);
 
            
-
             var geomKeys = new Dictionary<string, DataRow>();
             foreach (DataRow row in wholeGeomTable.Rows)
             {
@@ -856,15 +802,6 @@ order by county, tract, blkgroup";
                     Utilities.GetAs<int>(row["TRACT"], -1),
                     Utilities.GetAs<int>(row["BLKGRP"], -1)
                 );
-
-                ////DEBUG
-                //string logrecno = row["LOGRECNO"] as string;
-                //if (logrecno.Contains("883"))
-                //{
-                //    _log.Debug("here");
-                //}
-                ////DEBUG
-
                 geomKeys[key] = row;
             }
 
@@ -904,14 +841,18 @@ order by county, tract, blkgroup";
 
                 using (var conn = DbClient.GetConnection())
                 {
-                    var features = new List<Feature>();
-
                     Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
                     var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName);
+                    if ((variablesDT == null) || (variablesDT.Rows.Count == 0))
+                    {
+                        _log.Fatal("Nothing to export, data table is empty");
+                        return false;
+                    }
 
-                    var header = ShapefileHelper.SetupHeader(variablesDT);
 
                     GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
+                    var features = new List<Feature>(variablesDT.Rows.Count);
+                    var header = ShapefileHelper.SetupHeader(variablesDT);
 
                     foreach (DataRow row in variablesDT.Rows)
                     {
@@ -922,19 +863,17 @@ order by county, tract, blkgroup";
                         AttributesTable t = new AttributesTable();
                         foreach (DataColumn col in variablesDT.Columns)
                         {
-                            //produces crazy results
-                            // t.AddAttribute("col" + col.Ordinal, row[col.Ordinal]);
-
                             //produces more sane results.
-                            t.AddAttribute("col" + col.Ordinal, Utilities.GetAsType(col.DataType, row[col.Ordinal], null));
-                            //t.AddAttribute(col.ColumnName, row[col.Ordinal]);
+                            //t.AddAttribute("col" + col.Ordinal, Utilities.GetAsType(col.DataType, row[col.Ordinal], null));
+
+                            t.AddAttribute(col.ColumnName, Utilities.GetAsType(col.DataType, row[col.Ordinal], null));
                         }
 
                         byte[] geomBytes = (byte[])shapeDict[id]["Geometry"];
                         IGeometry geom = binReader.Read(geomBytes);
                         if (geom == null)
                         {
-                            _log.Warn("Geometry was empty!");
+                            _log.WarnFormat("Geometry for LRN {0} was empty!", id);
                             continue;
                         }
 
@@ -945,9 +884,10 @@ order by county, tract, blkgroup";
                     string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
                     var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
                     writer.Header = header;
-                    writer.Write(features);
+                    writer.Write(features);                    
                 }
 
+                _log.Debug("Shapefile exported successfully...");
                 return true;
             }
             catch (Exception ex)

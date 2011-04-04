@@ -63,6 +63,7 @@ namespace Azavea.NijPredictivePolicing.Common.DB
             }
             catch (Exception ex)
             {
+                
                 _log.Error("error during select", ex);
             }
 

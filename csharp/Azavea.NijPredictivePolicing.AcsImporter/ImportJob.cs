@@ -143,13 +143,17 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 {
                     Utilities.DisplayEnum("State Codes:", typeof(AcsState));
                 }
-                
-
 
                 if (this.State != AcsState.None)
                 {
-                    var manager = new AcsDataManager(this.State);
+                    if (string.IsNullOrEmpty(this.JobName))
+                    {
+                        this.JobName = string.Format("{0}_{1}", this.State, DateTime.Now.ToShortDateString().Replace('/', '_'));
+                        _log.DebugFormat("Jobname was empty, using {0}", this.JobName);
+                    }
 
+
+                    var manager = new AcsDataManager(this.State);
                     if ((manager.CheckColumnMappingsFile())
                         && (manager.CheckBlockGroupFile())
                         && (manager.CheckDatabase())
@@ -175,7 +179,11 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
                         if (!string.IsNullOrEmpty(IncludedVariableFile) && !string.IsNullOrEmpty(this.JobName))
                         {
-                            manager.CheckBuildVariableTable(this.JobName);
+                            if (!manager.CheckBuildVariableTable(this.JobName))
+                            {
+                                _log.Error("There was a problem building the variable table, exiting");
+                                return false;
+                            }
                         }
 
 

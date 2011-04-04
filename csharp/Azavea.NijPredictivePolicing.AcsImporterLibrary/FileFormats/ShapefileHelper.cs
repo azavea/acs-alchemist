@@ -96,8 +96,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             foreach (DataColumn col in table.Columns)
             {
                 Type t = col.DataType;
-                //string columnName = col.ColumnName;
-                string columnName = "col" + col.Ordinal;
+                string columnName = col.ColumnName;
+                //string columnName = "col" + col.Ordinal;
 
                 if (t == typeof(bool))
                 {
