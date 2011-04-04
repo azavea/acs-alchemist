@@ -191,5 +191,10 @@ namespace Azavea.NijPredictivePolicing.Common
             }
         }
 
+        public static string EnsureMaxLength(string str, int maxlen)
+        {
+            return (str.Length <= maxlen) ? str : str.Substring(0, maxlen);
+        }
+
     }
 }

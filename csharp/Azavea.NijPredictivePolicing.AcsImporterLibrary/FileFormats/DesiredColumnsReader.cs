@@ -7,6 +7,7 @@ using log4net;
 using Azavea.NijPredictivePolicing.Common.Data;
 using System.Data.Common;
 using Azavea.NijPredictivePolicing.Common.DB;
+using Azavea.NijPredictivePolicing.Common;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 {
@@ -68,12 +69,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                         continue;
 
                     var varName = row[0];
-                    var varAlias = (row.Count > 1) ? row[1] : row[0];                    
+                    var varAlias = (row.Count > 1) ? row[1] : row[0];
                     if (varAlias.Length > 10)
                     {
                         //Shapefiles have a 10 character column name limit :(
                         _log.WarnFormat("Line:{0}, \"{1}\" name was too long, max 10 characters", line, varAlias);
-                        varAlias = varAlias.Substring(0, 10);
+                        varAlias = Utilities.EnsureMaxLength(varAlias, 10);
                     }
 
                     dt.Rows.Add(varName, varAlias);

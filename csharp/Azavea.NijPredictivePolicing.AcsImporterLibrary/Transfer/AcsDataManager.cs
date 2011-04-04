@@ -642,6 +642,11 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         }
 
 
+        /// <summary>
+        /// Gets the filtered LogicalRecordNumbers, and the requested variables, and builds a table of their crossjoin
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
         public bool CheckBuildVariableTable(string tableName)
         {
             try
@@ -674,7 +679,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     }
 
 
-
                     DataTable newTable = new DataTable();
                     newTable.Columns.Add("LOGRECNO", typeof(string));
                     Dictionary<string, DataRow> rowsByLRN = new Dictionary<string, DataRow>(requestedLRNs.Count);                                        
@@ -702,16 +706,34 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                             continue;
                         }
 
-                        //TODO: alternate column naming?
-                        var newColumnName = variableRow["COLNAME"] as string;
-                        int columnIDX = Utilities.GetAs<int>(variableRow["COLNO"] as string, -1);
+                        var errorFile = Directory.GetFiles(this.CurrentDataPath, "m*" + sequenceNo.ToString("0000") + "000.txt");    //0001000
+                        if ((errorFile == null) || (errorFile.Length == 0))
+                        {
+                            _log.DebugFormat("Couldn't find error margin file {0}", sequenceNo);
+                        }
 
-                        _log.DebugFormat("Importing {0}...", newColumnName);
+
+                        //TODO: alternate column naming?
+                        string newColumnName = variableRow["COLNAME"] as string;
                         if (newTable.Columns.Contains(newColumnName))
                         {
                             newColumnName = newColumnName + varNum;
                         }
                         newTable.Columns.Add(newColumnName, typeof(double));
+
+                        //this really ought to be unique.
+                        string newErrorMarginColumnName = "m_" + newColumnName;
+                        if (newTable.Columns.Contains(newErrorMarginColumnName))
+                        {
+                            newErrorMarginColumnName = newErrorMarginColumnName + varNum;
+                        }
+                        newTable.Columns.Add(newErrorMarginColumnName, typeof(double));
+
+
+                        _log.DebugFormat("Importing {0}...", newColumnName);
+                        int columnIDX = Utilities.GetAs<int>(variableRow["COLNO"] as string, -1);
+
+
 
                         CommaSeparatedValueReader reader = new CommaSeparatedValueReader(seqFile[0], false);
                         foreach (List<string> values in reader)
@@ -726,6 +748,25 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                                 if (!double.IsNaN(val))
                                 {
                                     rowsByLRN[lrn][newColumnName] = val;
+                                }
+                            }
+                        }
+                        reader.Close();
+
+                        //these error files better have the exact same format!
+                        reader = new CommaSeparatedValueReader(errorFile[0], false);
+                        foreach (List<string> values in reader)
+                        {
+                            string lrn = values[5];
+                            if (!requestedLRNs.Contains(lrn))
+                                continue;
+
+                            if (columnIDX < values.Count)
+                            {
+                                double val = Utilities.GetAs<double>(values[columnIDX], double.NaN);
+                                if (!double.IsNaN(val))
+                                {
+                                    rowsByLRN[lrn][newErrorMarginColumnName] = val;
                                 }
                             }
                         }
@@ -861,9 +902,10 @@ order by county, tract, blkgroup";
                         foreach (DataColumn col in variablesDT.Columns)
                         {
                             //produces more sane results.
-                            //t.AddAttribute("col" + col.Ordinal, Utilities.GetAsType(col.DataType, row[col.Ordinal], null));
-
-                            t.AddAttribute(col.ColumnName, Utilities.GetAsType(col.DataType, row[col.Ordinal], null));
+                            t.AddAttribute(
+                                Utilities.EnsureMaxLength(col.ColumnName, 10),
+                                Utilities.GetAsType(col.DataType, row[col.Ordinal], null)
+                                );
                         }
 
                         byte[] geomBytes = (byte[])shapeDict[id]["Geometry"];

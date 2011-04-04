@@ -96,7 +96,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             foreach (DataColumn col in table.Columns)
             {
                 Type t = col.DataType;
-                string columnName = col.ColumnName;
+                string columnName = Utilities.EnsureMaxLength(col.ColumnName, 10);
                 //string columnName = "col" + col.Ordinal;
 
                 if (t == typeof(bool))
