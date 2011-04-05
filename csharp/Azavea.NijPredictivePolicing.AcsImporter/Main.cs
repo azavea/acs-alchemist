@@ -59,6 +59,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 _log.DebugFormat("  -{0, -15}: {1}", arg.Flag, arg.Description);
             }
             _log.Debug("");
+            _log.Debug("**Pro Tip!  You can place all your arguments in a text file, and call the importer with just that filename");
+            _log.Debug("");
         }
 
         static void Main(string[] args)

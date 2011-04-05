@@ -73,7 +73,35 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             }
         }
 
+        /// <summary>
+        /// Generates a proj file for a given shapefile if it's missing
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public static bool MakeCensusProjFile(string filename)
+        {
+            string WGS84NAD83 = "GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]";
+            string prjFileName = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)) + ".prj";
 
+            if (!File.Exists(prjFileName))
+            {
+                File.WriteAllText(prjFileName, WGS84NAD83);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// A .prj file seems to be exactly what we're asking for as input, so copy er over.
+        /// </summary>
+        /// <param name="wktProjFilename"></param>
+        /// <param name="newShapefilename"></param>
+        /// <returns></returns>
+        public static bool MakeOutputProjFile(string wktProjFilename, string filename)
+        {
+            string prjFileName = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)) + ".prj";
+            File.WriteAllText(prjFileName, File.ReadAllText(wktProjFilename));
+            return true;
+        }
 
 
         public static GeometryFactory GetGeomFactory()
@@ -181,6 +209,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         //        _log.Debug(value);
         //    }
         //}
+
+
 
 
 

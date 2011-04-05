@@ -9,6 +9,7 @@ using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
 using Azavea.NijPredictivePolicing.Common.DB;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats;
 using Azavea.NijPredictivePolicing.Common.Data;
+using System.IO;
 
 namespace Azavea.NijPredictivePolicing.AcsDataImporter
 {
@@ -19,7 +20,6 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         #region Command Line Stuff
 
         public static ImportArg[] Arguments = new ImportArg[] {
-            
             new ImportArg() { Flag = "s", Description = "State Code", DataType=typeof(AcsState), PropertyName="State"},
             new ImportArg() { Flag = "v", Description = "Filter data by variable name file", DataType=typeof(string), PropertyName="IncludedVariableFile"},
             
@@ -36,23 +36,16 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new ImportArg() { Flag = "exportToShape", Description = "Export results to shapefile", DataType=typeof(string), PropertyName="ExportToShapefile"},
             new ImportArg() { Flag = "exportToGrid", Description = "Export results to fishnetted shapefile where value = # feet", DataType=typeof(string), PropertyName="ExportToGrid"},
 
-            new ImportArg() { Flag = "gridEnvelope", Description = "Align the grid cells to a WKT envelope in a file", DataType=typeof(string), PropertyName="WKTEnvelope"},
-
+            new ImportArg() { Flag = "gridEnvelope", Description = "Align the grid cells to an envelope in a file", DataType=typeof(string), PropertyName="GridEnvelope"},
+            new ImportArg() { Flag = "outputProjection", Description = "Provide the WKT of a desired projection to operate in", DataType=typeof(string), PropertyName="OutputProjection"},
+            
             
             new ImportArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
             new ImportArg() { Flag = "listSummaryLevels", Description = "Displays a list of available boundary levels", DataType=typeof(string), PropertyName="DisplaySummaryLevels"},
             new ImportArg() { Flag = "exportVariables", Description = "Exports a CSV of all variables to allVariables.csv", DataType=typeof(string), PropertyName="ExportVariables"}
-
-
-
-            //TODO: add option for fishnet config file?  spatial output config file?  something?
-
-
-            //new ImportArg() { Flag = "t", Description = "Run Tests", PropertyName="RunTests"},
-            //new ImportArg() { Flag = "a", Description = "Optional thing that a", PropertyName="PropA"},
-            //new ImportArg() { Flag = "b", Description = "Optional thing that b", PropertyName="PropB"},
-            //new ImportArg() { Flag = "c", Description = "Optional thing that c", PropertyName="PropC"}
         };
+
+
 
         public AcsState State { get; set; }
 
@@ -67,15 +60,11 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         
         public string DisplaySummaryLevels { get; set; }
         public string DisplayStateCodes { get; set; }
+        public string GridEnvelope { get; set; }
+        public string OutputProjection { get; set; }
         
+
         
-        
-        
-        
-        //public string RunTests { get; set; }
-        public string PropA { get; set; }
-        public string PropB { get; set; }
-        public string PropC { get; set; }
 
 
         public ImportJob()
@@ -94,8 +83,27 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             string line = sb.ToString();
             char delim = '-';
 
-            var thisType = typeof(ImportJob);
 
+            if (line.IndexOf(delim) == -1)
+            {
+                //if we have arguments, but they didn't include flags, it's probably a file,
+                //look for the file.
+                if (File.Exists(args[0]))
+                {
+                    var lines = File.ReadAllLines(args[0]);
+                    sb = new StringBuilder();
+                    foreach (string chunk in lines)
+                    {
+                        if (chunk.StartsWith("#") || chunk.StartsWith("/"))
+                            continue;
+                        sb.Append(chunk).Append(" ");
+                    }
+                    line = sb.ToString();
+                }
+            }
+
+
+            var thisType = typeof(ImportJob);
             int idx = line.IndexOf(delim);
             while (idx >= 0)
             {
@@ -194,9 +202,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
 
                         manager.SummaryLevel = this.SummaryLevel;
-                        manager.WKTFilterFilename = this.WKTFilterFilename;
-                        manager.IncludedVariableFile = IncludedVariableFile;
+                        manager.ExportFilterFilename = this.WKTFilterFilename;
+                        manager.DesiredVariablesFilename = IncludedVariableFile;
                         manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
+                        manager.OutputProjectionFilename = this.OutputProjection;
 
                         if (!string.IsNullOrEmpty(IncludedVariableFile) && !string.IsNullOrEmpty(this.JobName))
                         {
@@ -219,6 +228,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
                         if (!string.IsNullOrEmpty(ExportToGrid))
                         {
+                            manager.GridEnvelopeFilename = GridEnvelope;
                             manager.SetGridParam(ExportToGrid);
 
                             _log.DebugFormat("Exporting all requested variables to fishnet shapefile with grid cell size {0} ", ExportToGrid);

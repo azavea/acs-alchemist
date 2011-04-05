@@ -28,27 +28,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public const string DesiredColumnsTableName = "desiredColumns";
 
-        ////protected string _stateFips;
-        //public string StateFIPS
-        //{
-        //    get
-        //    {
-        //        //if (string.IsNullOrEmpty(_stateFips))
-        //        //{
-        //        //    using (var reader = DbClient.GetCommand("select STATE from geographies limit 1").ExecuteReader())
-        //        //    {
-        //        //        reader.Read();
-        //        //        _stateFips = reader.GetString(0);
-        //        //    }
-        //        //}
-        //        //return _stateFips;
-        //    }
-        //    set
-        //    {
-        //        _stateFips = value;
-        //    }
-        //}
-
         public string StateFIPS
         {
             get
@@ -80,12 +59,32 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             }
         }
 
-        public string WKTFilterFilename;
-        public string IncludedVariableFile;
+        /// <summary>
+        /// If set, the manager will look for a file of WKTs that it will use to ensure all exported geometries
+        /// at least intersect
+        /// </summary>
+        public string ExportFilterFilename;
+
+        /// <summary>
+        /// If set, the manager will read in as a CSV, and import the variable values into the provided job table
+        /// </summary>
+        public string DesiredVariablesFilename;
+
+        /// <summary>
+        /// If set, the manager will erase a previous job with the same name, and replace it
+        /// </summary>
         public bool ReplaceTable = false;
+
+        public string OutputProjectionFilename;
 
         public double GridCellWidthFeet = 10000;
         public double GridCellHeightFeet = 10000;
+
+        /// <summary>
+        /// If set, the manager will use this envelope while calculating the export grid
+        /// (minx, miny, maxx, maxy)
+        /// </summary>
+        public string GridEnvelopeFilename;
 
 
         
@@ -246,6 +245,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             {
                 if (FileLocator.ExpandZipFile(destFilepath, this.ShapePath))
                 {
+                   
+
                     _log.DebugFormat("State {0} decompressed successfully", niceName);
 
                     var client = DbClient;
@@ -260,6 +261,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                             {
                                 foreach (string filename in filenames)
                                 {
+                                    ShapefileHelper.MakeCensusProjFile(filename);
                                     ShapefileHelper.ImportShapefile(conn, this.DbClient,
                                         Path.Combine(this.ShapePath, filename),
                                         tablename);
@@ -639,12 +641,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             _log.Debug("Filtering requested variables");
 
             DataTable dt = null;
-            if (!string.IsNullOrEmpty(IncludedVariableFile))
+            if (!string.IsNullOrEmpty(DesiredVariablesFilename))
             {
                 DesiredColumnsReader fileReader = new DesiredColumnsReader();
-                if (fileReader.CreateTemporaryTable(conn, DbClient, this.IncludedVariableFile, AcsDataManager.DesiredColumnsTableName))
+                if (fileReader.CreateTemporaryTable(conn, DbClient, this.DesiredVariablesFilename, AcsDataManager.DesiredColumnsTableName))
                 {
-                    _log.DebugFormat("Variable file {0} imported successfully", this.IncludedVariableFile);
+                    _log.DebugFormat("Variable file {0} imported successfully", this.DesiredVariablesFilename);
                     string getRequestedVariablesSQL = string.Format(
                         @"SELECT columnMappings.CENSUS_TABLE_ID, columnMappings.COLNO, columnMappings.SEQNO, {0}.CUSTOM_COLUMN_NAME AS COLNAME 
                         FROM columnMappings, {0} 
@@ -666,16 +668,16 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         public List<IGeometry> GetFilteringGeometries()
         {
             List<IGeometry> results = null;
-            if (!string.IsNullOrEmpty(this.WKTFilterFilename))
+            if (!string.IsNullOrEmpty(this.ExportFilterFilename))
             {
-                if (!File.Exists(this.WKTFilterFilename))
+                if (!File.Exists(this.ExportFilterFilename))
                 {
                     _log.Error("Provided WKT file doesn't exist");
                     return null;
                 }
 
                 WKTReader reader = new WKTReader(ShapefileHelper.GetGeomFactory());
-                string[] lines = File.ReadAllLines(this.WKTFilterFilename);
+                string[] lines = File.ReadAllLines(this.ExportFilterFilename);
                 results = new List<IGeometry>(lines.Length);
 
                 foreach (string line in lines)
@@ -912,80 +914,124 @@ order by county, tract, blkgroup";
         }
 
 
+        public bool IsIncluded(IGeometry geom, List<IGeometry> filteringGeoms)
+        {
+            if ((filteringGeoms == null) || (filteringGeoms.Count == 0))
+            {
+                return true;
+            }
+            else
+            {
+                for (int i = 0; i < filteringGeoms.Count; i++)
+                {
+                    var filt = filteringGeoms[i];
+                    for (int g = 0; g < filt.NumGeometries; g++)
+                    {
+                        var fg = filt.GetGeometryN(g);
+                        if (fg.Intersects(geom))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        }
 
+        public List<Feature> GetShapeFeaturesToExport(string tableName, bool spatialFilter)
+        {
+            using (var conn = DbClient.GetConnection())
+            {
+                Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
+                var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName);
+                if ((variablesDT == null) || (variablesDT.Rows.Count == 0))
+                {
+                    _log.Fatal("Nothing to export, data table is empty");
+                    return null;
+                }
+
+                List<IGeometry> filteringGeoms = (spatialFilter) ? GetFilteringGeometries() : null;
+
+                GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
+                var features = new List<Feature>(variablesDT.Rows.Count);
+
+
+                foreach (DataRow row in variablesDT.Rows)
+                {
+                    var id = row["LOGRECNO"] as string;
+                    if (!shapeDict.ContainsKey(id))
+                        continue;
+
+                    AttributesTable t = new AttributesTable();
+                    foreach (DataColumn col in variablesDT.Columns)
+                    {
+                        //produces more sane results.
+                        t.AddAttribute(
+                            Utilities.EnsureMaxLength(col.ColumnName, 10),
+                            Utilities.GetAsType(col.DataType, row[col.Ordinal], null)
+                            );
+                    }
+
+                    byte[] geomBytes = (byte[])shapeDict[id]["Geometry"];
+                    IGeometry geom = binReader.Read(geomBytes);
+                    if (geom == null)
+                    {
+                        _log.WarnFormat("Geometry for LRN {0} was empty!", id);
+                        continue;
+                    }
+
+                    if (!IsIncluded(geom, filteringGeoms))
+                    {
+                        continue;
+                    }
+
+                    features.Add(new Feature(geom, t));
+                }
+
+                return features;
+            }
+        }
 
 
         public bool ExportShapefile(string tableName)
         {
             try
             {
+                var exportFeatures = GetShapeFeaturesToExport(tableName, true);
+                if ((exportFeatures == null) || (exportFeatures.Count == 0))
+                {
+                    return false;
+                }
+
+                
+
+
+
+                DbaseFileHeader header = null;
                 using (var conn = DbClient.GetConnection())
                 {
                     Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
-                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName);
-                    if ((variablesDT == null) || (variablesDT.Rows.Count == 0))
-                    {
-                        _log.Fatal("Nothing to export, data table is empty");
-                        return false;
-                    }
-
-                    List<IGeometry> filteringGeoms = GetFilteringGeometries();
-
-
-                    GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
-                    var features = new List<Feature>(variablesDT.Rows.Count);
-                    var header = ShapefileHelper.SetupHeader(variablesDT);
-
-                    foreach (DataRow row in variablesDT.Rows)
-                    {
-                        var id = row["LOGRECNO"] as string;
-                        if (!shapeDict.ContainsKey(id))
-                            continue;
-
-                        AttributesTable t = new AttributesTable();
-                        foreach (DataColumn col in variablesDT.Columns)
-                        {
-                            //produces more sane results.
-                            t.AddAttribute(
-                                Utilities.EnsureMaxLength(col.ColumnName, 10),
-                                Utilities.GetAsType(col.DataType, row[col.Ordinal], null)
-                                );
-                        }
-
-                        byte[] geomBytes = (byte[])shapeDict[id]["Geometry"];
-                        IGeometry geom = binReader.Read(geomBytes);
-                        if (geom == null)
-                        {
-                            _log.WarnFormat("Geometry for LRN {0} was empty!", id);
-                            continue;
-                        }
-
-                        if ((filteringGeoms != null) && (filteringGeoms.Count > 0))
-                        {
-                            bool included = false;
-                            for (int i = 0; i < filteringGeoms.Count; i++)
-                            {
-                                if (filteringGeoms[i].Intersects(geom))
-                                {
-                                    included = true;
-                                    break;
-                                }
-                            }
-
-                            if (!included)
-                                continue;
-                        }
-
-
-                        features.Add(new Feature(geom, t));
-                    }
-                    header.NumRecords = features.Count;
-
-                    string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
-                    var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
-                    writer.Header = header;
-                    writer.Write(features);
+                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName + " where 0 = 1 ");
+                    header = ShapefileHelper.SetupHeader(variablesDT);
                 }
+                header.NumRecords = exportFeatures.Count;
+
+                string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
+                var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
+                writer.Header = header;
+
+                if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
+                {
+                    //Reproject everything in this file to the requested projection...                    
+                    exportFeatures = Utilities.ReprojectFeaturesTo(exportFeatures, this.OutputProjectionFilename);
+
+                    ShapefileHelper.MakeOutputProjFile(this.OutputProjectionFilename, newShapefilename);
+                }
+                else
+                {
+                    ShapefileHelper.MakeCensusProjFile(newShapefilename);
+                }
+                writer.Write(exportFeatures);
 
                 _log.Debug("Shapefile exported successfully");
                 return true;
@@ -998,209 +1044,163 @@ order by county, tract, blkgroup";
         }
 
 
+
+
+
         public bool ExportGriddedShapefile(string tableName)
         {
             try
             {
+                //don't filter out geometries, we'll do that at the cell level
+                var exportFeatures = GetShapeFeaturesToExport(tableName, false);
+                if ((exportFeatures == null) || (exportFeatures.Count == 0))
+                {
+                    return false;
+                }
+
+                Envelope env = new Envelope();
+                var index = new GisSharpBlog.NetTopologySuite.Index.Strtree.STRtree(exportFeatures.Count);
+
+                for (int i = 0; i < exportFeatures.Count; i++)
+                {
+                    Feature f = exportFeatures[i];
+                    index.Insert(f.Geometry.EnvelopeInternal, f);
+                    env.ExpandToInclude(f.Geometry.EnvelopeInternal);
+                }
+                index.Build();
+
+                ///adjust envelope to only scan area inside filtering geometries
+                List<IGeometry> filteringGeoms = GetFilteringGeometries();
+                if (!string.IsNullOrEmpty(this.GridEnvelopeFilename))
+                {
+                    //a specified envelope file overrides the envelope of the filtering geometries
+                    env = GetGridEnvelope();
+                }
+                else if ((filteringGeoms != null) && (filteringGeoms.Count > 0))
+                {
+                    //in the absence ... //TODO: finish--
+                    env = new Envelope();
+                    for (int i = 0; i < filteringGeoms.Count; i++)
+                    {
+                        env.ExpandToInclude(filteringGeoms[i].EnvelopeInternal);
+                    }
+                }
+
+
+
+                //progress tracking stuff
+                DateTime start = DateTime.Now, lastCheck = DateTime.Now;
+                int lastProgress = 0;
+
+
+                var features = new List<Feature>(exportFeatures.Count);
+                var cellStepPoint = Utilities.GetCellFeetForProjection(GridCellWidthFeet, GridCellHeightFeet);
+                double cellWidth = cellStepPoint.X;
+                double cellHeight = cellStepPoint.Y;
+
+                int numRows = (int)Math.Ceiling(env.Height / cellHeight);
+                int numCols = (int)Math.Ceiling(env.Width / cellWidth);
+                int expectedCells = numRows * numCols;
+
+                if (expectedCells > 1000000)
+                {
+                    _log.Warn("**********************");
+                    _log.Warn("Your selected area will produce a shapefile with over a million cells, is that a good idea?");
+                    _log.WarnFormat("Area of {0}, Expected Cell Count of {1}", env.Area, expectedCells);
+                    _log.Warn("**********************");
+                }
+
+
+
+                int cellCount = 0;
+                int xidx = 0;
+                for (double x = env.MinX; x < env.MaxX; x += cellWidth)
+                {
+                    xidx++;
+                    int yidx = 0;
+                    for (double y = env.MinY; y < env.MaxY; y += cellHeight)
+                    {
+                        yidx++;
+                        cellCount++;
+                        string cellID = string.Format("{0}_{1}", xidx, yidx);
+
+                        Envelope cellEnv = new Envelope(x, x + cellWidth, y, y + cellHeight);
+                        IGeometry cellCenter = new Point(cellEnv.Centre);
+                        IGeometry cellGeom = Utilities.IEnvToIGeometry(cellEnv);
+
+                        Feature found = null;
+                        IList mightMatch = index.Query(cellGeom.EnvelopeInternal);
+                        foreach (Feature f in mightMatch)
+                        {
+                            if (f.Geometry.Contains(cellCenter))
+                            {
+                                found = f;
+                                break;
+                            }
+                        }
+
+                        if (found == null)
+                        {
+                            //_log.DebugFormat("No feature found for cell {0}", cellID);
+                            continue;
+                        }
+
+
+                        //if we have filtering geometries, skip a cell if it isn't included
+                        if (!IsIncluded(cellGeom, filteringGeoms))
+                        {
+                            continue;
+                        }
+
+                        if ((cellCount % 1000) == 0)
+                        {
+                            int step = (int)((((double)cellCount) / ((double)expectedCells)) * 100.0);
+                            TimeSpan elapsed = (DateTime.Now - lastCheck);
+                            if ((step != lastProgress) && (elapsed.TotalSeconds > 1))
+                            {
+                                _log.DebugFormat("{0:###.##}% complete, {1:#0.0#} seconds, {2} built, {3} checked, {4} left",
+                                   step, (DateTime.Now - start).TotalSeconds,
+                                   features.Count,
+                                   cellCount,
+                                   expectedCells - cellCount
+                                   );
+                                lastCheck = DateTime.Now;
+                                lastProgress = step;
+                            }
+                        }
+
+                        //this is a lot of work just to add an id...
+                        AttributesTable attribs = new AttributesTable();
+                        foreach (string name in found.Attributes.GetNames())
+                        {
+                            attribs.AddAttribute(name, found.Attributes[name]);
+                        }
+                        attribs.AddAttribute("CELLID", cellID);
+
+                        features.Add(new Feature(cellGeom, attribs));
+                    }
+                }
+                _log.Debug("Done building cells, Saving Shapefile...");
+
+
+
+                DbaseFileHeader header = null;
                 using (var conn = DbClient.GetConnection())
                 {
                     Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
-                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName);
-                    if ((variablesDT == null) || (variablesDT.Rows.Count == 0))
-                    {
-                        _log.Fatal("Nothing to export, data table is empty");
-                        return false;
-                    }
-
-
-                    GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
-
-                    var header = ShapefileHelper.SetupHeader(variablesDT);
-
-
-                    Envelope env = new Envelope();
-                    var index = new GisSharpBlog.NetTopologySuite.Index.Strtree.STRtree(variablesDT.Rows.Count);
-
-                    foreach (DataRow row in variablesDT.Rows)
-                    {
-                        var id = row["LOGRECNO"] as string;
-                        if (!shapeDict.ContainsKey(id))
-                            continue;
-
-                        AttributesTable t = new AttributesTable();
-                        foreach (DataColumn col in variablesDT.Columns)
-                        {
-                            //produces more sane results.
-                            t.AddAttribute(
-                                Utilities.EnsureMaxLength(col.ColumnName, 10),
-                                Utilities.GetAsType(col.DataType, row[col.Ordinal], null)
-                                );
-                        }
-
-                        byte[] geomBytes = (byte[])shapeDict[id]["Geometry"];
-                        IGeometry geom = binReader.Read(geomBytes);
-                        if (geom == null)
-                        {
-                            _log.WarnFormat("Geometry for LRN {0} was empty!", id);
-                            continue;
-                        }
-                        var f = new Feature(geom, t);
-                        env.ExpandToInclude(geom.EnvelopeInternal);
-                        index.Insert(geom.EnvelopeInternal, f);
-                    }
-                    index.Build();
-
-                    //int xkey = (int)Math.Round((x - Envelope.MinX) / _cellWidth, 10, MidpointRounding.AwayFromZero);
-                    //int ykey = (int)Math.Round((y - Envelope.MinY) / _cellHeight, 10, MidpointRounding.AwayFromZero);
-                    //Dictionary<string, Feature> featuresByCell = new Dictionary<string, Feature>();
-
-                    //progress tracking stuff
-                    DateTime start = DateTime.Now, lastCheck = DateTime.Now;
-                    int lastProgress = 0;
-
-
-                    var features = new List<Feature>(variablesDT.Rows.Count);
-                    var cellStepPoint = Utilities.GetCellFeetForProjection(GridCellWidthFeet, GridCellHeightFeet);
-                    double cellWidth = cellStepPoint.X;
-                    double cellHeight = cellStepPoint.Y;
-
-                    ///adjust envelope to only scan area inside filtering geometries
-                    List<IGeometry> filteringGeoms = GetFilteringGeometries();
-                    if ((filteringGeoms != null) && (filteringGeoms.Count > 0))
-                    {
-                        env = new Envelope();
-                        for (int i = 0; i < filteringGeoms.Count; i++)
-                        {
-                            env.ExpandToInclude(filteringGeoms[i].EnvelopeInternal);
-                        }
-                    }
-
-
-                    int numRows = (int)Math.Ceiling(env.Height / cellHeight);
-                    int numCols = (int)Math.Ceiling(env.Width / cellWidth);
-                    int expectedCells = numRows * numCols;
-
-                    if (expectedCells > 1000000)
-                    {
-                        _log.Warn("**********************");
-                        _log.Warn("Your selected area will produce a shapefile with over a million cells, is that a good idea?");
-                        _log.WarnFormat("Area of {0}, Expected Cell Count of {1}", env.Area, expectedCells);
-                        _log.Warn("**********************");
-                    }
-
-
-                    header.AddColumn("CELLID", 'C', 254, 0);
-                    int cellCount = 0;
-                    int xidx = 0;
-                    for (double x = env.MinX; x < env.MaxX; x += cellWidth)
-                    {
-                        xidx++;
-
-                        ////if we have filtering geometries, try to skip a whole row if we can.
-                        //if ((filteringGeoms != null) && (filteringGeoms.Count > 0))
-                        //{
-                        //    Envelope colEnv = new Envelope(x, x + cellWidth, env.MinY, env.MaxY);
-                        //    IGeometry colGeom = Utilities.IEnvToIGeometry(colEnv);
-                        //
-                        //    bool included = false;
-                        //    for (int i = 0; i < filteringGeoms.Count; i++)
-                        //    {
-                        //        if (filteringGeoms[i].Intersects(colGeom))
-                        //        {
-                        //            included = true;
-                        //            break;
-                        //        }
-                        //    }
-                        //
-                        //    if (!included)
-                        //        continue;
-                        //}
-
-
-
-                        int yidx = 0;
-                        for (double y = env.MinY; y < env.MaxY; y += cellHeight)
-                        {
-                            yidx++;
-                            cellCount++;
-                            string cellID = string.Format("{0}_{1}", xidx, yidx);
-
-                            Envelope cellEnv = new Envelope(x, x + cellWidth, y, y + cellHeight);
-                            IGeometry cellCenter = new Point(cellEnv.Centre);
-                            IGeometry cellGeom = Utilities.IEnvToIGeometry(cellEnv);
-
-                            Feature found = null;
-                            IList mightMatch = index.Query(cellGeom.EnvelopeInternal);
-                            foreach (Feature f in mightMatch)
-                            {
-                                if (f.Geometry.Contains(cellCenter))
-                                {
-                                    found = f;
-                                    break;
-                                }
-                            }
-
-                            if (found == null)
-                            {
-                                //_log.DebugFormat("No feature found for cell {0}", cellID);
-                                continue;
-                            }
-
-
-                            //if we have filtering geometries, skip a cell if it isn't included
-                            if ((filteringGeoms != null) && (filteringGeoms.Count > 0))
-                            {
-                                bool included = false;
-                                for (int i = 0; i < filteringGeoms.Count; i++)
-                                {
-                                    if (filteringGeoms[i].Intersects(cellGeom))
-                                    {
-                                        included = true;
-                                        break;
-                                    }
-                                }
-
-                                if (!included)
-                                    continue;
-                            }
-
-
-                            if ((cellCount % 1000) == 0)
-                            {
-                                int step = (int)((((double)cellCount) / ((double)expectedCells)) * 100.0);
-                                TimeSpan elapsed = (DateTime.Now - lastCheck);
-                                if ((step != lastProgress) && (elapsed.TotalSeconds > 1))
-                                {
-                                    _log.DebugFormat("{0:###.##}% complete, {1:#0.0#} seconds, {2} built, {3} checked, {4} left",
-                                       step, (DateTime.Now - start).TotalSeconds,
-                                       features.Count,
-                                       cellCount,
-                                       expectedCells - cellCount
-                                       );
-                                    lastCheck = DateTime.Now;
-                                    lastProgress = step;
-                                }
-                            }
-
-                            //this is a lot of work just to add an id...
-                            AttributesTable attribs = new AttributesTable();
-                            foreach (string name in found.Attributes.GetNames())
-                            {
-                                attribs.AddAttribute(name, found.Attributes[name]);
-                            }
-                            attribs.AddAttribute("CELLID", cellID);
-
-                            features.Add(new Feature(cellGeom, attribs));
-                        }
-                    }
-                    _log.Debug("Done building cells, Saving Shapefile...");
-
-                    header.NumRecords = features.Count;
-                    string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
-                    var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
-                    writer.Header = header;
-                    writer.Write(features);
+                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName + " where 0 = 1 ");
+                    header = ShapefileHelper.SetupHeader(variablesDT);
                 }
+                header.AddColumn("CELLID", 'C', 254, 0);
+                header.NumRecords = exportFeatures.Count;                
+                
+
+                header.NumRecords = features.Count;
+                string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
+                var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
+                writer.Header = header;
+                writer.Write(features);
+
 
                 _log.Debug("Done! Shapefile exported successfully");
                 return true;
@@ -1210,6 +1210,31 @@ order by county, tract, blkgroup";
                 _log.Error("Error while exporting shapefile", ex);
             }
             return false;
+        }
+
+        public Envelope GetGridEnvelope()
+        {
+            Envelope env = null;
+            if (!string.IsNullOrEmpty(GridEnvelopeFilename))
+            {
+                string[] lines = File.ReadAllLines(GridEnvelopeFilename);
+                foreach (string line in lines)
+                {
+                    if (line.StartsWith("#") || line.StartsWith("//"))
+                        continue;
+
+                    string[] chunks = line.Split(" ,:".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    env = new Envelope(
+                        Utilities.GetAs<double>(chunks[0], -1),     //env.MinX
+                        Utilities.GetAs<double>(chunks[2], -1),  //env.MaxX
+                        Utilities.GetAs<double>(chunks[1], -1),   //env.MinY
+                        Utilities.GetAs<double>(chunks[3], -1)    //env.MaxY
+                    );
+                    break;
+                }
+            }
+            
+            return env;
         }
 
 

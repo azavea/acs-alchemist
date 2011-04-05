@@ -9,6 +9,9 @@ using GeoAPI.Geometries;
 using GisSharpBlog.NetTopologySuite.Geometries;
 using SharpMap.CoordinateSystems.Transformations;
 using SharpMap.CoordinateSystems;
+using GeoAPI.CoordinateSystems;
+using GeoAPI.CoordinateSystems.Transformations;
+using GisSharpBlog.NetTopologySuite.Features;
 
 namespace Azavea.NijPredictivePolicing.Common
 {
@@ -232,6 +235,65 @@ namespace Azavea.NijPredictivePolicing.Common
             var yStep = proj.MathTransform.Transform(new double[] { 0, heightMeters });
 
             return new Point(xStep[0], yStep[1]);
+        }
+
+        public static ICoordinateSystem GetCoordinateSystemByWKTFile(string filename)
+        {
+            CoordinateSystemFactory csf = new CoordinateSystemFactory();
+            return csf.CreateFromWkt(File.ReadAllText(filename));
+        }
+
+        public static ICoordinateTransformation BuildTransformationObject(ICoordinateSystem src, ICoordinateSystem dest)
+        {
+            var f = new CoordinateTransformationFactory();
+            return f.CreateFromCoordinateSystems(src, dest);
+        }
+
+        public static List<Feature> ReprojectFeaturesTo(List<Feature> features, string wktFilename)
+        {
+            var destCRS = GetCoordinateSystemByWKTFile(wktFilename);
+            var trans = BuildTransformationObject(GeographicCoordinateSystem.WGS84, destCRS);
+           
+
+            _log.DebugFormat("Reprojecting {0} features from \"{1}\" to \"{2}\"",
+                features.Count,
+                trans.SourceCS.AuthorityCode,
+                (trans.TargetCS.AuthorityCode != -1) ? trans.TargetCS.AuthorityCode.ToString() : trans.TargetCS.Name);
+
+            return ReprojectFeatures(features, trans);
+        }
+
+        /// <summary>
+        /// Transforms the provided features in place
+        /// </summary>
+        /// <param name="features"></param>
+        /// <param name="trans"></param>
+        /// <returns></returns>
+        public static List<Feature> ReprojectFeatures(List<Feature> features, ICoordinateTransformation trans)
+        {
+            for (int i = 0; i < features.Count; i++)
+            {
+                features[i].Geometry = ReprojectGeometry(features[i].Geometry, trans);
+            }
+            return features;
+        }
+
+        
+
+        public static IGeometry ReprojectGeometry(IGeometry geom, ICoordinateTransformation trans)
+        {
+            double[] srcPt = new double[2], pt = null;
+            foreach (ICoordinate coord in geom.Coordinates)
+            {
+                srcPt[0] = coord.X;
+                srcPt[1] = coord.Y;
+
+                pt = trans.MathTransform.Transform(srcPt);
+
+                coord.X = pt[0];
+                coord.Y = pt[1];
+            }
+            return geom;
         }
 
 

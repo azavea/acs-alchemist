@@ -1,0 +1,24 @@
+#
+#This is an example arguments file for the AcsDataImporter
+#
+
+#The name for this job
+-j testPhilly
+
+#Specify our desired State
+-s Pennsylvania
+
+#The desired variables
+-v C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\testvars.txt 
+
+#Our filtering geometry
+-f C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\filterGeom.txt
+
+#Our filtering geometry
+-gridEnvelope C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\gridEnvelope.txt
+
+#Our summary level - by block groups
+-e 150 
+
+#The result, a grid with cells WxH in feet
+-exportToGrid 100000
