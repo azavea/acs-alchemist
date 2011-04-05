@@ -253,7 +253,21 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             var destCRS = GetCoordinateSystemByWKTFile(wktFilename);
             var trans = BuildTransformationObject(GeographicCoordinateSystem.WGS84, destCRS);
-           
+
+
+            _log.DebugFormat("Reprojecting {0} features from \"{1}\" to \"{2}\"",
+                features.Count,
+                trans.SourceCS.AuthorityCode,
+                (trans.TargetCS.AuthorityCode != -1) ? trans.TargetCS.AuthorityCode.ToString() : trans.TargetCS.Name);
+
+            return ReprojectFeatures(features, trans);
+        }
+
+        public static List<IGeometry> ReprojectFeaturesTo(List<IGeometry> features, string wktFilename)
+        {
+            var destCRS = GetCoordinateSystemByWKTFile(wktFilename);
+            var trans = BuildTransformationObject(GeographicCoordinateSystem.WGS84, destCRS);
+
 
             _log.DebugFormat("Reprojecting {0} features from \"{1}\" to \"{2}\"",
                 features.Count,
@@ -278,6 +292,20 @@ namespace Azavea.NijPredictivePolicing.Common
             return features;
         }
 
+        /// <summary>
+        /// Transforms the provided features in place
+        /// </summary>
+        /// <param name="features"></param>
+        /// <param name="trans"></param>
+        /// <returns></returns>
+        public static List<IGeometry> ReprojectFeatures(List<IGeometry> features, ICoordinateTransformation trans)
+        {
+            for (int i = 0; i < features.Count; i++)
+            {
+                features[i] = ReprojectGeometry(features[i], trans);
+            }
+            return features;
+        }
         
 
         public static IGeometry ReprojectGeometry(IGeometry geom, ICoordinateTransformation trans)

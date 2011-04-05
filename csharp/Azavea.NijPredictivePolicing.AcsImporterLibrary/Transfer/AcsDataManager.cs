@@ -77,14 +77,16 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public string OutputProjectionFilename;
 
-        public double GridCellWidthFeet = 10000;
-        public double GridCellHeightFeet = 10000;
+        public double GridCellWidth = 10000;
+        public double GridCellHeight = 10000;
 
         /// <summary>
         /// If set, the manager will use this envelope while calculating the export grid
         /// (minx, miny, maxx, maxy)
         /// </summary>
         public string GridEnvelopeFilename;
+
+        public bool IncludeEmptyGridCells = false;
 
 
         
@@ -1058,9 +1060,24 @@ order by county, tract, blkgroup";
                     return false;
                 }
 
-                Envelope env = new Envelope();
-                var index = new GisSharpBlog.NetTopologySuite.Index.Strtree.STRtree(exportFeatures.Count);
+                //if we need to reproject:
+                List<IGeometry> filteringGeoms = GetFilteringGeometries();                
+                if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
+                {
+                    //Reproject everything in this file to the requested projection...                    
+                    exportFeatures = Utilities.ReprojectFeaturesTo(exportFeatures, this.OutputProjectionFilename);
+                    
+                    //THESE MUST BE PROVIDED ALREADY PROJECTED!
+                    //filteringGeoms = Utilities.ReprojectFeaturesTo(filteringGeoms, this.OutputProjectionFilename);
 
+                    //TODO: generate .prj file later on
+                }
+
+
+
+
+                Envelope env = new Envelope();
+                var index = new GisSharpBlog.NetTopologySuite.Index.Strtree.STRtree();
                 for (int i = 0; i < exportFeatures.Count; i++)
                 {
                     Feature f = exportFeatures[i];
@@ -1069,8 +1086,9 @@ order by county, tract, blkgroup";
                 }
                 index.Build();
 
-                ///adjust envelope to only scan area inside filtering geometries
-                List<IGeometry> filteringGeoms = GetFilteringGeometries();
+
+
+                //adjust envelope to only scan area inside filtering geometries                
                 if (!string.IsNullOrEmpty(this.GridEnvelopeFilename))
                 {
                     //a specified envelope file overrides the envelope of the filtering geometries
@@ -1094,9 +1112,14 @@ order by county, tract, blkgroup";
 
 
                 var features = new List<Feature>(exportFeatures.Count);
-                var cellStepPoint = Utilities.GetCellFeetForProjection(GridCellWidthFeet, GridCellHeightFeet);
-                double cellWidth = cellStepPoint.X;
-                double cellHeight = cellStepPoint.Y;
+                //var cellStepPoint = Utilities.GetCellFeetForProjection(GridCellWidthFeet, GridCellHeightFeet);
+                //double cellWidth = cellStepPoint.X;
+                //double cellHeight = cellStepPoint.Y;
+                
+                double cellWidth = GridCellWidth;
+                double cellHeight = GridCellHeight;
+                bool discardEmptyGridCells = !IncludeEmptyGridCells;
+                
 
                 int numRows = (int)Math.Ceiling(env.Height / cellHeight);
                 int numCols = (int)Math.Ceiling(env.Width / cellWidth);
@@ -1110,6 +1133,14 @@ order by county, tract, blkgroup";
                     _log.Warn("**********************");
                 }
 
+                DbaseFileHeader header = null;
+                using (var conn = DbClient.GetConnection())
+                {
+                    Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
+                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName + " where 0 = 1 ");
+                    header = ShapefileHelper.SetupHeader(variablesDT);
+                }
+                header.AddColumn("CELLID", 'C', 254, 0);
 
 
                 int cellCount = 0;
@@ -1139,7 +1170,7 @@ order by county, tract, blkgroup";
                             }
                         }
 
-                        if (found == null)
+                        if ((found == null) && (discardEmptyGridCells))
                         {
                             //_log.DebugFormat("No feature found for cell {0}", cellID);
                             continue;
@@ -1171,11 +1202,23 @@ order by county, tract, blkgroup";
 
                         //this is a lot of work just to add an id...
                         AttributesTable attribs = new AttributesTable();
-                        foreach (string name in found.Attributes.GetNames())
+                        if (found != null)
                         {
-                            attribs.AddAttribute(name, found.Attributes[name]);
+                            foreach (string name in found.Attributes.GetNames())
+                            {
+                                attribs.AddAttribute(name, found.Attributes[name]);
+                            }
+                            attribs.AddAttribute("CELLID", cellID);
                         }
-                        attribs.AddAttribute("CELLID", cellID);
+                        else
+                        {
+                            foreach (var field in header.Fields)
+                            {
+                                attribs.AddAttribute(field.Name, null);
+                            }
+                            attribs["CELLID"] = cellID;
+                        }
+                        
 
                         features.Add(new Feature(cellGeom, attribs));
                     }
@@ -1184,16 +1227,8 @@ order by county, tract, blkgroup";
 
 
 
-                DbaseFileHeader header = null;
-                using (var conn = DbClient.GetConnection())
-                {
-                    Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
-                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName + " where 0 = 1 ");
-                    header = ShapefileHelper.SetupHeader(variablesDT);
-                }
-                header.AddColumn("CELLID", 'C', 254, 0);
-                header.NumRecords = exportFeatures.Count;                
-                
+
+                header.NumRecords = exportFeatures.Count;
 
                 header.NumRecords = features.Count;
                 string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
@@ -1201,6 +1236,16 @@ order by county, tract, blkgroup";
                 writer.Header = header;
                 writer.Write(features);
 
+
+                if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
+                {
+                    //Reproject everything in this file to the requested projection...                                        
+                    ShapefileHelper.MakeOutputProjFile(this.OutputProjectionFilename, newShapefilename);
+                }
+                else
+                {
+                    ShapefileHelper.MakeCensusProjFile(newShapefilename);
+                }
 
                 _log.Debug("Done! Shapefile exported successfully");
                 return true;
@@ -1266,18 +1311,18 @@ order by county, tract, blkgroup";
             if (chunks.Length > 0)
             {
                 //only provided the one, make em square!
-                this.GridCellWidthFeet = Utilities.GetAs<double>(chunks[0], 10000);
-                this.GridCellHeightFeet = this.GridCellWidthFeet;
+                this.GridCellWidth = Utilities.GetAs<double>(chunks[0], 10000);
+                this.GridCellHeight = this.GridCellWidth;
             }
             if (chunks.Length > 1)
             {
                 //they provided both
-                this.GridCellHeightFeet = Utilities.GetAs<double>(chunks[0], 10000);
+                this.GridCellHeight = Utilities.GetAs<double>(chunks[0], 10000);
             }
 
-            _log.DebugFormat("Set Grid cell width to {0}ft, and height to {1}ft ",
-                this.GridCellWidthFeet,
-                this.GridCellHeightFeet);
+            _log.DebugFormat("Set Grid cell width to {0}, and height to {1} ",
+                this.GridCellWidth,
+                this.GridCellHeight);
         }
 
 

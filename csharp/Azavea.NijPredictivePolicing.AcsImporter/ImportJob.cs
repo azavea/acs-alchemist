@@ -38,6 +38,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
             new ImportArg() { Flag = "gridEnvelope", Description = "Align the grid cells to an envelope in a file", DataType=typeof(string), PropertyName="GridEnvelope"},
             new ImportArg() { Flag = "outputProjection", Description = "Provide the WKT of a desired projection to operate in", DataType=typeof(string), PropertyName="OutputProjection"},
+            new ImportArg() { Flag = "includeEmptyGridCells", Description = "Keeps empty grid cells during export", DataType=typeof(string), PropertyName="IncludeEmptyGridCells"},
             
             
             new ImportArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
@@ -62,6 +63,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public string DisplayStateCodes { get; set; }
         public string GridEnvelope { get; set; }
         public string OutputProjection { get; set; }
+        public string IncludeEmptyGridCells { get; set; }
         
 
         
@@ -206,6 +208,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         manager.DesiredVariablesFilename = IncludedVariableFile;
                         manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
                         manager.OutputProjectionFilename = this.OutputProjection;
+                        manager.IncludeEmptyGridCells = (!string.IsNullOrEmpty(this.IncludeEmptyGridCells));
+                        
 
                         if (!string.IsNullOrEmpty(IncludedVariableFile) && !string.IsNullOrEmpty(this.JobName))
                         {
