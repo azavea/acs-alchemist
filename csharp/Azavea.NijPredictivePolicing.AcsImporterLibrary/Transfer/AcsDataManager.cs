@@ -266,7 +266,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                                     ShapefileHelper.MakeCensusProjFile(filename);
                                     ShapefileHelper.ImportShapefile(conn, this.DbClient,
                                         Path.Combine(this.ShapePath, filename),
-                                        tablename);
+                                        tablename, 4269);
 
                                     //TODO: multiple shape files in one zip?
                                     break;
@@ -337,7 +337,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         public bool CreateShapefileTable(DbConnection conn, string tableName)
         {
             string filename = Directory.GetFiles(this.ShapePath, "*.shp")[0];
-            return ShapefileHelper.ImportShapefile(conn, this.DbClient, filename, tableName);
+            return ShapefileHelper.ImportShapefile(conn, this.DbClient, filename, tableName, 4269);
         }
 
         //public string GetLocalShapefileName()

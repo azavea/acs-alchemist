@@ -26,11 +26,11 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
             using (DbConnection conn = Client.GetConnection())
             {
-                return ShapefileHelper.ImportShapefile(conn, Client, filename, tableName);
+                return ShapefileHelper.ImportShapefile(conn, Client, filename, tableName, 4269);
             }
         }
 
-        public static bool ImportShapefile(DbConnection conn, IDataClient client, string filename, string tableName)
+        public static bool ImportShapefile(DbConnection conn, IDataClient client, string filename, string tableName, int srid)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
                 //trim off the '.shp' from the end
                 filename = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename));
-                string sql = string.Format("CREATE VIRTUAL TABLE " + tableName + " USING VirtualShape('{0}', CP1252, 4269);", filename);
+                string sql = string.Format("CREATE VIRTUAL TABLE " + tableName + " USING VirtualShape('{0}', CP1252, {1});", filename, srid);
                 client.GetCommand(sql, conn).ExecuteNonQuery();
                 
                 _log.DebugFormat("Imported Shapefile {0} into table {1}",
@@ -125,31 +125,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             {
                 Type t = col.DataType;
                 string columnName = Utilities.EnsureMaxLength(col.ColumnName, 10);
-                //string columnName = "col" + col.Ordinal;
 
-                if (t == typeof(bool))
-                {
-                    header.AddColumn(columnName, 'L', 1, 0);
-                }
-                else if (t == typeof(string))
-                {
-                    header.AddColumn(columnName, 'C', 254, 0);
-                }
-                else if (t == typeof(DateTime))
-                {
-                    // D stores only the date
-                    //retVal.AddColumn(shapefileColumnName, 'D', 8, 0);
-                    header.AddColumn(columnName, 'C', 22, 0);
-                }
-                else if (t == typeof(float) || t == typeof(double) || t == typeof(decimal))
-                {
-                    header.AddColumn(columnName, 'N', 18, 10);
-                }
-                else if (t == typeof(short) || t == typeof(int) || t == typeof(long)
-                    || t == typeof(ushort) || t == typeof(uint) || t == typeof(ulong))
-                {
-                    header.AddColumn(columnName, 'N', 18, 0);
-                }
+                AddColumn(header, columnName, t);
             }
 
             return header;
@@ -211,6 +188,39 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         //}
 
 
+
+
+
+
+        public static void AddColumn(DbaseFileHeader header, string columnName, Type t)
+        {
+            columnName = Utilities.EnsureMaxLength(columnName, 10);
+            
+            if (t == typeof(bool))
+            {
+                header.AddColumn(columnName, 'L', 1, 0);
+            }
+            else if (t == typeof(string))
+            {
+                header.AddColumn(columnName, 'C', 254, 0);
+            }
+            else if (t == typeof(DateTime))
+            {
+                // D stores only the date
+                //retVal.AddColumn(shapefileColumnName, 'D', 8, 0);
+                header.AddColumn(columnName, 'C', 22, 0);
+            }
+            else if (t == typeof(float) || t == typeof(double) || t == typeof(decimal))
+            {
+                header.AddColumn(columnName, 'N', 18, 10);
+            }
+            else if (t == typeof(short) || t == typeof(int) || t == typeof(long)
+                || t == typeof(ushort) || t == typeof(uint) || t == typeof(ulong))
+            {
+                header.AddColumn(columnName, 'N', 18, 0);
+            }
+
+        }
 
 
 
