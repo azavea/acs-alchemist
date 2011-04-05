@@ -19,11 +19,11 @@ namespace Azavea.NijPredictivePolicing.Common
         public const string ApplicationName = "ACSImporter";
 
 
-#if DEBUG
-        private static string _tempPath = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\ACSImporter";
-#else
-        private static string _tempPath;
-#endif
+//#if DEBUG
+//        private static string _tempPath = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\ACSImporter";
+//#else
+        private static string _tempPath = FileUtilities.SafePathEnsure(Environment.CurrentDirectory, "Data");
+//#endif
 
         /// <summary>
         /// Gets (and creates) the path to the Applications Temporary Folder

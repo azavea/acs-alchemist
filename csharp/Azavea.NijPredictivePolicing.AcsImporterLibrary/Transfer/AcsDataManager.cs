@@ -89,6 +89,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         public string GridEnvelopeFilename;
 
         public bool IncludeEmptyGridCells = false;
+        public string OutputFolder;
+        
 
 
         
@@ -249,8 +251,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             {
                 if (FileLocator.ExpandZipFile(destFilepath, this.ShapePath))
                 {
-                   
-
                     _log.DebugFormat("State {0} decompressed successfully", niceName);
 
                     var client = DbClient;
@@ -265,9 +265,11 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                             {
                                 foreach (string filename in filenames)
                                 {
-                                    ShapefileHelper.MakeCensusProjFile(filename);
+                                    string fullShapefilename = Path.Combine(this.ShapePath, filename);
+
+                                    ShapefileHelper.MakeCensusProjFile(fullShapefilename);
                                     ShapefileHelper.ImportShapefile(conn, this.DbClient,
-                                        Path.Combine(this.ShapePath, filename),
+                                        fullShapefilename,
                                         tablename, 4269);
 
                                     //TODO: multiple shape files in one zip?
@@ -875,12 +877,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             var temp = DataClient.GetMagicTable(conn, DbClient, "select * from census_tracts"); // where logrecno like '%883%'
 
 
-            string geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGRP) as blkgrp from geographies order by county, tract, blkgrp ";
-            string shapeSQL = 
+            string geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGRP) as blkgrp, GEOID from geographies order by county, tract, blkgrp ";
+            string shapeSQL =
 @"
-select trim(COUNTY) as county, trim(TRACT) || '00' as tract, trim(BLKGROUP) as blkgroup, AsBinary(Geometry) as Geometry from census_blockgroups
+select trim(COUNTY) as county, trim(TRACT) || '00' as tract, trim(BLKGROUP) as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_blockgroups
 UNION
-select trim(COUNTY) as county, trim(TRACT) || '00' as tract, '' as blkgroup, AsBinary(Geometry) as Geometry from census_tracts 
+select trim(COUNTY) as county, trim(TRACT) || '00' as tract, '' as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_tracts 
 order by county, tract, blkgroup";
 
             var wholeGeomTable = DataClient.GetMagicTable(conn, DbClient, geomSQL);
@@ -910,6 +912,7 @@ order by county, tract, blkgroup";
                 if (geomKeys.ContainsKey(key))
                 {
                     string logrecno = geomKeys[key]["LOGRECNO"] as string;
+                    row["GEOID"] = geomKeys[key]["GEOID"];
                     dict[logrecno] = row;
                 }
             }
@@ -966,16 +969,15 @@ order by county, tract, blkgroup";
 
                     //THESE MUST BE PROVIDED ALREADY PROJECTED!
                     //filteringGeoms = Utilities.ReprojectFeaturesTo(filteringGeoms, this.OutputProjectionFilename);
-
-                    //TODO: generate .prj file later on
                 }
 
 
 
                 List<IGeometry> filteringGeoms = (spatialFilter) ? GetFilteringGeometries() : null;
-
                 GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
                 var features = new List<Feature>(variablesDT.Rows.Count);
+
+                bool variablesHaveGeoID = variablesDT.Columns.Contains("GEOID");
 
 
                 foreach (DataRow row in variablesDT.Rows)
@@ -1015,6 +1017,11 @@ order by county, tract, blkgroup";
                         }
                     }
 
+                    if (!variablesHaveGeoID)
+                    {
+                        t.AddAttribute("GEOID", shapeDict[id]["GEOID"]);
+                    }
+
                     features.Add(new Feature(geom, t));
                 }
 
@@ -1036,13 +1043,22 @@ order by county, tract, blkgroup";
                 DbaseFileHeader header = null;
                 using (var conn = DbClient.GetConnection())
                 {
-                    Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
+                    //Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
                     var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName + " where 0 = 1 ");
                     header = ShapefileHelper.SetupHeader(variablesDT);
                 }
+                ShapefileHelper.AddColumn(header, "GEOID", typeof(string));
+
+
+                
                 header.NumRecords = exportFeatures.Count;
 
                 string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
+                if (!string.IsNullOrEmpty(OutputFolder))
+                {
+                    newShapefilename = Path.Combine(OutputFolder, tableName);
+                }
+                
                 var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
                 writer.Header = header;
 
@@ -1095,8 +1111,6 @@ order by county, tract, blkgroup";
                     
                 //    //THESE MUST BE PROVIDED ALREADY PROJECTED!
                 //    //filteringGeoms = Utilities.ReprojectFeaturesTo(filteringGeoms, this.OutputProjectionFilename);
-
-                //    //TODO: generate .prj file later on
                 //}
 
 
@@ -1162,7 +1176,7 @@ order by county, tract, blkgroup";
                 DbaseFileHeader header = null;
                 using (var conn = DbClient.GetConnection())
                 {
-                    Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
+                    //Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
                     var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName + " where 0 = 1 ");
                     header = ShapefileHelper.SetupHeader(variablesDT);
                 }
@@ -1250,6 +1264,7 @@ order by county, tract, blkgroup";
                     }
                 }
                 _log.Debug("Done building cells, Saving Shapefile...");
+                ShapefileHelper.AddColumn(header, "GEOID", typeof(string));
                 header.NumRecords = features.Count;
 
                 if (features.Count == 0)
@@ -1259,6 +1274,11 @@ order by county, tract, blkgroup";
                 }
 
                 string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
+                if (!string.IsNullOrEmpty(OutputFolder))
+                {
+                    newShapefilename = Path.Combine(OutputFolder, tableName);
+                }
+
                 var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
                 writer.Header = header;
                 writer.Write(features);

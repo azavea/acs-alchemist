@@ -16,5 +16,8 @@
 #for the grid shapefiles we'll want cellid
 -joinedColumns CELLID,LOGRECNO
 
+#STATE,COUNTY,TRACT,BLOCKGROUP
+#STFid
+
 #for the normal shapefiles we'll want LOGRECNO
 #-joinedColumns LOGRECNO
