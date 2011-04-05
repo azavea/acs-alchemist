@@ -3,7 +3,7 @@
 #
 
 #The name for this job
--j testProjPhilly
+-j phillyBlockGroups
 
 #Specify our desired State
 -s Pennsylvania
@@ -14,14 +14,16 @@
 #Our filtering geometry
 -f C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\philly_2272_boundary.txt
 
-#Our filtering geometry
-#-gridEnvelope C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\gridEnvelope.txt
-
 #Our summary level - by block groups
 -e 150 
 
+-exportToShape
+
 #The result, a grid with cells WxH in feet
--exportToGrid 1000
+#-exportToGrid 1000
+#Our filtering geometry
+#-gridEnvelope C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\gridEnvelope.txt
+
 
 #Specifies a file containing WKT of the desired output projection
 -outputProjection C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\2272.txt

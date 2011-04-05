@@ -17,6 +17,8 @@ using Azavea.NijPredictivePolicing.Common.Data;
 using GisSharpBlog.NetTopologySuite.Features;
 using GeoAPI.Geometries;
 using System.Collections;
+using SharpMap.CoordinateSystems;
+using GeoAPI.CoordinateSystems.Transformations;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
@@ -952,6 +954,24 @@ order by county, tract, blkgroup";
                     return null;
                 }
 
+                bool shouldReproject = (!string.IsNullOrEmpty(this.OutputProjectionFilename));
+                ICoordinateTransformation reprojector = null;
+                if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
+                {
+                    var destCRS = Utilities.GetCoordinateSystemByWKTFile(this.OutputProjectionFilename);
+                    reprojector = Utilities.BuildTransformationObject(GeographicCoordinateSystem.WGS84, destCRS);
+
+                    //Reproject everything in this file to the requested projection...                    
+                    //exportFeatures = Utilities.ReprojectFeaturesTo(exportFeatures, this.OutputProjectionFilename);
+
+                    //THESE MUST BE PROVIDED ALREADY PROJECTED!
+                    //filteringGeoms = Utilities.ReprojectFeaturesTo(filteringGeoms, this.OutputProjectionFilename);
+
+                    //TODO: generate .prj file later on
+                }
+
+
+
                 List<IGeometry> filteringGeoms = (spatialFilter) ? GetFilteringGeometries() : null;
 
                 GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
@@ -982,9 +1002,17 @@ order by county, tract, blkgroup";
                         continue;
                     }
 
-                    if (!IsIncluded(geom, filteringGeoms))
+                    if (shouldReproject)
                     {
-                        continue;
+                        geom = Utilities.ReprojectGeometry(geom, reprojector);
+                    }
+
+                    if (spatialFilter)
+                    {
+                        if (!IsIncluded(geom, filteringGeoms))
+                        {
+                            continue;
+                        }
                     }
 
                     features.Add(new Feature(geom, t));
@@ -1005,10 +1033,6 @@ order by county, tract, blkgroup";
                     return false;
                 }
 
-                
-
-
-
                 DbaseFileHeader header = null;
                 using (var conn = DbClient.GetConnection())
                 {
@@ -1024,8 +1048,9 @@ order by county, tract, blkgroup";
 
                 if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
                 {
-                    //Reproject everything in this file to the requested projection...                    
-                    exportFeatures = Utilities.ReprojectFeaturesTo(exportFeatures, this.OutputProjectionFilename);
+                    //Reproject everything in this file to the requested projection...
+                    //_log.Debug("Reprojecting...");
+                    //exportFeatures = Utilities.ReprojectFeaturesTo(exportFeatures, this.OutputProjectionFilename);
 
                     ShapefileHelper.MakeOutputProjFile(this.OutputProjectionFilename, newShapefilename);
                 }
@@ -1061,17 +1086,18 @@ order by county, tract, blkgroup";
                 }
 
                 //if we need to reproject:
-                List<IGeometry> filteringGeoms = GetFilteringGeometries();                
-                if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
-                {
-                    //Reproject everything in this file to the requested projection...                    
-                    exportFeatures = Utilities.ReprojectFeaturesTo(exportFeatures, this.OutputProjectionFilename);
+                List<IGeometry> filteringGeoms = GetFilteringGeometries();         
+       
+                //if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
+                //{
+                //    //Reproject everything in this file to the requested projection...                    
+                //    //exportFeatures = Utilities.ReprojectFeaturesTo(exportFeatures, this.OutputProjectionFilename);
                     
-                    //THESE MUST BE PROVIDED ALREADY PROJECTED!
-                    //filteringGeoms = Utilities.ReprojectFeaturesTo(filteringGeoms, this.OutputProjectionFilename);
+                //    //THESE MUST BE PROVIDED ALREADY PROJECTED!
+                //    //filteringGeoms = Utilities.ReprojectFeaturesTo(filteringGeoms, this.OutputProjectionFilename);
 
-                    //TODO: generate .prj file later on
-                }
+                //    //TODO: generate .prj file later on
+                //}
 
 
 
@@ -1224,13 +1250,14 @@ order by county, tract, blkgroup";
                     }
                 }
                 _log.Debug("Done building cells, Saving Shapefile...");
-
-
-
-
-                header.NumRecords = exportFeatures.Count;
-
                 header.NumRecords = features.Count;
+
+                if (features.Count == 0)
+                {
+                    _log.Error("No features found, exiting!");
+                    return false;
+                }
+
                 string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
                 var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
                 writer.Header = header;

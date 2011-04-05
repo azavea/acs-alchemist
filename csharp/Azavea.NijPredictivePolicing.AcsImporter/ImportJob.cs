@@ -208,6 +208,18 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         manager.DesiredVariablesFilename = IncludedVariableFile;
                         manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
                         manager.OutputProjectionFilename = this.OutputProjection;
+
+                        if (string.IsNullOrEmpty(this.OutputProjection))
+                        {
+                            _log.Warn("*********************");
+                            _log.Warn(
+@"IMPORTANT!:  
+    You have not specified an output projection, meaning the resulting shapefile will
+be in unprojected WGS84.  Your filtering geometries, envelope, grid cell sizes, 
+and all other parameters must match that projection.");
+                            _log.Warn("*********************");
+                        }
+
                         manager.IncludeEmptyGridCells = (!string.IsNullOrEmpty(this.IncludeEmptyGridCells));
                         
 
@@ -226,7 +238,14 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         if (!string.IsNullOrEmpty(ExportToShapefile))
                         {
                             _log.Debug("Exporting all requested variables to shapefile");
-                            manager.ExportShapefile(this.JobName);
+                            if (manager.ExportShapefile(this.JobName))
+                            {
+                                _log.Debug("Exported successfully");
+                            }
+                            else
+                            {
+                                _log.Debug("There was an error while exporting the shapefile");
+                            }
                             _log.Debug("Done!");
                         }
 
