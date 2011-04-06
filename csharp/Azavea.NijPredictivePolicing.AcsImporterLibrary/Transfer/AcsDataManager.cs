@@ -875,27 +875,45 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             //and cast(g.BLKGRP as integer) = cast(s.BLKGROUP as integer) ";
 
             var temp = DataClient.GetMagicTable(conn, DbClient, "select * from census_tracts"); // where logrecno like '%883%'
+            string geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGRP) as blkgroup, GEOID from geographies order by county, tract, blkgrp ";
 
-
-            string geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGRP) as blkgrp, GEOID from geographies order by county, tract, blkgrp ";
-            string shapeSQL =
-@"
-select trim(COUNTY) as county, trim(TRACT) || '00' as tract, trim(BLKGROUP) as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_blockgroups
-UNION
-select trim(COUNTY) as county, trim(TRACT) || '00' as tract, '' as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_tracts 
-order by county, tract, blkgroup";
+            string shapeSQL = string.Empty;
+            switch (this.SummaryLevel)
+            {
+                //census_regions
+                //census_divisions
+                //states
+                //counties
+                case "060":
+                    //TODO: add subdivisions
+                    shapeSQL = "select *, '' as GEOID from county_subdivisions ";
+                    break;
+                case "140":
+                    //tracts
+                    shapeSQL = "select trim(COUNTY) as county, trim(TRACT) as tract, '' as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_tracts ";
+                    break;
+                case "150":
+                    //block groups
+                    shapeSQL = "select trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGROUP) as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_blockgroups ";
+                    break;
+                default:
+                    shapeSQL = "select trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGROUP) as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_blockgroups ";
+                    _log.Error("No summary level listed, choosing blockgroups");
+                    break;
+            }
+            shapeSQL += "order by county, tract, blkgroup";
 
             var wholeGeomTable = DataClient.GetMagicTable(conn, DbClient, geomSQL);
             var wholeShapeTable = DataClient.GetMagicTable(conn, DbClient, shapeSQL);
 
-           
+
             var geomKeys = new Dictionary<string, DataRow>();
             foreach (DataRow row in wholeGeomTable.Rows)
             {
                 string key = string.Format("{0}_{1}_{2}",
                     Utilities.GetAs<int>(row["COUNTY"], -1),
                     Utilities.GetAs<int>(row["TRACT"], -1),
-                    Utilities.GetAs<int>(row["BLKGRP"], -1)
+                    Utilities.GetAs<int>(row["BLKGROUP"], -1)
                 );
                 geomKeys[key] = row;
             }
@@ -903,9 +921,13 @@ order by county, tract, blkgroup";
             var dict = new Dictionary<string, DataRow>();
             foreach (DataRow row in wholeShapeTable.Rows)
             {
+                string tract = Utilities.GetAs<string>(row["TRACT"], string.Empty);
+                if (tract.Trim().Length != 6)
+                    tract += "00";
+
                 string key = string.Format("{0}_{1}_{2}",
                    Utilities.GetAs<int>(row["COUNTY"], -1),
-                   Utilities.GetAs<int>(row["TRACT"], -1),
+                   Utilities.GetAs<int>(tract, -1),
                    Utilities.GetAs<int>(row["BLKGROUP"], -1)
                 );
 
@@ -913,7 +935,18 @@ order by county, tract, blkgroup";
                 {
                     string logrecno = geomKeys[key]["LOGRECNO"] as string;
                     row["GEOID"] = geomKeys[key]["GEOID"];
+
+                    if (dict.ContainsKey(logrecno))
+                    {
+                        //http://www.census.gov/geo/www/cob/tr_metadata.html
+                        _log.DebugFormat("duplicate logical record number? {0}, with spatial key {1}, if tract is between 9400, and 9499, it is reserved", logrecno, key);
+                    }
+
                     dict[logrecno] = row;
+                }
+                else
+                {
+                    _log.Debug("Couldn't find... this one");
                 }
             }
 
@@ -971,20 +1004,25 @@ order by county, tract, blkgroup";
                     //filteringGeoms = Utilities.ReprojectFeaturesTo(filteringGeoms, this.OutputProjectionFilename);
                 }
 
+                //TODO:
+                bool shouldAddMissingShapes = this.IncludeEmptyGridCells;
+                HashSet<string> allShapeIDs = new HashSet<string>(shapeDict.Keys);
 
-
-                List<IGeometry> filteringGeoms = (spatialFilter) ? GetFilteringGeometries() : null;
-                GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
-                var features = new List<Feature>(variablesDT.Rows.Count);
+                //Build hashset, remove by shapeid as shapes are added,
+                //go through and add missing shapes if 'shouldAddMissingShapes' is set...
 
                 bool variablesHaveGeoID = variablesDT.Columns.Contains("GEOID");
 
-
+                List<IGeometry> filteringGeoms = (spatialFilter) ? GetFilteringGeometries() : null;
+                GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
+                var features = new List<Feature>(variablesDT.Rows.Count);                
                 foreach (DataRow row in variablesDT.Rows)
                 {
                     var id = row["LOGRECNO"] as string;
                     if (!shapeDict.ContainsKey(id))
                         continue;
+
+                    allShapeIDs.Remove(id);
 
                     AttributesTable t = new AttributesTable();
                     foreach (DataColumn col in variablesDT.Columns)
@@ -1023,6 +1061,47 @@ order by county, tract, blkgroup";
                     }
 
                     features.Add(new Feature(geom, t));
+                }
+
+                if (shouldAddMissingShapes)
+                {
+                    _log.DebugFormat("Adding {0} missing shapes", allShapeIDs.Count);
+                    foreach (string id in allShapeIDs)
+                    {
+                        byte[] geomBytes = (byte[])shapeDict[id]["Geometry"];
+                        IGeometry geom = binReader.Read(geomBytes);
+                        if (geom == null)
+                        {
+                            _log.WarnFormat("Geometry for LRN {0} was empty!", id);
+                            continue;
+                        }
+
+                        if (shouldReproject)
+                        {
+                            geom = Utilities.ReprojectGeometry(geom, reprojector);
+                        }
+
+                        if (spatialFilter)
+                        {
+                            if (!IsIncluded(geom, filteringGeoms))
+                            {
+                                continue;
+                            }
+                        }
+
+                        AttributesTable t = new AttributesTable();
+                        foreach (DataColumn col in variablesDT.Columns)
+                        {
+                            //produces more sane results.
+                            t.AddAttribute(Utilities.EnsureMaxLength(col.ColumnName, 10), null);
+                        }
+                        if (!variablesHaveGeoID)
+                        {
+                            t.AddAttribute("GEOID", shapeDict[id]["GEOID"]);
+                        }
+                        t["LOGRECNO"] = id;
+                        features.Add(new Feature(geom, t));
+                    }
                 }
 
                 return features;
