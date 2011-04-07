@@ -41,6 +41,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new ImportArg() { Flag = "includeEmptyGridCells", Description = "Keeps empty grid cells during export", DataType=typeof(string), PropertyName="IncludeEmptyGridCells"},
 
             new ImportArg() { Flag = "outputFolder", Description = "Specify where you'd like the results saved", DataType=typeof(string), PropertyName="OutputFolder"},
+            new ImportArg() { Flag = "preserveJam", Description = "Optional flag to preserve jam values", DataType=typeof(string), PropertyName="PreserveJam"},
             
             new ImportArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
             new ImportArg() { Flag = "listSummaryLevels", Description = "Displays a list of available boundary levels", DataType=typeof(string), PropertyName="DisplaySummaryLevels"},
@@ -66,6 +67,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public string OutputProjection { get; set; }
         public string IncludeEmptyGridCells { get; set; }
         public string OutputFolder { get; set; }
+        public string PreserveJam { get; set; }
         
         
 
@@ -212,6 +214,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
                         manager.OutputProjectionFilename = this.OutputProjection;
                         manager.OutputFolder = this.OutputFolder;
+                        manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
 
                         if (string.IsNullOrEmpty(this.OutputProjection))
                         {

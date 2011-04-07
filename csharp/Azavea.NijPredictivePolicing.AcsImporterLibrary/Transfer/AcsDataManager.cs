@@ -90,6 +90,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public bool IncludeEmptyGridCells = false;
         public string OutputFolder;
+        public bool PreserveJam;
         
 
 
@@ -748,6 +749,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         rowsByLRN[id] = row;
                     }
 
+                    bool shouldNotParseErrorValues = PreserveJam;
                     
                     _log.Debug("Importing Columns");
                     int varNum = 0;
@@ -784,7 +786,16 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         {
                             newErrorMarginColumnName = newErrorMarginColumnName + varNum;
                         }
-                        newTable.Columns.Add(newErrorMarginColumnName, typeof(double));
+
+                        if (shouldNotParseErrorValues)
+                        {
+                            newTable.Columns.Add(newErrorMarginColumnName, typeof(string));
+                        }
+                        else
+                        {
+                            newTable.Columns.Add(newErrorMarginColumnName, typeof(double));
+                        }
+                        
 
 
                         _log.DebugFormat("Importing {0}...", newColumnName);
@@ -820,9 +831,17 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                             if (columnIDX < values.Count)
                             {
-                                double val = Utilities.GetAs<double>(values[columnIDX], double.NaN);
-                                if (!double.IsNaN(val))
+                                if (shouldNotParseErrorValues)
                                 {
+                                    rowsByLRN[lrn][newErrorMarginColumnName] = values[columnIDX];
+                                }
+                                else
+                                {
+                                    double val = Utilities.GetAs<double>(values[columnIDX], double.NaN);
+                                    if (!double.IsNaN(val))
+                                    {
+                                        rowsByLRN[lrn][newErrorMarginColumnName] = val;
+                                    }
                                     rowsByLRN[lrn][newErrorMarginColumnName] = val;
                                 }
                             }
@@ -1135,6 +1154,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
                 if (!string.IsNullOrEmpty(OutputFolder))
                 {
+                    FileUtilities.PathEnsure(OutputFolder);
                     newShapefilename = Path.Combine(OutputFolder, tableName);
                 }
                 
