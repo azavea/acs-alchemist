@@ -524,7 +524,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         string columnName = (columnNameRow[i] as string);
 
                         //                         ixid, CENSUS_TABLE_ID, NAME, COLNO, SEQNO
-                        var toAdd = new object[] { ixid++, columnID, columnName, i + 1, seqNo };
+                        var toAdd = new object[] { ixid++, columnID, columnName, i, seqNo };
                         table.Rows.Add(toAdd);
                     }
                 }
@@ -624,7 +624,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     while (reader.Read())
                     {
                         string lrn = reader.GetString(0);
-                        if (!results.Contains(lrn))
                             results.Add(lrn);
                     }
                 }
