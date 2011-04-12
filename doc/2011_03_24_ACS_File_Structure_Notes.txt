@@ -38,12 +38,15 @@ Index of files: http://www.census.gov/geo/www/cob/bg2000.html
 Relevant Metadata for each polygon:
  - STATE - FIPS 5-2 state code
  - COUNTY - 3-digit county code
- - TRACT - 4-digit census tract code
+ - TRACT - 6-digit census tract code
  - BLKGROUP - 1 digit block group code
+ 
+NOTE: While the shapefile TRACT field does map directly
 
 
  
 Sequence_Number_and_Table_Number_Lookup.xls:
+NOTE: Opening this file in OpenOffice (as of version 3.3) will cause it to crash.  If you need to use OO, have a friend open it in Excel and export it as something else.
 Located at http://www2.census.gov/acs2009_5yr/summaryfile/Sequence_Number_and_Table_Number_Lookup.xls
 Maps Column Names to Sequence Numbers and Row Locations
 Each row corresponds to a column in one of the Estimate/MoE files, except some which are aggregates.
@@ -75,6 +78,28 @@ position, cells1, cells2), and their titles always start with "Universe: " follo
 (e.g. "Universe: People reporting single ancestry"). Thus, to get the full information about what a row really means, 
 you need the row's title as well as the titles for its Measurement and Demographic headers. 
 
+EDIT: We have since discovered that the titles for this file are essentially a tree, with headers as nodes and the actual titles as leaves.  Unfortunately, it is nearly impossible to extract this tree structure, as there is no indication of parent-child relationship, and the only indication of node depth is encoded in the formatting of the cell, which we cannot easily extract.
+
+
+
+ACS2009_5-Year_TableShells.xls
+NOTE: Opening this file in OpenOffice (as of version 3.3) will cause it to crash.  If you need to use OO, have a friend open it in Excel and export it as something else.
+Located at http://www2.census.gov/acs2009_5yr/summaryfile/ACS2009_5-Year_TableShells.xls
+Maps Column Names to Table IDs
+Structure is the same as Sequence_Number_and_Table_Number_Lookup.xls but has slightly different columns
+File Columns:
+ - Table ID (tblid) - Same as Sequence_Number_and_Table_Number_Lookup.xls tblid
+ - Line (col) - Same as Sequence_Number_and_Table_Number_Lookup.xls col
+ - Unique ID (id) - Equal to tblid + (3 digit int)(col).  Maps directly to the ids in the first row of the 2005-2009_SummaryFileXLS files, except the ids in those files are equal to tblid + '_' + (3 digit int)(col)
+ - Stub (title) - Same as Sequence_Number_and_Table_Number_Lookup.xls title
+
+This file is useful for mapping desired column names to ids (the Unique ID column).  The location for each unique id is extracted from the 2005-2009_SummaryFileXLS files.  Unfortunately, it shares the same naming deficiencies that Sequence_Number_and_Table_Number_Lookup.xls does, so this must be done manually, at least for the moment.
+
+
+2005-2009_SummaryFileXLS files
+These files are named Seq[seq].xls, where [seq] is the sequence number the file corresponds to (they vary from "Seq1.xls" to "Seq117.xls").  Each file contains the schema for the corresponding Estimate and MoE files.  Each contains only two rows, the first is the ID of the corresponding column in the Estimate MoE files.  The first 6 column names are always FILEID	FILETYPE	STUSAB	CHARITER	SEQUENCE	LOGRECNO.  The remainder are unique ids (e.g. B08406_002) corresponding to the unique ids found in ACS2009_5-Year_TableShells.xls.
+The second row is the column names, however, while some of them are fairly descriptive (e.g. "Workers 16 years and over"), others are entirely useless (e.g. "MEAN HOUSEHOLD INCOME OF QUINTILES, Universe: Households, Quintile Means:, Lowest Quintile" in ACS2009_5-Year_TableShells.xls becomes "Households% Households" in its corresponding sequence file).  The second row should therefore be ignored completely.
+These files are useful for mapping unique ids to sequence numbers and column numbers.
 
 
 Estimate and MoE Files: 
