@@ -2,8 +2,12 @@
 #This is an example arguments file for the AcsDataImporter
 #
 
+-outputFolder C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\temp2
+-preserveJam
+-includeEmptyGridCells
+
 #The name for this job
--j phillyBlockGroupGrids
+-j phillyBGCells
 
 #Specify our desired State
 -s Pennsylvania
@@ -29,4 +33,3 @@
 #Specifies a file containing WKT of the desired output projection
 -outputProjection C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\2272.txt
 
--includeEmptyGridCells

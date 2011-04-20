@@ -1,0 +1,20 @@
+#
+#This is an example arguments file for the CrimeDataMerger
+#
+
+#The name for this job
+-j philly2008Cells
+-startDate 01/01/2008
+-endDate 01/01/2009
+
+#The shapefile we'll be joining against
+-src C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\temp2\phillyBGCells.shp
+
+#The file mapping output column names to CSV files of incidents
+-map C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\merge_columns.txt
+
+#for the grid shapefiles we'll want cellid
+-joinedColumns CELLID,LOGRECNO,GEOID
+
+#for the normal shapefiles we'll want LOGRECNO
+#-joinedColumns LOGRECNO

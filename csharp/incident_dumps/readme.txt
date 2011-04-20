@@ -1,4 +1,4 @@
-This folder contains raw dumps of crime incident data from 2007 up to jan 1st, 2010.
+This folder contains raw dumps of crime incident data from 2007 up to jan 1st, 2011.
 The files are projected in 2272 (Philly State Plane South Feet).
 The class numbers are mapped below
 
@@ -11,3 +11,12 @@ ClassID	Name	Label
 114	ALL_600	Thefts (600 Series)
 115	ALL_700	Stolen/Recovered Vehicles (700 series)
 116	ALL_800	Simple Assaults (800 series)
+
+
+The Query was:
+SELECT eventx, eventy, eventtime
+  FROM [HunchLab_Philadelphia].[dbo].[HL_EventLookup]
+  where eventtime >= '2007-01-01'
+  and eventtime < '2011-01-01'
+  and classid = ****
+  order by eventtime asc
