@@ -10,6 +10,7 @@ ClassID	Name	Label
 113	ALL_500	Burglaries (500 Series)
 114	ALL_600	Thefts (600 Series)
 115	ALL_700	Stolen/Recovered Vehicles (700 series)
+106 STOLEN_CAR Stolen Vehicles
 116	ALL_800	Simple Assaults (800 series)
 
 
