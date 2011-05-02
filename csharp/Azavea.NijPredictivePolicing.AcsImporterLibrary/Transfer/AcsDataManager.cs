@@ -988,7 +988,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         var fg = filt.GetGeometryN(g);
                         if (fg.Intersects(geom))
                         {
-                            return true;
+                            //double commonArea = fg.Intersection(geom).Area;
+                            //if(commonArea > 0.01 * fg.Area || commonArea > 0.01 * geom.Area)
+                                return true;
                         }
                     }
                 }
@@ -1279,6 +1281,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     header = ShapefileHelper.SetupHeader(variablesDT);
                 }
                 header.AddColumn("CELLID", 'C', 254, 0);
+                header.AddColumn("GEOID", 'C', 
+                    GeographyFileReader.Columns.Find((x) => (x.ColumnName == "GEOID")).End, 0);
 
 
                 int cellCount = 0;
@@ -1342,6 +1346,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         AttributesTable attribs = new AttributesTable();
                         if (found != null)
                         {
+                            //if (!found.Attributes.GetNames().Contains("GEOID"))
+                            //    throw new Exception("GEOID NOT FOUND!!!!");
                             foreach (string name in found.Attributes.GetNames())
                             {
                                 attribs.AddAttribute(name, found.Attributes[name]);
@@ -1357,12 +1363,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                             attribs["CELLID"] = cellID;
                         }
                         
-
                         features.Add(new Feature(cellGeom, attribs));
                     }
                 }
                 _log.Debug("Done building cells, Saving Shapefile...");
-                ShapefileHelper.AddColumn(header, "GEOID", typeof(string));
                 header.NumRecords = features.Count;
 
                 if (features.Count == 0)
