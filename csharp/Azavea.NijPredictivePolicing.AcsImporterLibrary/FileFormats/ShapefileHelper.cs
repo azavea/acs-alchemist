@@ -80,13 +80,27 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         /// <returns></returns>
         public static bool MakeCensusProjFile(string filename)
         {
-            string WGS84NAD83 = "GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]";
-            string prjFileName = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)) + ".prj";
-
-            if (!File.Exists(prjFileName))
+            string prjFileName = Path.Combine(Path.GetDirectoryName(filename), 
+                Path.GetFileNameWithoutExtension(filename)) + ".prj";
+            try
             {
-                File.WriteAllText(prjFileName, WGS84NAD83);
+                if (!File.Exists(Settings.AcsPrjFilePath))
+                {
+                    if (!File.Exists(prjFileName))
+                    {
+                        File.WriteAllText(prjFileName, Settings.DefaultPrj);
+                    }
+                }
+                else
+                {
+                    File.Copy(Settings.AcsPrjFilePath, prjFileName);
+                }
             }
+            catch
+            {
+                return false;
+            }
+
             return true;
         }
 

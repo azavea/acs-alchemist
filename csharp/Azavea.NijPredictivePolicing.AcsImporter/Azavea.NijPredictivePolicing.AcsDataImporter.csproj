@@ -69,7 +69,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ImportArg.cs" />
     <Compile Include="ImportJob.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -93,6 +92,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\spatialite\*.dll "$(ProjectDir)$(OutDir)"</PostBuildEvent>
+    <PostBuildEvent>copy C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\spatialite\*.dll "$(ProjectDir)$(OutDir)"
+copy "$(ProjectDir)\WGS84NAD83.prj" "$(ProjectDir)$(OutDir)\WGS84NAD83.prj"</PostBuildEvent>
   </PropertyGroup>
 </Project>

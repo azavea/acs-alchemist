@@ -9,7 +9,7 @@ namespace Azavea.NijPredictivePolicing.Common
     /// <summary>
     /// Used to store global settings.  Add as necessary
     /// </summary>
-    public class Settings
+    public static class Settings
     {
         public static Config ConfigFile;
 
@@ -17,6 +17,11 @@ namespace Azavea.NijPredictivePolicing.Common
         /// Application Name -- also name of our temp folder
         /// </summary>
         public const string ApplicationName = "ACSImporter";
+
+        /// <summary>
+        /// Path to the application home folder
+        /// </summary>
+        public static readonly string ApplicationPath = Environment.CurrentDirectory;
 
 
 //#if DEBUG
@@ -142,5 +147,14 @@ namespace Azavea.NijPredictivePolicing.Common
         public const string ShapeFileCountiesFilename = "co{FIPS-code}_d00_shp.zip";
 
 
+        /// <summary>
+        /// Path to the ACS prj file for the ACS shapefiles
+        /// </summary>
+        public static readonly string AcsPrjFilePath = Path.Combine(Settings.ApplicationPath, "WGS84NAD83.prj"); 
+        
+        /// <summary>
+        /// Default projection to use if AcsPrjFilePath is missing or invalid
+        /// </summary>
+        public const string DefaultPrj = "GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]";
     }
 }
