@@ -46,13 +46,13 @@ NOTE: While the shapefile TRACT field does map directly
 
  
 Sequence_Number_and_Table_Number_Lookup.xls:
-NOTE: Opening this file in OpenOffice (as of version 3.3) will cause it to crash.  If you need to use OO, have a friend open it in Excel and export it as something else.
+NOTE: Opening this file in OpenOffice (as of version 3.3) will cause it to crash.  If you need to use OO, have a friend open it in Excel and export it as something else (LibreOffice 3.3.2 seems to work though).
 Located at http://www2.census.gov/acs2009_5yr/summaryfile/Sequence_Number_and_Table_Number_Lookup.xls
 Maps Column Names to Sequence Numbers and Row Locations
 Each row corresponds to a column in one of the Estimate/MoE files, except some which are aggregates.
 File Columns:
  - File ID (fileid) - Always "ACSSF" as far as I can tell
- - Table ID (tblid) - Useless for our purposes
+ - Table ID (tblid) - A unique ID for each row, used in -v flag of ACSImporter
  - Sequence Numbers (seq) - Correspond to names of Estimate/MoE files
  - Line Number (col) - Misnomer, this is really column number (sort of).  The actual column number is 
 	 computed as (position + col - 1), with the first column as 1.  Individual lines within a Estimate/MoE 

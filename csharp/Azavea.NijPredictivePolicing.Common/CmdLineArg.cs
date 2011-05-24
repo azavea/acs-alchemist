@@ -13,10 +13,4 @@ namespace Azavea.NijPredictivePolicing.Common
         public Type DataType;
         public bool Display = true;
     }
-
-
-
-
-
-
 }
