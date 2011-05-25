@@ -236,8 +236,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             {
                 string url = ShapefileHelper.GetRemoteShapefileURL(level, this.StateFIPS);
                 string localPath = Path.Combine(this.WorkingPath, Path.GetFileName(url));
+                string name = level.ToString();
 
-                GetAndBuildShapefile(url, localPath, level.ToString(), level.ToString());
+                if (!GetAndBuildShapefile(url, localPath, name, name))
+                {
+                    return false;
+                }
             }
 
             return true;

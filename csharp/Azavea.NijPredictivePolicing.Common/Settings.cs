@@ -156,5 +156,10 @@ namespace Azavea.NijPredictivePolicing.Common
         /// Default projection to use if AcsPrjFilePath is missing or invalid
         /// </summary>
         public const string DefaultPrj = "GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]";
+
+        /// <summary>
+        /// Time to wait in milliseconds for a net connection request to timeout before giving up
+        /// </summary>
+        public const int TimeOutMs = 10000;
     }
 }

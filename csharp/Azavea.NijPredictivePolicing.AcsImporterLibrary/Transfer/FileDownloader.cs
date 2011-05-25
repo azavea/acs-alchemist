@@ -13,7 +13,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private static DateTime _lastQuery = DateTime.Now;
+        private static DateTime _lastQuery = DateTime.Now - new TimeSpan(0, 0, 0, 0, WaitTimeMs);
 
         /// <summary>
         /// Time to sleep between Http Requests
@@ -34,63 +34,75 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 }
             }
 
+            int retries = 0;
 
-            try
+            while (!File.Exists(filePath) && retries < 4)
             {
-                //This is to avoid the server blocking too many connection requests
-                if ((DateTime.Now - _lastQuery).Milliseconds < WaitTimeMs)
+                try
                 {
-                    System.Threading.Thread.Sleep(
-                        WaitTimeMs - Math.Max((DateTime.Now - _lastQuery).Milliseconds, 0));
-                }
-                _lastQuery = DateTime.Now;
-
-
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(desiredURL);
-                request.KeepAlive = false;  //We're only doing this once
-                request.Credentials = CredentialCache.DefaultCredentials;
-                //TODO: Add this to config file somewhere
-                request.Timeout = 10000;
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                {
-
-                    Stream downloadStream = response.GetResponseStream();
-                    long expectedLength = response.ContentLength;
-                    DateTime lastModified = response.LastModified;
-
-
-                    if (File.Exists(filePath))
+                    //This is to avoid the server blocking too many connection requests
+                    if ((DateTime.Now - _lastQuery).Milliseconds < WaitTimeMs)
                     {
-                        string srcDate = response.LastModified.ToShortDateString();
-                        string localDate = File.GetLastWriteTime(filePath).ToShortDateString();
-                        if (localDate == srcDate)
+                        int nap = (int)Math.Pow(2, retries) * WaitTimeMs - (DateTime.Now - _lastQuery).Milliseconds;
+                        if (nap > 0)
                         {
-                            _log.DebugFormat("File {0} already exists, and date stamps match, skipping", 
-                                Path.GetFileName(filePath));
-                            File.SetCreationTime(filePath, DateTime.Now);
-                            return true;
+                            _log.DebugFormat("Sleeping for {0} ms before attempting to download next file", nap);
+                            System.Threading.Thread.Sleep(nap);
                         }
                     }
+                    _lastQuery = DateTime.Now;
 
-                    FileStream output = new FileStream(filePath, FileMode.Create);
-                    Utilities.CopyToWithProgress(downloadStream, expectedLength, output);
 
-                    downloadStream.Close();
-                    output.Close();
-                    response.Close();
-                    request.Abort();
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(desiredURL);
+                    request.KeepAlive = false;  //We're only doing this once
+                    request.Credentials = CredentialCache.DefaultCredentials;
+                    request.Timeout = Settings.TimeOutMs;
+                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                    {
 
-                    File.SetLastWriteTime(filePath, response.LastModified);
-                    _log.DebugFormat("Downloaded {0} successfully", Path.GetFileName(filePath));
+                        Stream downloadStream = response.GetResponseStream();
+                        long expectedLength = response.ContentLength;
+                        DateTime lastModified = response.LastModified;
+
+
+                        if (File.Exists(filePath))
+                        {
+                            string srcDate = response.LastModified.ToShortDateString();
+                            string localDate = File.GetLastWriteTime(filePath).ToShortDateString();
+                            if (localDate == srcDate)
+                            {
+                                _log.DebugFormat("File {0} already exists, and date stamps match, skipping",
+                                    Path.GetFileName(filePath));
+                                File.SetCreationTime(filePath, DateTime.Now);
+                                return true;
+                            }
+                        }
+
+                        FileStream output = new FileStream(filePath, FileMode.Create);
+                        Utilities.CopyToWithProgress(downloadStream, expectedLength, output);
+
+                        downloadStream.Close();
+                        output.Close();
+                        response.Close();
+                        request.Abort();
+
+                        File.SetLastWriteTime(filePath, response.LastModified);
+                        _log.DebugFormat("Downloaded {0} successfully", Path.GetFileName(filePath));
+                    }
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    _log.Error("Error downloading file, retrying", ex);
                 }
 
-                return true;
+                retries++;
             }
-            catch (Exception ex)
-            {
-                _log.Error("Error downloading block group file", ex);
-            }
-            return (File.Exists(filePath));
+
+            _log.FatalFormat("Could not download file at {0} to location {1} after {2} retries.  Please re-run the program to try again.  If this problem persists, you can try manually downloading the file and copying it to the above path.", desiredURL, filePath, retries);
+
+            return false;
         }
 
     }

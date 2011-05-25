@@ -75,7 +75,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 _log.Debug("Loading arguments...");
                 job.Load(args);
 
-                job.ExecuteJob();
+                if (!job.ExecuteJob())
+                {
+                    _log.Fatal("An error was encountered while performing the operation.  Please examine the log output and try again if necessary.");
+                }
             }
             else
             {
