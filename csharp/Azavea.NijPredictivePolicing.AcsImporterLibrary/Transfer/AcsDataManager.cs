@@ -784,7 +784,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         newTable.Columns.Add(newColumnName, typeof(double));
 
                         //this really ought to be unique.
-                        string newErrorMarginColumnName = "m_" + newColumnName;
+                        string newErrorMarginColumnName = "m" + newColumnName;
                         if (newTable.Columns.Contains(newErrorMarginColumnName))
                         {
                             newErrorMarginColumnName = newErrorMarginColumnName + varNum;
