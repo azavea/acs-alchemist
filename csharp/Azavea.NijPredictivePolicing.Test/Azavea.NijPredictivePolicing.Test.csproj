@@ -51,13 +51,25 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\excelDataReader\Excel.dll</HintPath>
     </Reference>
+    <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\geoapi\GeoAPI.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\log4net\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="NetTopologySuite, Version=1.7.3.20585, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\nettopologysuite\NetTopologySuite.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=2.2.10.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\nunit\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="ProjNET, Version=1.1.2854.24700, Culture=neutral, PublicKeyToken=a1f5bdcd9c6f5740, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\nettopologysuite\ProjNET.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -77,7 +89,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AcsDataManagerTests.cs" />
     <Compile Include="AcsImporterLibrary\AreaDownloaderTests.cs" />
+    <Compile Include="AcsImporterLibrary\ShapefileHelperTests.cs" />
     <Compile Include="Common\ConfigTests.cs" />
     <Compile Include="Common\Data\CommaSeparatedValueTests.cs" />
     <Compile Include="Common\Data\FixedWidthColumnFileTests.cs" />

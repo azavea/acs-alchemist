@@ -24,8 +24,9 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new CmdLineArg() { Flag = "v", Description = "Filter data by variable name file", DataType=typeof(string), PropertyName="IncludedVariableFile"},
             
             new CmdLineArg() { Flag = "e", Description = "Filter Spatially by Census Summary Level", DataType=typeof(string), PropertyName="SummaryLevel"},
-            new CmdLineArg() { Flag = "f", Description = "Filter Spatially by optional filename of WKT geometries", DataType=typeof(string), PropertyName="WKTFilterFilename"},
+            new CmdLineArg() { Flag = "f", Description = "Filter Spatially by optional shapefile", DataType=typeof(string), PropertyName="ExportFilterShapefile"},
             
+            new CmdLineArg() { Flag = "ExportFilterSRID", Description = "SRID to use for shapefile filter if none is provided in the shapefile", DataType=typeof(string), PropertyName="ExportFilterSRID"},
 
             new CmdLineArg() { Flag = "j", Display=false, DataType=typeof(string), PropertyName="JobName"},
             new CmdLineArg() { Flag = "jobName", Description = "Specify a name for this job / shapefile", DataType=typeof(string), PropertyName="JobName"},
@@ -37,7 +38,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new CmdLineArg() { Flag = "exportToGrid", Description = "Export results to fishnetted shapefile where value = # feet", DataType=typeof(string), PropertyName="ExportToGrid"},
 
             new CmdLineArg() { Flag = "gridEnvelope", Description = "Align the grid cells to an envelope in a file", DataType=typeof(string), PropertyName="GridEnvelope"},
-            new CmdLineArg() { Flag = "outputProjection", Description = "Provide the WKT of a desired projection to operate in", DataType=typeof(string), PropertyName="OutputProjection"},
+            new CmdLineArg() { Flag = "outputProjection", Description = "Provide the .prj file of a desired projection to operate in", DataType=typeof(string), PropertyName="OutputProjection"},
             new CmdLineArg() { Flag = "includeEmptyGridCells", Description = "Keeps empty grid cells during export", DataType=typeof(string), PropertyName="IncludeEmptyGridCells"},
 
             new CmdLineArg() { Flag = "outputFolder", Description = "Specify where you'd like the results saved", DataType=typeof(string), PropertyName="OutputFolder"},
@@ -45,14 +46,16 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             
             new CmdLineArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
             new CmdLineArg() { Flag = "listSummaryLevels", Description = "Displays a list of available boundary levels", DataType=typeof(string), PropertyName="DisplaySummaryLevels"},
-            new CmdLineArg() { Flag = "exportVariables", Description = "Exports a CSV of all variables to allVariables.csv", DataType=typeof(string), PropertyName="ExportVariables"}
+            //This command is now kind of useless now that we discovered how mangled these variable names actually are
+            //new CmdLineArg() { Flag = "exportVariables", Description = "Exports a CSV of all variables to allVariables.csv", DataType=typeof(string), PropertyName="ExportVariables"}
         };
 
 
 
         public AcsState State { get; set; }
 
-        public string WKTFilterFilename { get; set; }
+        public string ExportFilterShapefile { get; set; }
+        public string ExportFilterSRID { get; set; }
         public string ExportVariables { get; set; }
         public string IncludedVariableFile { get; set; }
         public string JobName { get; set; }
@@ -178,43 +181,43 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         _log.DebugFormat("Jobname was empty, using {0}", this.JobName);
                     }
 
+                    var manager = new AcsDataManager(this.State);
+
+                    //if (!string.IsNullOrEmpty(ExportVariables))
+                    //{
+                    //    _log.Debug("Exporting table of all available variables to allVariables.csv");
+
+                    //    var variablesDT = manager.GetAllSequenceVariables();
+
+                    //    CommaSeparatedValueWriter writer = new CommaSeparatedValueWriter("allVariables.csv");
+                    //    FileWriterHelpers.WriteDataTable(writer, variablesDT);
+
+                    //    _log.Debug("Done!");
+                    //    return true;
+                    //}
+
                     _log.Debug("");
                     _log.Debug("Loading Prerequisites...");
 
-                    var manager = new AcsDataManager(this.State);
+
                     if ((manager.CheckColumnMappingsFile())
                         && (manager.CheckBlockGroupFile())
                         && (manager.CheckDatabase())
                         && (manager.CheckShapefiles())
                         )
                     {
-                        _log.Debug("Done!");
+                        _log.Debug("Done Loading Prerequisites!");
                         _log.Debug("");
 
 
-
-                        if (!string.IsNullOrEmpty(ExportVariables))
-                        {
-                            _log.Debug("Exporting table of all available variables to allVariables.csv");
-
-                            var variablesDT = manager.GetAllSequenceVariables();
-
-                            CommaSeparatedValueWriter writer = new CommaSeparatedValueWriter("allVariables.csv");
-                            FileWriterHelpers.WriteDataTable(writer, variablesDT);
-
-                            _log.Debug("Done!");
-                            return true;
-                        }
-
-
-
                         manager.SummaryLevel = this.SummaryLevel;
-                        manager.ExportFilterFilename = this.WKTFilterFilename;
+                        manager.ExportFilterFilename = this.ExportFilterShapefile;
                         manager.DesiredVariablesFilename = IncludedVariableFile;
                         manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
                         manager.OutputProjectionFilename = this.OutputProjection;
                         manager.OutputFolder = this.OutputFolder;
                         manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
+                        manager.SRID = Utilities.GetAs<int>(this.ExportFilterSRID, -1);
 
                         if (string.IsNullOrEmpty(this.OutputProjection))
                         {

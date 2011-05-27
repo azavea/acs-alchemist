@@ -10,27 +10,118 @@ using System.Data.Common;
 using log4net;
 using System.IO;
 using Azavea.NijPredictivePolicing.Common;
+using System.Text.RegularExpressions;
+using GeoAPI.CoordinateSystems;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 {
-    public class ShapefileHelper
+    public static class ShapefileHelper
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public SqliteDataClient Client;
+        private static readonly Regex _forbiddenShapefiles;
 
-        public bool OpenShapefile(string filename, string tableName)
+        static ShapefileHelper()
+        {
+            StringBuilder newRegex = new StringBuilder(512);
+
+            string [] levels = new string[] {
+                Settings.ShapeFileBlockGroupFilename,
+                Settings.ShapeFileTractFilename,
+                Settings.ShapeFileCountySubdivisionsFilename,
+                Settings.ShapeFileVotingFilename,
+                Settings.ShapeFileThreeDigitZipsFilename,
+                Settings.ShapeFileFiveDigitZipsFilename,
+                Settings.ShapeFileCountiesFilename
+                };
+
+            foreach (string level in levels)
+            {
+                string temp = level.Replace(Settings.FipsPlaceholder, "\\d{2}").Replace("_shp.zip", "");
+                newRegex.Append("^").Append(temp).Append("$").Append("|");
+            }
+
+            ShapefileHelper._forbiddenShapefiles = new Regex(newRegex.ToString(0, newRegex.Length - 1));
+        }
+
+        public static bool OpenShapefile(string filename, string tableName)
         {
             string databaseFileName = Path.Combine(Path.GetDirectoryName(filename), "shape.dat");
-            this.Client = new SqliteDataClient(databaseFileName);
+            var client = new SqliteDataClient(databaseFileName);
 
-            using (DbConnection conn = Client.GetConnection())
+            using (DbConnection conn = client.GetConnection())
             {
-                return ShapefileHelper.ImportShapefile(conn, Client, filename, tableName, 4269);
+                return ShapefileHelper.ImportShapefile(conn, client, filename, tableName, 4269);
             }
         }
 
-        public static bool ImportShapefile(DbConnection conn, IDataClient client, string filename, string tableName, int srid)
+        /// <summary>
+        /// Imports a shapefile into the database.  Do not use this to load census shapefiles.
+        /// </summary>
+        /// <param name="filename">The path of the file to import</param>
+        /// <param name="DbClient">The database to load the file into</param>
+        /// <param name="srid">The SRID to use.  If srid &gt;= 0, the .prj won't be checked.  If srid &lt; 0, the .prj file will be required, and srid will be changed to whatever is in the .prj file</param>
+        /// <returns>True on success, False on failure</returns>
+        public static bool LoadShapefile(string filename, IDataClient DbClient, ref int srid)
+        {
+            if ((string.IsNullOrEmpty(filename)) || (!File.Exists(filename)))
+            {
+                _log.ErrorFormat("Couldn't find file {0}", filename);
+                return false;
+            }
+
+            if (ShapefileHelper.IsForbiddenShapefileName(Path.GetFileNameWithoutExtension(filename)))
+            {
+                _log.ErrorFormat("{0} conflicts with a census shapefile name, please rename", filename);
+                return false;
+            }
+
+            try
+            {
+                //string workingDirectory = FileUtilities.SafePathEnsure(TempPath, Path.GetFileNameWithoutExtension(filename));
+                using (DbConnection conn = DbClient.GetConnection())
+                {
+                    string prjFileName = Path.Combine(Path.GetDirectoryName(filename),
+                        Path.GetFileNameWithoutExtension(filename)) + ".prj";
+                    if (srid < 0 && File.Exists(prjFileName))
+                    {
+                        ICoordinateSystem crs = Utilities.GetCoordinateSystemByWKTFile(prjFileName);
+                        string authority = crs.Authority.ToLower();
+                        if (authority == "epsg" || authority == "epgs")
+                            srid = (int)crs.AuthorityCode;
+                        else
+                        {
+                            _log.Error("Could not use the authority code in the shapefile's .prj file and none was provided.  Please either specify the correct EPSG authority code / SRID on the command line or reproject your shapefile to a projection with a valid EPSG authority code.");
+                            return false;
+                        }
+                    }
+
+                    if (ShapefileHelper.ImportShapefile(conn, DbClient, filename, Path.GetFileNameWithoutExtension(filename), srid))
+                    {
+                        
+
+                        _log.Debug("Shapefile imported successfully...");
+                    }
+                    else
+                    {
+                        _log.Error("Error while importing shapefile.");
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Error while importing shapefile", ex);
+            }
+
+            return false;
+        }
+
+
+        public static bool ImportShapefile(DbConnection conn, IDataClient client, 
+            string filename, string tableName, int srid)
         {
             try
             {
@@ -61,12 +152,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         }
 
 
-        public DataTable GetSchema()
+        public static DataTable GetSchema(SqliteDataClient client)
         {
-            if (Client == null)
+            if (client == null)
                 return null;
 
-            using (DbConnection conn = Client.GetConnection())
+            using (DbConnection conn = client.GetConnection())
             {
                 var dt = conn.GetSchema();
                 return conn.GetSchema("Tables");
@@ -182,7 +273,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
             if (!string.IsNullOrEmpty(url))
             {
-                url = url.Replace("{FIPS-code}", stateFips);
+                url = url.Replace(Settings.FipsPlaceholder, stateFips);
             }
 
             return url;
@@ -200,6 +291,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         //        _log.Debug(value);
         //    }
         //}
+
+
+        public static bool IsForbiddenShapefileName(string name)
+        {
+            return ShapefileHelper._forbiddenShapefiles.IsMatch(name.ToLower().Replace(".shp", ""));
+        }
 
 
 

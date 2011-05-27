@@ -17,7 +17,7 @@ namespace Azavea.NijPredictivePolicing.Common.Data
         /// <summary>
         /// Some countries use other characters such as ;
         /// </summary>
-        protected const char Comma = ',';
+        protected const char Delim = ',';
 
         /// <summary>
         /// an internal copy of our filename
@@ -171,7 +171,7 @@ namespace Azavea.NijPredictivePolicing.Common.Data
                 int temp = fs.ReadByte();
                 char c = (char)temp;
 
-                if (c == Comma)
+                if (c == Delim)
                     return -1;
                 else if (c == '\n')
                     return -2;
@@ -245,7 +245,7 @@ namespace Azavea.NijPredictivePolicing.Common.Data
                         int next = IsCurrentCommaOrNewLine(fs);
                         if (next == -1)
                         {
-                            buffer.Append(Comma);
+                            buffer.Append(Delim);
                             continue;
                         }
                         else if (next == -2)
@@ -279,7 +279,7 @@ namespace Azavea.NijPredictivePolicing.Common.Data
                             else
                             {
                                 //Seek to end of field
-                                if (c == Comma)
+                                if (c == Delim)
                                 {
                                     lastFieldInRow = false;
                                     break;

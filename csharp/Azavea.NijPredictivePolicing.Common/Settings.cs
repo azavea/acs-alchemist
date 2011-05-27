@@ -120,6 +120,10 @@ namespace Azavea.NijPredictivePolicing.Common
         /// </summary>
         public const string BlockGroupsFileTypeExtension = ".zip";
 
+        /// <summary>
+        /// Used in the ShapeFile*Filename variables as a placeholder for the state fips code
+        /// </summary>
+        public const string FipsPlaceholder = "{FIPS-code}";
 
         public const string ShapeFileBlockGroupURL = "http://www.census.gov/geo/cob/bdy/bg/bg00shp/";
         public const string ShapeFileBlockGroupFilename = "bg{FIPS-code}_d00_shp.zip";

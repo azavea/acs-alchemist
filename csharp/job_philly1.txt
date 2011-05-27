@@ -15,7 +15,7 @@
 -v C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\testvars.txt 
 
 #Our filtering geometry
--f C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\philly_2272_boundary.txt
+-f C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\philly_2272_boundary.shp
 
 #Our summary level - by block groups
 -e 150 

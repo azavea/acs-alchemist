@@ -19,6 +19,7 @@ using GeoAPI.Geometries;
 using System.Collections;
 using SharpMap.CoordinateSystems;
 using GeoAPI.CoordinateSystems.Transformations;
+using GeoAPI.CoordinateSystems;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
@@ -91,6 +92,11 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         public bool IncludeEmptyGridCells = false;
         public string OutputFolder;
         public bool PreserveJam;
+
+        /// <summary>
+        /// SRID to use for shapefile filter
+        /// </summary>
+        public int SRID;
         
 
 
@@ -675,29 +681,93 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         }
 
 
-        public List<IGeometry> GetFilteringGeometries()
+        //public List<IGeometry> GetFilteringGeometries()
+        //{
+        //    List<IGeometry> results = null;
+        //    if (!string.IsNullOrEmpty(this.ExportFilterFilename))
+        //    {
+        //        if (!File.Exists(this.ExportFilterFilename))
+        //        {
+        //            _log.Error("Provided WKT file doesn't exist");
+        //            return null;
+        //        }
+
+        //        WKTReader reader = new WKTReader(ShapefileHelper.GetGeomFactory());
+        //        string[] lines = File.ReadAllLines(this.ExportFilterFilename);
+        //        results = new List<IGeometry>(lines.Length);
+
+        //        foreach (string line in lines)
+        //        {
+        //            if (string.IsNullOrEmpty(line) || line.StartsWith("#") || line.StartsWith("//"))
+        //                continue;
+
+        //            results.Add(reader.Read(line));
+        //        }
+        //    }
+        //    return results;
+        //}
+
+        public List<IGeometry> GetFilteringGeometries(string filename, ICoordinateSystem crs)
         {
             List<IGeometry> results = null;
-            if (!string.IsNullOrEmpty(this.ExportFilterFilename))
+            if (!string.IsNullOrEmpty(filename))
             {
-                if (!File.Exists(this.ExportFilterFilename))
+                if (!File.Exists(filename))
                 {
-                    _log.Error("Provided WKT file doesn't exist");
+                    _log.Error("Provided shapefile doesn't exist");
                     return null;
                 }
 
-                WKTReader reader = new WKTReader(ShapefileHelper.GetGeomFactory());
-                string[] lines = File.ReadAllLines(this.ExportFilterFilename);
-                results = new List<IGeometry>(lines.Length);
+                int srid = this.SRID;
 
-                foreach (string line in lines)
+                if (!ShapefileHelper.LoadShapefile(filename, DbClient, ref srid))
                 {
-                    if (string.IsNullOrEmpty(line) || line.StartsWith("#") || line.StartsWith("//"))
-                        continue;
+                    _log.Error("Could not load filtering geometries!");
+                    return null;
+                }
 
-                    results.Add(reader.Read(line));
+                string tableName = Path.GetFileNameWithoutExtension(filename);
+                string sqlcmd = "SELECT AsBinary(Geometry) AS Geometry FROM " + tableName;
+                var wholeShapeTable = DataClient.GetMagicTable(DbClient.GetConnection(), DbClient, sqlcmd);
+                results = new List<IGeometry>(wholeShapeTable.Rows.Count);
+                ICoordinateTransformation reprojector = null;
+                if (crs != null)
+                {
+                    reprojector = Utilities.BuildTransformationObject(GeographicCoordinateSystem.WGS84, crs);
+                }
+                
+                GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
+                    new GeometryFactory(new PrecisionModel(), srid));
+
+                foreach (DataRow row in wholeShapeTable.Rows)
+                {
+                    byte[] geomBytes = (byte[])row["Geometry"];
+                    IGeometry geom = binReader.Read(geomBytes);
+                    if (geom == null || geom.Dimension != Dimensions.Surface)
+                    {
+                        continue;
+                    }
+
+                    if (reprojector != null)
+                    {
+                        geom = Utilities.ReprojectGeometry(geom, reprojector);
+                    }
+
+                    results.Add(geom);
+                }
+
+                //Cleanup so we don't store lots of crap in database
+                sqlcmd = "DROP TABLE " + tableName;
+                var droptable = DbClient.GetCommand(sqlcmd);
+                droptable.ExecuteNonQuery();
+
+                if (results.Count == 0)
+                {
+                    _log.Error("Could not use shapefile to create filter because no two dimensional geometries were found");
+                    return null;
                 }
             }
+
             return results;
         }
 
@@ -1016,9 +1086,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                 bool shouldReproject = (!string.IsNullOrEmpty(this.OutputProjectionFilename));
                 ICoordinateTransformation reprojector = null;
+                ICoordinateSystem destCRS = null;
                 if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
                 {
-                    var destCRS = Utilities.GetCoordinateSystemByWKTFile(this.OutputProjectionFilename);
+                    destCRS = Utilities.GetCoordinateSystemByWKTFile(this.OutputProjectionFilename);
                     reprojector = Utilities.BuildTransformationObject(GeographicCoordinateSystem.WGS84, destCRS);
 
                     //Reproject everything in this file to the requested projection...                    
@@ -1034,12 +1105,19 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                 //Build hashset, remove by shapeid as shapes are added,
                 //go through and add missing shapes if 'shouldAddMissingShapes' is set...
-
                 bool variablesHaveGeoID = variablesDT.Columns.Contains("GEOID");
 
-                List<IGeometry> filteringGeoms = (spatialFilter) ? GetFilteringGeometries() : null;
-                GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
-                var features = new List<Feature>(variablesDT.Rows.Count);                
+                List<IGeometry> filteringGeoms = (spatialFilter) ? GetFilteringGeometries(this.ExportFilterFilename, destCRS) : null;
+                //Die if we're supposed to have a filter but don't
+                if (spatialFilter && filteringGeoms == null)
+                {
+                    return null;
+                }
+
+                GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
+                    ShapefileHelper.GetGeomFactory());
+                var features = new List<Feature>(variablesDT.Rows.Count);
+
                 foreach (DataRow row in variablesDT.Rows)
                 {
                     var id = row["LOGRECNO"] as string;
@@ -1206,7 +1284,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 }
 
                 //if we need to reproject:
-                List<IGeometry> filteringGeoms = GetFilteringGeometries();         
+                List<IGeometry> filteringGeoms = GetFilteringGeometries(
+                    this.ExportFilterFilename, GeographicCoordinateSystem.WGS84);         
        
                 //if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
                 //{
