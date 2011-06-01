@@ -1,0 +1,34 @@
+#
+#This is an example arguments file for the AcsDataImporter
+#
+
+-outputFolder ..\
+-includeEmptyGridCells
+
+#The name for this job
+-j wyoming01
+
+#Specify our desired State
+-s Wyoming
+
+#The desired variables
+-v ..\examples\wyoming1_variables.txt
+
+#Our filtering geometry
+#-f ..\examples\philly_2272_boundary.txt
+
+#Our summary level - by tracts
+-e 140 
+
+#Specifies a file containing WKT of the desired output projection
+#-outputProjection ..\examples\2272.prj
+
+#produce a shapefile using the census summary level shapes
+-exportToShape
+
+#OR produce a grid with cellsizes 1000 ft on a side (in the units we're projecting to)
+#-exportToGrid 1000
+
+#An optional grid to align our grid cells against
+#-gridEnvelope ..\examples\philly_2272_env.txt
+

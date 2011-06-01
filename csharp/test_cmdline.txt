@@ -1,1 +1,0 @@
--j test1 -s Wyoming -e 070 -v C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\testvars.txt
