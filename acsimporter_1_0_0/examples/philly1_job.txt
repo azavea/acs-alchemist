@@ -3,6 +3,8 @@
 #
 
 -outputFolder ..\
+-includeEmptyGridCells
+-preserveJam
 
 #The name for this job
 -j philly01
@@ -17,7 +19,7 @@
 -f ..\examples\philly_2272_boundary.txt
 
 #Our summary level - by block groups
--e 150 
+-e 140 
 
 #Specifies a file containing WKT of the desired output projection
 -outputProjection ..\examples\2272.prj
@@ -30,4 +32,3 @@
 
 #An optional grid to align our grid cells against
 #-gridEnvelope ..\examples\philly_2272_env.txt
-#-includeEmptyGridCells

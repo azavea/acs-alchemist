@@ -3,6 +3,7 @@
 #
 
 -outputFolder ..\
+-includeEmptyGridCells
 
 #The name for this job
 -j wyoming01
@@ -30,4 +31,4 @@
 
 #An optional grid to align our grid cells against
 #-gridEnvelope ..\examples\philly_2272_env.txt
-#-includeEmptyGridCells
+
