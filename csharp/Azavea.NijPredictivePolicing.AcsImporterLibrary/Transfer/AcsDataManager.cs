@@ -96,7 +96,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         /// <summary>
         /// SRID to use for shapefile filter
         /// </summary>
-        public int SRID;
+        //public int SRID;
         
 
 
@@ -280,8 +280,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                                     ShapefileHelper.MakeCensusProjFile(fullShapefilename);
                                     ShapefileHelper.ImportShapefile(conn, this.DbClient,
-                                        fullShapefilename,
-                                        tablename, 4269);
+                                        fullShapefilename, tablename);
 
                                     //TODO: multiple shape files in one zip?
                                     break;
@@ -352,7 +351,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         public bool CreateShapefileTable(DbConnection conn, string tableName)
         {
             string filename = Directory.GetFiles(this.ShapePath, "*.shp")[0];
-            return ShapefileHelper.ImportShapefile(conn, this.DbClient, filename, tableName, 4269);
+            return ShapefileHelper.ImportShapefile(conn, this.DbClient, filename, tableName);
         }
 
         //public string GetLocalShapefileName()
@@ -707,9 +706,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         //    return results;
         //}
 
-        public List<IGeometry> GetFilteringGeometries(string filename, ICoordinateSystem crs)
+        public List<IGeometry> GetFilteringGeometries(string filename, ICoordinateSystem outputCrs)
         {
             List<IGeometry> results = null;
+            ICoordinateSystem inputCrs;
             if (!string.IsNullOrEmpty(filename))
             {
                 if (!File.Exists(filename))
@@ -718,9 +718,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     return null;
                 }
 
-                int srid = this.SRID;
-
-                if (!ShapefileHelper.LoadShapefile(filename, DbClient, ref srid))
+                //inputCrs is guaranteed to be valid if LoadShapefile returns true
+                if (!ShapefileHelper.LoadShapefile(filename, DbClient, out inputCrs))
                 {
                     _log.Error("Could not load filtering geometries!");
                     return null;
@@ -731,13 +730,13 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 var wholeShapeTable = DataClient.GetMagicTable(DbClient.GetConnection(), DbClient, sqlcmd);
                 results = new List<IGeometry>(wholeShapeTable.Rows.Count);
                 ICoordinateTransformation reprojector = null;
-                if (crs != null)
+                if (outputCrs != null)
                 {
-                    reprojector = Utilities.BuildTransformationObject(GeographicCoordinateSystem.WGS84, crs);
+                    reprojector = Utilities.BuildTransformationObject(inputCrs, outputCrs);
                 }
                 
                 GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
-                    new GeometryFactory(new PrecisionModel(), srid));
+                    new GeometryFactory());
 
                 foreach (DataRow row in wholeShapeTable.Rows)
                 {
@@ -1072,6 +1071,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             }
         }
 
+        /// <summary>
+        /// Given a table, returns a list of features to export.  Assumes table geometries are in WGS84 
+        /// </summary>
+        /// <param name="tableName">Name of the sqlite table</param>
+        /// <param name="spatialFilter">Should we load and use a spatial filter?</param>
+        /// <returns></returns>
         public List<Feature> GetShapeFeaturesToExport(string tableName, bool spatialFilter)
         {
             using (var conn = DbClient.GetConnection())
@@ -1277,6 +1282,13 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             {
                 //don't filter out geometries, we'll do that at the cell level
                 var exportFeatures = GetShapeFeaturesToExport(tableName, false);
+                ICoordinateSystem outputCrs = GeographicCoordinateSystem.WGS84;
+                if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
+                {
+                    outputCrs = Utilities.GetCoordinateSystemByWKTFile(this.OutputProjectionFilename);
+                }
+
+
                 if ((exportFeatures == null) || (exportFeatures.Count == 0))
                 {
                     return false;
@@ -1284,7 +1296,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                 //if we need to reproject:
                 List<IGeometry> filteringGeoms = GetFilteringGeometries(
-                    this.ExportFilterFilename, GeographicCoordinateSystem.WGS84);         
+                    this.ExportFilterFilename, outputCrs);         
        
                 //if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
                 //{

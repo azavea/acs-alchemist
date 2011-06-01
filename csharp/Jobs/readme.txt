@@ -1,6 +1,6 @@
 ralph.bat runs everything
-The requested variables were split into 3 different files to deal with the 254 column limit of shapefiles (the AcsImporter does not yet automatically deal with this limitation and will probably explode if you give it too many)
-There are 6 different jobs to run, one each for the three different files, and one each for block groups (BG) and fishnets (Grid)
+The requested variables were split into 3 different files to deal with the 254 column limit of shapefilesn
+There are 6 different jobs to run, one each for the three different files, and one each for block groups (BG) and fishnets (Grid).  The fishnet jobs haven't been run yet.
 
 Variable name changes (to avoid column name collisions):
 "B05002002","nnatbrn" --> "B05002002","nnatbrn1"

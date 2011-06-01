@@ -51,7 +51,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
             using (DbConnection conn = client.GetConnection())
             {
-                return ShapefileHelper.ImportShapefile(conn, client, filename, tableName, 4269);
+                return ShapefileHelper.ImportShapefile(conn, client, filename, tableName);
             }
         }
 
@@ -60,10 +60,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         /// </summary>
         /// <param name="filename">The path of the file to import</param>
         /// <param name="DbClient">The database to load the file into</param>
-        /// <param name="srid">The SRID to use.  If srid &gt;= 0, the .prj won't be checked.  If srid &lt; 0, the .prj file will be required, and srid will be changed to whatever is in the .prj file</param>
         /// <returns>True on success, False on failure</returns>
-        public static bool LoadShapefile(string filename, IDataClient DbClient, ref int srid)
+        public static bool LoadShapefile(string filename, IDataClient DbClient, out ICoordinateSystem CRS)
         {
+            CRS = null;
             if ((string.IsNullOrEmpty(filename)) || (!File.Exists(filename)))
             {
                 _log.ErrorFormat("Couldn't find file {0}", filename);
@@ -83,20 +83,17 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                 {
                     string prjFileName = Path.Combine(Path.GetDirectoryName(filename),
                         Path.GetFileNameWithoutExtension(filename)) + ".prj";
-                    if (srid < 0 && File.Exists(prjFileName))
+                    if (File.Exists(prjFileName))
                     {
-                        ICoordinateSystem crs = Utilities.GetCoordinateSystemByWKTFile(prjFileName);
-                        string authority = crs.Authority.ToLower();
-                        if (authority == "epsg" || authority == "epgs")
-                            srid = (int)crs.AuthorityCode;
-                        else
-                        {
-                            _log.Error("Could not use the authority code in the shapefile's .prj file and none was provided.  Please either specify the correct EPSG authority code / SRID on the command line or reproject your shapefile to a projection with a valid EPSG authority code.");
-                            return false;
-                        }
+                        CRS = Utilities.GetCoordinateSystemByWKTFile(prjFileName);
+                    }
+                    else
+                    {
+                        _log.ErrorFormat("Could not locate the .prj file for {0}.  Please use a shapefile with a specified coordinate system", filename);
+                        return false;
                     }
 
-                    if (ShapefileHelper.ImportShapefile(conn, DbClient, filename, Path.GetFileNameWithoutExtension(filename), srid))
+                    if (ShapefileHelper.ImportShapefile(conn, DbClient, filename, Path.GetFileNameWithoutExtension(filename)))
                     {
                         
 
@@ -121,7 +118,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
 
         public static bool ImportShapefile(DbConnection conn, IDataClient client, 
-            string filename, string tableName, int srid)
+            string filename, string tableName)
         {
             try
             {
@@ -134,7 +131,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
                 //trim off the '.shp' from the end
                 filename = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename));
-                string sql = string.Format("CREATE VIRTUAL TABLE " + tableName + " USING VirtualShape('{0}', CP1252, {1});", filename, srid);
+                string sql = string.Format("CREATE VIRTUAL TABLE " + tableName + " USING VirtualShape('{0}', CP1252, foo);", filename);
                 client.GetCommand(sql, conn).ExecuteNonQuery();
                 
                 _log.DebugFormat("Imported Shapefile {0} into table {1}",

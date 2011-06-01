@@ -61,7 +61,6 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
         {
             man = new AcsDataManager();
             AcsDataManagerInit();
-            man.SRID = -1;
             var features = new List<IGeometry>();
             var features2 = new List<IGeometry>();
 
@@ -80,7 +79,6 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
                 GeographicCoordinateSystem.WGS84);
             Assert.AreEqual(features.Count > 0, true);
 
-            man.SRID = 2272;
             features2 = man.GetFilteringGeometries(GetShapePath("bg42_d00_srid.shp"),
                 GeographicCoordinateSystem.WGS84);
         }

@@ -26,7 +26,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new CmdLineArg() { Flag = "e", Description = "Filter Spatially by Census Summary Level", DataType=typeof(string), PropertyName="SummaryLevel"},
             new CmdLineArg() { Flag = "f", Description = "Filter Spatially by optional shapefile", DataType=typeof(string), PropertyName="ExportFilterShapefile"},
             
-            new CmdLineArg() { Flag = "ExportFilterSRID", Description = "SRID to use for shapefile filter if none is provided in the shapefile", DataType=typeof(string), PropertyName="ExportFilterSRID"},
+            //new CmdLineArg() { Flag = "ExportFilterSRID", Description = "SRID to use for shapefile filter if none is provided in the shapefile", DataType=typeof(string), PropertyName="ExportFilterSRID"},
 
             new CmdLineArg() { Flag = "j", Display=false, DataType=typeof(string), PropertyName="JobName"},
             new CmdLineArg() { Flag = "jobName", Description = "Specify a name for this job / shapefile", DataType=typeof(string), PropertyName="JobName"},
@@ -55,7 +55,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public AcsState State { get; set; }
 
         public string ExportFilterShapefile { get; set; }
-        public string ExportFilterSRID { get; set; }
+        //public string ExportFilterSRID { get; set; }
         public string ExportVariables { get; set; }
         public string IncludedVariableFile { get; set; }
         public string JobName { get; set; }
@@ -224,7 +224,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         }
 
                         manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
-                        manager.SRID = Utilities.GetAs<int>(this.ExportFilterSRID, -1);
+                        //manager.SRID = Utilities.GetAs<int>(this.ExportFilterSRID, -1);
 
                         if (string.IsNullOrEmpty(this.OutputProjection))
                         {
