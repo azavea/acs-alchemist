@@ -21,7 +21,8 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <summary>
         /// Path to the application home folder
         /// </summary>
-        public static readonly string ApplicationPath = Environment.CurrentDirectory;
+        public static readonly string ApplicationPath = Path.GetDirectoryName(
+            System.Reflection.Assembly.GetEntryAssembly().GetName().CodeBase);
 
 
 //#if DEBUG
