@@ -87,7 +87,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
 
             _log.Debug("Done! Press ANY KEY to Quit");
-            Console.ReadKey();
+            //Console.ReadKey();
         }
 
         

@@ -1237,7 +1237,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
                 if (!string.IsNullOrEmpty(OutputFolder))
                 {
-                    FileUtilities.PathEnsure(OutputFolder);
                     newShapefilename = Path.Combine(OutputFolder, tableName);
                 }
                 

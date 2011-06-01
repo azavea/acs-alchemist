@@ -209,13 +209,20 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         _log.Debug("Done Loading Prerequisites!");
                         _log.Debug("");
 
-
+                        //TODO: check for garbage inputs
                         manager.SummaryLevel = this.SummaryLevel;
                         manager.ExportFilterFilename = this.ExportFilterShapefile;
                         manager.DesiredVariablesFilename = IncludedVariableFile;
                         manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
                         manager.OutputProjectionFilename = this.OutputProjection;
                         manager.OutputFolder = this.OutputFolder;
+                        if (!string.IsNullOrEmpty(OutputFolder) && !Directory.Exists(OutputFolder))
+                        {
+                            _log.FatalFormat("The output folder you specified ( {0} ) doesn't exist, exiting",
+                                OutputFolder);
+                            return false;
+                        }
+
                         manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
                         manager.SRID = Utilities.GetAs<int>(this.ExportFilterSRID, -1);
 
