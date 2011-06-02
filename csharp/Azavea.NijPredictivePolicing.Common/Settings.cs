@@ -22,13 +22,15 @@ namespace Azavea.NijPredictivePolicing.Common
         /// Path to the application home folder
         /// </summary>
         public static readonly string ApplicationPath = Path.GetDirectoryName(
-            System.Reflection.Assembly.GetEntryAssembly().GetName().CodeBase);
+            System.Reflection.Assembly.GetEntryAssembly().GetName().CodeBase).Replace("file:\\", "");
+        //Why does CodeBase have "file:\\" in front of the path so none of the MS file utilities recognize it?
+        //Only Microsoft knows.
 
 
 //#if DEBUG
 //        private static string _tempPath = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\ACSImporter";
 //#else
-        private static string _tempPath = FileUtilities.SafePathEnsure(Environment.CurrentDirectory, "Data");
+        private static string _tempPath = FileUtilities.SafePathEnsure(Settings.ApplicationPath, "Data");
 //#endif
 
         /// <summary>

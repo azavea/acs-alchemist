@@ -66,7 +66,7 @@ namespace Azavea.NijPredictivePolicing.Common.DB
             conn.Open();
             _connsOpened++;
 
-            string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, "libspatialite-2.dll");
+            string spatialitePath = System.IO.Path.Combine(Settings.ApplicationPath, "libspatialite-2.dll");
             this.GetCommand("SELECT load_extension('" + spatialitePath + "');", conn).ExecuteNonQuery();
 
             return conn;
@@ -78,7 +78,7 @@ namespace Azavea.NijPredictivePolicing.Common.DB
             conn.Open();
             _connsOpened++;
 
-            string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, "libspatialite-2.dll");
+            string spatialitePath = System.IO.Path.Combine(Settings.ApplicationPath, "libspatialite-2.dll");
             this.GetCommand("SELECT load_extension('" + spatialitePath + "');", conn).ExecuteNonQuery();
 
             return conn;
