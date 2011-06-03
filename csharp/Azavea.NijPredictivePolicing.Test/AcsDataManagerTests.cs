@@ -26,7 +26,7 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 
         private static void AcsDataManagerInit()
         {
-            man.WorkingPath = Path.Combine(@"E:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test", "TestData");
+            man.WorkingPath = Path.Combine(@"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test", "TestData");
             
             FileUtilities.PathEnsure(man.WorkingPath, "database");
             man.DBFilename = FileUtilities.PathCombine(man.WorkingPath, "database", Settings.CurrentAcsDirectory + ".sqlite");
