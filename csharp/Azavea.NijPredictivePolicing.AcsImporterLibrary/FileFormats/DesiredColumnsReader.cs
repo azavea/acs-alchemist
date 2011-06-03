@@ -31,15 +31,18 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         //}
 
 
-        public bool CreateTemporaryTable(DbConnection conn, IDataClient client, string filename, string tablename)
+        public bool ImportDesiredVariables(DbConnection conn, IDataClient client, string filename, string tablename)
         {
             if ((string.IsNullOrEmpty(filename)) || (!File.Exists(filename)))
             {
                 _log.Debug("No Variable File Found");
                 return false;
             }
+
             TempTableName = tablename;
             int line = 0;
+            var DuplicateLines = new Dictionary<string, List<int>>(256);
+            var Duplicates = new List<string>(256);
 
             try
             {
@@ -53,8 +56,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                 dt.Constraints.Add("CENSUS_TABLE_ID Primary Key", dt.Columns["CENSUS_TABLE_ID"], true);
                 dt.Constraints.Add("CUSTOM_COLUMN_NAME Unique", dt.Columns["CUSTOM_COLUMN_NAME"], false);
                
-                //we're enumerable!
-
                if (string.IsNullOrEmpty(_filename))
                 {
                     this.LoadFile(filename);
@@ -67,22 +68,58 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
                     if ((row.Count < 1) || (string.IsNullOrEmpty(row[0])))
                         continue;
+                    if (row.Count > 2)
+                        _log.WarnFormat("Line {0} has more than two fields, all fields after the first two will be ignored", line);
+
 
                     var varName = row[0];
                     var varAlias = (row.Count > 1) ? row[1] : row[0];
                     if (varAlias.Length > 10)
                     {
                         //Shapefiles have a 10 character column name limit :(
-                        _log.WarnFormat("Line:{0}, \"{1}\" name was too long, max 10 characters", line, varAlias);
+                        _log.WarnFormat("Line:{0}, \"{1}\" name was too long, truncating to 10 characters", line, varAlias);
                         varAlias = Utilities.EnsureMaxLength(varAlias, 10);
+                    }
+
+                    if (DuplicateLines[varAlias] == null)
+                    {
+                        DuplicateLines[varAlias] = new List<int>(4);
+                        DuplicateLines[varAlias].Add(line);
+                    }
+                    else
+                    {
+                        Duplicates.Add(varAlias);
+                        DuplicateLines[varAlias].Add(line);
                     }
 
                     dt.Rows.Add(varName, varAlias);
                 }
 
-                if ((dt == null) && (dt.Rows.Count == 0))
+                if ((dt == null) || (dt.Rows.Count == 0))
                 {
                     _log.Error("No variables imported!");
+                    return false;
+                }
+
+                if (DuplicateLines.Count > 0)
+                {
+                    _log.ErrorFormat("The following names in {0} were duplicated on the lines listed:", filename);
+                    foreach (string name in Duplicates)
+                    {
+                        _log.Error(name);
+                        foreach (int myLine in DuplicateLines[name])
+                        {
+                            _log.Error("\t" + myLine);
+                        }
+                    }
+
+                    _log.Error("");
+                    return false;
+                }
+
+                if (dt.Rows.Count > 100)
+                {
+                    _log.ErrorFormat("The maximum number of columns you can specify for a given shapefile is 100, but {0} contained {1} entries.  Please shorten it and try again.", filename, dt.Rows.Count);
                     return false;
                 }
 
@@ -97,6 +134,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             {
                 _log.Error("Variable Import Failed", ex);
                 _log.ErrorFormat("Variable Import made it to line {0}:{1}", filename, line);
+                RemoveTemporaryTable(conn, client);
             }
 
             return false;
@@ -105,7 +143,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
         public void RemoveTemporaryTable(DbConnection conn, IDataClient client)
         {
-            client.GetCommand(string.Format(CreateTableSQL, TempTableName), conn).ExecuteNonQuery();
+            client.GetCommand(string.Format(DropTableSQL, TempTableName), conn).ExecuteNonQuery();
         }
 
         

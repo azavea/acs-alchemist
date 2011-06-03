@@ -659,20 +659,25 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             if (!string.IsNullOrEmpty(DesiredVariablesFilename))
             {
                 DesiredColumnsReader fileReader = new DesiredColumnsReader();
-                if (fileReader.CreateTemporaryTable(conn, DbClient, this.DesiredVariablesFilename, AcsDataManager.DesiredColumnsTableName))
+                if (fileReader.ImportDesiredVariables(conn, DbClient, 
+                    this.DesiredVariablesFilename, AcsDataManager.DesiredColumnsTableName))
                 {
                     _log.DebugFormat("Variable file {0} imported successfully", this.DesiredVariablesFilename);
                     string getRequestedVariablesSQL = string.Format(
-                        @"SELECT columnMappings.CENSUS_TABLE_ID, columnMappings.COLNO, columnMappings.SEQNO, {0}.CUSTOM_COLUMN_NAME AS COLNAME 
-                        FROM columnMappings, {0} 
-                        WHERE columnMappings.CENSUS_TABLE_ID = {0}.CENSUS_TABLE_ID;",
-                            AcsDataManager.DesiredColumnsTableName);
+                      @"SELECT    columnMappings.CENSUS_TABLE_ID, 
+                                  columnMappings.COLNO, 
+                                  columnMappings.SEQNO, 
+                                  {0}.CUSTOM_COLUMN_NAME AS COLNAME 
+                        FROM      columnMappings, {0} 
+                        WHERE     columnMappings.CENSUS_TABLE_ID = {0}.CENSUS_TABLE_ID;",
+                        AcsDataManager.DesiredColumnsTableName);
 
                     dt = DataClient.GetMagicTable(conn, DbClient, getRequestedVariablesSQL);
                 }
                 else
                 {
-                    _log.Warn("Unable to read/build requested variables list");
+                    //Just one less error that's spit out when this fails
+                    //_log.Warn("Unable to read/build requested variables list");
                 }
             }
 
