@@ -18,7 +18,7 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
     [TestFixture]
     public class ExcelDataReaderTests
     {
-        public const string InputDirectory = @"..\..\TestData\ParserTests";
+        public const string InputDirectory = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test\TestData\ParserTests";
 
         public const string OutputDirectory = "output\\";
 

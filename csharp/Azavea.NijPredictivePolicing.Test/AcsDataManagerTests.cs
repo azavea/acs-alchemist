@@ -54,13 +54,14 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 
             if (!Directory.Exists(OutputDir))
                 Directory.CreateDirectory(OutputDir);
+
+            man = new AcsDataManager();
+            AcsDataManagerInit();
         }
 
         [Test]
         public void GetShapefileFeatures()
         {
-            man = new AcsDataManager();
-            AcsDataManagerInit();
             var features = new List<IGeometry>();
             var features2 = new List<IGeometry>();
 
@@ -73,14 +74,20 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 
             features = man.GetFilteringGeometries(GetShapePath("bg42_d00_nosrid.shp"), 
                 GeographicCoordinateSystem.WGS84);
-            Assert.AreEqual(features, null);
+            Assert.IsTrue(features.Count > 0);
 
             features = man.GetFilteringGeometries(GetShapePath("bg42_d00_srid.shp"), 
                 GeographicCoordinateSystem.WGS84);
-            Assert.AreEqual(features.Count > 0, true);
+            Assert.IsTrue(features.Count > 0);
 
             features2 = man.GetFilteringGeometries(GetShapePath("bg42_d00_srid.shp"),
                 GeographicCoordinateSystem.WGS84);
+        }
+
+        [Test]
+        public void ImportVariablesFile()
+        {
+
         }
     }
 }

@@ -9,9 +9,9 @@ using Azavea.NijPredictivePolicing.Common.Data;
 namespace Azavea.NijPredictivePolicing.Test.Common.Data
 {
     [TestFixture]
-    class CommaSeparatedValueTests
+    public class CommaSeparatedValueTests
     {
-        public const string InputDirectory = @"..\..\TestData\ParserTests";
+        public string InputDirectory = @"..\..\TestData\ParserTests";
 
         public const string WellFormedCsvFile = "wellFormed.csv";
 
@@ -20,7 +20,9 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
         {
             if (!Directory.Exists(InputDirectory))
             {
-                Assert.Fail("Error: input directory not found at {0}", InputDirectory);
+                InputDirectory = "..\\" + InputDirectory;
+                if (!Directory.Exists(InputDirectory))
+                    Assert.Fail("Error: input directory not found at {0}", InputDirectory);
             }
 
             if (!File.Exists(Path.Combine(InputDirectory, WellFormedCsvFile)))

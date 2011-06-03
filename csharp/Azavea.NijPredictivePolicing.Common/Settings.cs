@@ -11,6 +11,32 @@ namespace Azavea.NijPredictivePolicing.Common
     /// </summary>
     public static class Settings
     {
+        static Settings()
+        {
+            try
+            {
+                //Under normal operation, we want entry assembly path
+                //However, when running with NUnit, this throws an exception, whereas GetCallingAssembly 
+                //works fine.  We therefore try both.
+                Settings.ApplicationPath = Path.GetDirectoryName(
+                    System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase).Replace("file:\\", "");
+                Settings.ApplicationPath = Path.GetDirectoryName(
+                    System.Reflection.Assembly.GetEntryAssembly().GetName().CodeBase).Replace("file:\\", "");
+                //Why does CodeBase have "file:\\" in front of the path so none of the MS 
+                //file utilities recognize it?  Only Microsoft knows.
+            }
+            catch
+            {
+                if (string.IsNullOrEmpty(Settings.ApplicationPath))
+                    throw new Exception("Could not find application path!");
+            }
+
+            //These MUST be in the constructor, because static class fields are initialized before the constructor
+            //is run, which would mean ApplicationPath would be empty
+            _tempPath = FileUtilities.SafePathEnsure(Settings.ApplicationPath, "Data");
+            AcsPrjFilePath = Path.Combine(Settings.ApplicationPath, "WGS84NAD83.prj"); 
+        }
+
         public static Config ConfigFile;
 
         /// <summary>
@@ -21,16 +47,13 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <summary>
         /// Path to the application home folder
         /// </summary>
-        public static readonly string ApplicationPath = Path.GetDirectoryName(
-            System.Reflection.Assembly.GetEntryAssembly().GetName().CodeBase).Replace("file:\\", "");
-        //Why does CodeBase have "file:\\" in front of the path so none of the MS file utilities recognize it?
-        //Only Microsoft knows.
+        public static readonly string ApplicationPath;
 
 
 //#if DEBUG
 //        private static string _tempPath = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\ACSImporter";
 //#else
-        private static string _tempPath = FileUtilities.SafePathEnsure(Settings.ApplicationPath, "Data");
+        private static string _tempPath;
 //#endif
 
         /// <summary>
@@ -157,7 +180,7 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <summary>
         /// Path to the ACS prj file for the ACS shapefiles
         /// </summary>
-        public static readonly string AcsPrjFilePath = Path.Combine(Settings.ApplicationPath, "WGS84NAD83.prj"); 
+        public static readonly string AcsPrjFilePath; 
         
         /// <summary>
         /// Default projection to use if AcsPrjFilePath is missing or invalid
