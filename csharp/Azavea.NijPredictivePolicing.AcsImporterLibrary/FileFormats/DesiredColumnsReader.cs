@@ -55,10 +55,14 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                 //Constraints will help us catch errors (Also: Iron helps us play.)
                 dt.Constraints.Add("CENSUS_TABLE_ID Primary Key", dt.Columns["CENSUS_TABLE_ID"], true);
                 dt.Constraints.Add("CUSTOM_COLUMN_NAME Unique", dt.Columns["CUSTOM_COLUMN_NAME"], false);
-               
-               if (string.IsNullOrEmpty(_filename))
+
+                if (string.IsNullOrEmpty(_filename))
                 {
-                    this.LoadFile(filename);
+                    if (!this.LoadFile(filename))
+                    {
+                        _log.Error("Couldn't open file " + filename);
+                        return false;
+                    }
                 }
 
 
@@ -80,6 +84,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                         _log.WarnFormat("Line:{0}, \"{1}\" name was too long, truncating to 10 characters", line, varAlias);
                         varAlias = Utilities.EnsureMaxLength(varAlias, 10);
                     }
+
+//explosion here
+
 
                     if (DuplicateLines[varAlias] == null)
                     {
@@ -113,7 +120,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                         }
                     }
 
-                    _log.Error("");
+                    //_log.Error(string.Empty);
                     return false;
                 }
 
