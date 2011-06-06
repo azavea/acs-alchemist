@@ -9,6 +9,7 @@ using GeoAPI.Geometries;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary;
 using Azavea.NijPredictivePolicing.Common;
 using Azavea.NijPredictivePolicing.Common.DB;
+using log4net.Core;
 
 namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 {
@@ -87,7 +88,48 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
         [Test]
         public void ImportVariablesFile()
         {
+            string Invalid101Lines = "Invalid101Lines.txt";
+            string InvalidAllDupes = "InvalidAllDupes.txt";
+            string InvalidAllms = "InvalidAllms.txt";
+            string InvalidEmpty = "InvalidEmpty.txt";
+            string InvalidLotsOfDupes = "InvalidLotsOfDupes.txt";
+            string InvalidTruncCollisions = "InvalidTruncCollisions.txt";
+            string Valid100Lines = "Valid100Lines.txt";
+            string ValidNoNames = "ValidNoNames.txt";
 
+            var appender = new log4net.Appender.MemoryAppender();
+            var mylog = (_log as log4net.Repository.Hierarchy.Logger);
+            mylog.AddAppender(appender);
+
+            using (var conn = man.DbClient.GetConnection())
+            {
+            }
+        }
+
+        private List<string> GetParsingLog(string columnFile)
+        {
+            var appender = new log4net.Appender.MemoryAppender();
+            var mylog = (_log.Logger as log4net.Repository.Hierarchy.Logger);
+            mylog.AddAppender(appender);
+            string oldName = man.DesiredVariablesFilename;
+            man.DesiredVariablesFilename = columnFile;
+
+            using (var conn = man.DbClient.GetConnection())
+            {
+                man.GetRequestedVariables(conn);
+            }
+
+            var events = appender.GetEvents();
+            var result = new List<string>(events.Length);
+            foreach (var e in events)
+            {
+                result.Add(e.RenderedMessage);
+            }
+
+            appender.Close();
+            mylog.RemoveAppender(appender);
+            man.DesiredVariablesFilename = oldName;
+            return result;
         }
     }
 }

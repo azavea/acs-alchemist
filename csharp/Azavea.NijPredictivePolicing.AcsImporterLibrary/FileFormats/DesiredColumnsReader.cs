@@ -81,9 +81,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                         varAlias = Utilities.EnsureMaxLength(varAlias, 10);
                     }
 
-                    if (DuplicateLines[varAlias] == null)
+                    if (!DuplicateLines.ContainsKey(varAlias))
                     {
-                        DuplicateLines[varAlias] = new List<int>(4);
+                        DuplicateLines.Add(varAlias, new List<int>(4));
                         DuplicateLines[varAlias].Add(line);
                     }
                     else
@@ -101,7 +101,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                     return false;
                 }
 
-                if (DuplicateLines.Count > 0)
+                if (Duplicates.Count > 0)
                 {
                     _log.ErrorFormat("The following names in {0} were duplicated on the lines listed:", filename);
                     foreach (string name in Duplicates)
