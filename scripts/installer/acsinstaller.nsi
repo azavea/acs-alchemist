@@ -61,7 +61,8 @@ ShowUninstDetails show
 Section -Main SEC0000
     SetOutPath $INSTDIR
     SetOverwrite on
-    File /r C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug\*
+    File /r C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\x86\Debug\*
+    ;File /r C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug\*
     File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\README.txt
     SetOutPath $SMPROGRAMS\$StartMenuGroup
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\ACS Importer.lnk" $INSTDIR

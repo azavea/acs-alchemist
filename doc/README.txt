@@ -93,7 +93,7 @@ The variable values were at the block group summary level.  From here you
 can export your results into a shapefile using the summary geography, or
 using a grid 'fishnet.'
 
-Exporting to Shapefile
+Exporting to a Shapefile
 -------------------------------------
 
   When you're ready to run your full export, you can send everything to
@@ -119,4 +119,7 @@ and the importer will reproject the data into your projection when exporting.
 
 C:\...> AcsDataImporter.exe -s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 -exportToShape -outputProjection myproj.prj
 
+
+Frequently Asked Questions
+-------------------------------------
 
