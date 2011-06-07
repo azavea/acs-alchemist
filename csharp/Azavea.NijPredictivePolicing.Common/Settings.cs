@@ -40,6 +40,11 @@ namespace Azavea.NijPredictivePolicing.Common
         public static Config ConfigFile;
 
         /// <summary>
+        /// Prefix for Margin of Error column names
+        /// </summary>
+        public const string MoEPrefix = "m";
+
+        /// <summary>
         /// Application Name -- also name of our temp folder
         /// </summary>
         public const string ApplicationName = "ACSImporter";

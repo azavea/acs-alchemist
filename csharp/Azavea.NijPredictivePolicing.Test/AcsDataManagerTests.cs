@@ -10,6 +10,7 @@ using Azavea.NijPredictivePolicing.AcsImporterLibrary;
 using Azavea.NijPredictivePolicing.Common;
 using Azavea.NijPredictivePolicing.Common.DB;
 using System.Text;using System;using log4net.Core;
+using System.Data;
 namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 {
     [TestFixture]
@@ -23,9 +24,6 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
         /// </summary>
         protected const string OutputDir = @"output\";
 
-
-
-
         [TestFixtureSetUp]
         public void Init()
         {
@@ -33,7 +31,6 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 
             if (!Directory.Exists(OutputDir))
                 Directory.CreateDirectory(OutputDir);
-
         }
 
         [Test]
@@ -66,22 +63,164 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
         [Test]
         public void ImportVariablesFile()
         {
-            string Invalid101Lines = "Invalid101Lines.txt";
-            string InvalidAllDupes = "InvalidAllDupes.txt";
-            string InvalidAllms = "InvalidAllms.txt";
-            string InvalidEmpty = "InvalidEmpty.txt";
-            string InvalidLotsOfDupes = "InvalidLotsOfDupes.txt";
-            string InvalidTruncCollisions = "InvalidTruncCollisions.txt";
-            string Valid100Lines = "Valid100Lines.txt";
-            string ValidNoNames = "ValidNoNames.txt";
+            var man = GetManager();
+            man.WorkingPath = Path.Combine(man.WorkingPath, "ColumnFiles");
+            man.CheckColumnMappingsFile();
 
-            var appender = new log4net.Appender.MemoryAppender();
-            var mylog = (_log as log4net.Repository.Hierarchy.Logger);
-            mylog.AddAppender(appender);
+            string Invalid101Lines = Path.Combine(man.WorkingPath,          "Invalid101Lines.txt");
+            string InvalidAllDupes = Path.Combine(man.WorkingPath,          "InvalidAllDupes.txt");
+            string InvalidAllms = Path.Combine(man.WorkingPath,             "InvalidAllms.txt");
+            string InvalidEmpty = Path.Combine(man.WorkingPath,             "InvalidEmpty.txt");
+            string InvalidLotsOfDupes = Path.Combine(man.WorkingPath,       "InvalidLotsOfDupes.txt");
+            string InvalidTruncCollisions = Path.Combine(man.WorkingPath,   "InvalidTruncCollisions.txt");
+            string Valid100Lines = Path.Combine(man.WorkingPath,            "Valid100Lines.txt");
+            string ValidNoNames = Path.Combine(man.WorkingPath,             "ValidNoNames.txt");
+
 
             using (var conn = man.DbClient.GetConnection())
             {
+                if (!DataClient.HasTable(conn, man.DbClient, "columnMappings"))
+                {
+                    man.CreateColumnMappingsTable(conn);
+                }
+
+                DataTable dt = null;
+
+                Assert.IsTrue(File.Exists(Invalid101Lines));
+                man.DesiredVariablesFilename = Invalid101Lines;
+                dt = man.GetRequestedVariables(conn);
+                Assert.IsTrue(dt == null);
+
+                Assert.IsTrue(File.Exists(InvalidAllDupes));
+                man.DesiredVariablesFilename = InvalidAllDupes;
+                dt = man.GetRequestedVariables(conn);
+                Assert.IsTrue(dt == null);
+
+                Assert.IsTrue(File.Exists(InvalidAllms));
+                man.DesiredVariablesFilename = InvalidAllms;
+                dt = man.GetRequestedVariables(conn);
+                Assert.IsTrue(dt == null);
+
+                Assert.IsTrue(File.Exists(InvalidEmpty));
+                man.DesiredVariablesFilename = InvalidEmpty;
+                dt = man.GetRequestedVariables(conn);
+                Assert.IsTrue(dt == null);
+
+                Assert.IsTrue(File.Exists(InvalidLotsOfDupes));
+                man.DesiredVariablesFilename = InvalidLotsOfDupes;
+                dt = man.GetRequestedVariables(conn);
+                Assert.IsTrue(dt == null);
+
+                Assert.IsTrue(File.Exists(InvalidTruncCollisions));
+                man.DesiredVariablesFilename = InvalidTruncCollisions;
+                dt = man.GetRequestedVariables(conn);
+                Assert.IsTrue(dt == null);
+
+                //105 should really be 100, but there are duplicate rows in columnMappings
+                //See http://192.168.1.2/FogBugz/default.asp?19869
+                //If/when that bug gets fixed, 105 should be changed to 100 and this comment deleted
+                Assert.IsTrue(File.Exists(Valid100Lines));
+                man.DesiredVariablesFilename = Valid100Lines;
+                dt = man.GetRequestedVariables(conn);
+                Assert.AreEqual(dt.Rows.Count, 105);
+
+                dt = null;
+
+                Assert.IsTrue(File.Exists(ValidNoNames));
+                man.DesiredVariablesFilename = ValidNoNames;
+                dt = man.GetRequestedVariables(conn);
+                Assert.AreEqual(dt.Rows.Count, 105);
             }
         }
-        private List<string> GetParsingLog(string columnFile)        {            var appender = new log4net.Appender.MemoryAppender();            var mylog = (_log.Logger as log4net.Repository.Hierarchy.Logger);            mylog.AddAppender(appender);            string oldName = man.DesiredVariablesFilename;            man.DesiredVariablesFilename = columnFile;            using (var conn = man.DbClient.GetConnection())            {                man.GetRequestedVariables(conn);            }            var events = appender.GetEvents();            var result = new List<string>(events.Length);            foreach (var e in events)            {                result.Add(e.RenderedMessage);            }            appender.Close();            mylog.RemoveAppender(appender);            man.DesiredVariablesFilename = oldName;            return result;        }        /// <summary>        /// Test to ensure importer correctly detects and bails on too many requested columns        /// </summary>        [Test]        public void CheckTooManyColumnsFail()        {            string basePath = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test\TestData";            FileUtilities.PathEnsure(basePath);            const string JobName = "TestTooMany";            string TooManyVariablesFile = Path.Combine(basePath, "TooManyColumns.txt");            if (!File.Exists(TooManyVariablesFile))            {                int maxColumns = 255, max = (maxColumns / 2) + 1;                StringBuilder sb = new StringBuilder();                for (int i = 0; i < max; i++)                {                    sb.Append("COLUMN").Append(i).Append(Environment.NewLine);                }                File.WriteAllText(TooManyVariablesFile, sb.ToString());            }            var manager = new AcsDataManager(AcsState.Wyoming);            manager.WorkingPath = basePath;            manager.DesiredVariablesFilename = TooManyVariablesFile;            Assert.IsFalse(manager.CheckBuildVariableTable(JobName));        }        protected AcsDataManager GetManager()        {            AcsDataManager m = new AcsDataManager();            m.WorkingPath = Path.Combine(@"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test", "TestData");            FileUtilities.PathEnsure(m.WorkingPath, "database");            m.DBFilename = FileUtilities.PathCombine(m.WorkingPath, "database", Settings.CurrentAcsDirectory + ".sqlite");            m.ShapePath = FileUtilities.PathEnsure(m.WorkingPath, "shapes");            m.CurrentDataPath = m.WorkingPath;            //man.DataPath = FileLocator.GetStateBlockGroupDataDir(man.State);            //man.ShpPath = FileLocator.GetStateBlockGroupDataDir(man.State);                        //man.DBPath = FileUtilities.PathCombine(man.DataPath, man.State.ToString() + ".sqlite");            m.DbClient = DataClient.GetDefaultClient(m.DBFilename);            return m;        }        protected string GetShapePath(AcsDataManager man, string filename)        {            return Path.Combine(man.ShapePath, Path.GetFileName(filename));        }    }
+
+
+        //private List<string> GetParsingLog(string columnFile)
+        //{
+        //    var man = GetManager();
+
+        //    var appender = new log4net.Appender.MemoryAppender();
+        //    var mylog = (LogManager.GetLogger(man.GetType()).Logger as log4net.Repository.Hierarchy.Logger);
+        //    mylog.AddAppender(appender);
+
+        //    string oldName = man.DesiredVariablesFilename;
+        //    man.DesiredVariablesFilename = columnFile;
+        //    using (var conn = man.DbClient.GetConnection())
+        //    {
+        //        man.GetRequestedVariables(conn);
+        //    }
+
+        //    var events = appender.GetEvents();
+        //    var result = new List<string>(events.Length);
+
+        //    foreach (var e in events)
+        //    {
+        //        result.Add(e.RenderedMessage);
+        //    }
+
+        //    appender.Close();
+        //    mylog.RemoveAppender(appender);
+        //    man.DesiredVariablesFilename = oldName;
+
+        //    return result;
+        //}
+
+
+        /// <summary>        
+        /// Test to ensure importer correctly detects and bails on too many requested columns        
+        /// </summary>        
+        [Test]
+        public void CheckTooManyColumnsFail()
+        {
+            string basePath = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test\TestData";
+            FileUtilities.PathEnsure(basePath);
+            const string JobName = "TestTooMany";
+            string TooManyVariablesFile = Path.Combine(basePath, "TooManyColumns.txt");
+
+            if (!File.Exists(TooManyVariablesFile))
+            {
+                int maxColumns = 255, max = (maxColumns / 2) + 1;
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < max; i++)
+                {
+                    sb.Append("COLUMN").Append(i).Append(Environment.NewLine);
+                }
+                File.WriteAllText(TooManyVariablesFile, sb.ToString());
+            }
+
+            var manager = new AcsDataManager(AcsState.Wyoming);
+            manager.WorkingPath = basePath;
+            manager.DesiredVariablesFilename = TooManyVariablesFile;
+            Assert.IsFalse(manager.CheckBuildVariableTable(JobName));
+        }
+
+
+        protected AcsDataManager GetManager()
+        {
+            AcsDataManager m = new AcsDataManager(AcsState.Wyoming);
+
+            m.WorkingPath = Path.Combine(
+                @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test", 
+                "TestData");
+            FileUtilities.PathEnsure(m.WorkingPath, "database");
+
+            m.DBFilename = FileUtilities.PathCombine(m.WorkingPath, "database", 
+                Settings.CurrentAcsDirectory + ".sqlite");
+            m.ShapePath = FileUtilities.PathEnsure(m.WorkingPath, "shapes");
+            m.CurrentDataPath = m.WorkingPath;
+
+            //man.DataPath = FileLocator.GetStateBlockGroupDataDir(man.State);            
+            //man.ShpPath = FileLocator.GetStateBlockGroupDataDir(man.State);                        
+            //man.DBPath = FileUtilities.PathCombine(man.DataPath, man.State.ToString() + ".sqlite");
+
+            m.DbClient = DataClient.GetDefaultClient(m.DBFilename);
+
+            return m;
+        }
+
+
+        protected string GetShapePath(AcsDataManager man, string filename)
+        {
+            return Path.Combine(man.ShapePath, Path.GetFileName(filename));
+        }
+    }
 }

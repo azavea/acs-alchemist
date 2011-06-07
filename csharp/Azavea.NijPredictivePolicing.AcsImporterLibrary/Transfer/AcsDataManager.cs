@@ -39,7 +39,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             }
         }
 
-
         public string WorkingPath;
         public string ShapePath;
         public string CurrentDataPath;
@@ -673,6 +672,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         AcsDataManager.DesiredColumnsTableName);
 
                     dt = DataClient.GetMagicTable(conn, DbClient, getRequestedVariablesSQL);
+                    if (dt == null || dt.Rows == null || dt.Rows.Count == 0)
+                        dt = null;
                 }
                 else
                 {
@@ -848,6 +849,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                             _log.DebugFormat("Couldn't find error margin file {0}", sequenceNo);
                         }
 
+                        //These next two if statement checks should probably be removed once
+                        //http://192.168.1.2/FogBugz/default.asp?19869 is resolved
+                        //Until that case is resolved, we can't guarantee rows in reqVariablesDT will be
+                        //unique so they should stay.
 
                         //TODO: alternate column naming?
                         string newColumnName = variableRow["COLNAME"] as string;

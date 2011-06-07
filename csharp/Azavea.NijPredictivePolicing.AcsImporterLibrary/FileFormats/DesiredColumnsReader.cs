@@ -42,7 +42,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             TempTableName = tablename;
             int line = 0;
             var DuplicateLines = new Dictionary<string, List<int>>(256);
-            var Duplicates = new List<string>(256);
+            var Duplicates = new HashSet<string>();
 
             try
             {
@@ -53,16 +53,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                 var dt = DataClient.GetMagicTable(conn, client, selectAllSQL);
 
                 //Constraints will help us catch errors (Also: Iron helps us play.)
-                dt.Constraints.Add("CENSUS_TABLE_ID Primary Key", dt.Columns["CENSUS_TABLE_ID"], true);
-                dt.Constraints.Add("CUSTOM_COLUMN_NAME Unique", dt.Columns["CUSTOM_COLUMN_NAME"], false);
-
-                if (string.IsNullOrEmpty(_filename))
+                //dt.Constraints.Add("CENSUS_TABLE_ID Primary Key", dt.Columns["CENSUS_TABLE_ID"], true);
+                //dt.Constraints.Add("CUSTOM_COLUMN_NAME Unique", dt.Columns["CUSTOM_COLUMN_NAME"], false);
+               
+               if (string.IsNullOrEmpty(_filename))
                 {
-                    if (!this.LoadFile(filename))
-                    {
-                        _log.Error("Couldn't open file " + filename);
-                        return false;
-                    }
+                    this.LoadFile(filename);
                 }
 
 
@@ -76,14 +72,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                         _log.WarnFormat("Line {0} has more than two fields, all fields after the first two will be ignored", line);
 
 
-                    var varName = row[0];
-                    var varAlias = (row.Count > 1) ? row[1] : row[0];
+                    string varName = row[0];
+                    string varAlias = (row.Count > 1) ? row[1] : row[0];
                     if (varAlias.Length > 10)
                     {
                         //Shapefiles have a 10 character column name limit :(
                         _log.WarnFormat("Line:{0}, \"{1}\" name was too long, truncating to 10 characters", line, varAlias);
                         varAlias = Utilities.EnsureMaxLength(varAlias, 10);
                     }
+
 
                     if (!DuplicateLines.ContainsKey(varAlias))
                     {
@@ -94,6 +91,19 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                     {
                         Duplicates.Add(varAlias);
                         DuplicateLines[varAlias].Add(line);
+                    }
+
+                    //Make sure m + name isn't here either, b/c we create it later.
+                    string mvarAlias = Utilities.EnsureMaxLength(Settings.MoEPrefix + varAlias, 10);
+                    if (!DuplicateLines.ContainsKey(mvarAlias))
+                    {
+                        DuplicateLines.Add(mvarAlias, new List<int>(4));
+                        DuplicateLines[mvarAlias].Add(line);
+                    }
+                    else
+                    {
+                        Duplicates.Add(mvarAlias);
+                        DuplicateLines[mvarAlias].Add(line);
                     }
 
                     dt.Rows.Add(varName, varAlias);
@@ -117,7 +127,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                         }
                     }
 
-                    //_log.Error(string.Empty);
+                    _log.ErrorFormat("Please modify your column specification file to remove duplicates.  Note that all columns with a given name have a corresponding Margin of Error column named \"{0}\" + [column name] which can cause duplicates to be created.", Settings.MoEPrefix);
                     return false;
                 }
 
