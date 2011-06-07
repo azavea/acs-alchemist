@@ -39,13 +39,14 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                 return false;
             }
 
-            TempTableName = tablename;
             int line = 0;
-            var DuplicateLines = new Dictionary<string, List<int>>(256);
-            var Duplicates = new HashSet<string>();
 
             try
             {
+                TempTableName = tablename;
+                var DuplicateLines = new Dictionary<string, List<int>>(256);
+                var Duplicates = new HashSet<string>();
+
                 //empty/create our temporary table
                 client.GetCommand(string.Format(CreateTableSQL, TempTableName), conn).ExecuteNonQuery();
 
@@ -115,6 +116,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                     return false;
                 }
 
+                bool success = true;
+
                 if (Duplicates.Count > 0)
                 {
                     _log.ErrorFormat("The following names in {0} were duplicated on the lines listed:", filename);
@@ -128,14 +131,16 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                     }
 
                     _log.ErrorFormat("Please modify your column specification file to remove duplicates.  Note that all columns with a given name have a corresponding Margin of Error column named \"{0}\" + [column name] which can cause duplicates to be created.", Settings.MoEPrefix);
-                    return false;
+                    success = false;
                 }
 
                 if (dt.Rows.Count > 100)
                 {
                     _log.ErrorFormat("The maximum number of columns you can specify for a given shapefile is 100, but {0} contained {1} entries.  Please shorten it and try again.", filename, dt.Rows.Count);
-                    return false;
+                    success = false;
                 }
+
+                if (success == false) return false;
 
                 _log.Debug("Saving...");
                 var adapter = DataClient.GetMagicAdapter(conn, client, selectAllSQL);
