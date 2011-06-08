@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using log4net;
+using System.Reflection;
 
 namespace Azavea.NijPredictivePolicing.Common
 {
@@ -11,6 +13,14 @@ namespace Azavea.NijPredictivePolicing.Common
     /// </summary>
     public static class Settings
     {
+        private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static string _tempPath;
+
+        /// <summary>
+        /// Path to the ACS prj file for the ACS shapefiles
+        /// </summary>
+        public static readonly string AcsPrjFilePath; 
+
         static Settings()
         {
             try
@@ -18,12 +28,21 @@ namespace Azavea.NijPredictivePolicing.Common
                 //Under normal operation, we want entry assembly path
                 //However, when running with NUnit, this throws an exception, whereas GetCallingAssembly 
                 //works fine.  We therefore try both.
-                Settings.ApplicationPath = Path.GetDirectoryName(
-                    System.Reflection.Assembly.GetCallingAssembly().GetName().CodeBase).Replace("file:\\", "");
-                Settings.ApplicationPath = Path.GetDirectoryName(
-                    System.Reflection.Assembly.GetEntryAssembly().GetName().CodeBase).Replace("file:\\", "");
-                //Why does CodeBase have "file:\\" in front of the path so none of the MS 
-                //file utilities recognize it?  Only Microsoft knows.
+
+                Assembly a = Assembly.GetEntryAssembly();
+                if (a == null)
+                {
+                    a = Assembly.GetCallingAssembly();
+                }
+
+                if (a != null)
+                {
+                    Settings.ApplicationPath = Path.GetDirectoryName(a.GetName().CodeBase).Replace("file:\\", "");
+                }
+                else
+                {
+                    Settings.ApplicationPath = Environment.CurrentDirectory;
+                }
             }
             catch
             {
@@ -36,6 +55,8 @@ namespace Azavea.NijPredictivePolicing.Common
             _tempPath = FileUtilities.SafePathEnsure(Settings.ApplicationPath, "Data");
             AcsPrjFilePath = Path.Combine(Settings.ApplicationPath, "WGS84NAD83.prj"); 
         }
+
+
 
         public static Config ConfigFile;
 
@@ -54,12 +75,8 @@ namespace Azavea.NijPredictivePolicing.Common
         /// </summary>
         public static readonly string ApplicationPath;
 
+        
 
-//#if DEBUG
-//        private static string _tempPath = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\ACSImporter";
-//#else
-        private static string _tempPath;
-//#endif
 
         /// <summary>
         /// Gets (and creates) the path to the Applications Temporary Folder
@@ -86,45 +103,47 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <summary>
         /// URL for the US Census FTP site root
         /// </summary>
-        public const string CensusFtpRoot = "http://www2.census.gov";
+        public static string CensusFtpRoot { get { return Settings.ConfigFile.Get("CensusFtpRoot", string.Empty); } }
 
         /// <summary>
         /// Directory containing the current ACS multi-year predictive data, relative to CensusFtpRoot
         /// </summary>
-        public const string CurrentAcsDirectory = "acs2005_2009_5yr";
+        public static string CurrentAcsDirectory { get { return Settings.ConfigFile.Get("CurrentAcsDirectory", string.Empty); } }
 
         /// <summary>
         /// Directory containing the summary files, relative to CurrentAcsDirectory
         /// </summary>
-        public const string SummaryFileDirectory = "summaryfile";
+        public static string SummaryFileDirectory { get { return Settings.ConfigFile.Get("SummaryFileDirectory", string.Empty); } }
 
         /// <summary>
         /// Directory containing the zip file with files mapping column names to sequence numbers, relative to SummaryFileDirectory
         /// </summary>
-        public const string ColumnMappingsFileDirectory = "UserTools";
+        public static string ColumnMappingsFileDirectory { get { return Settings.ConfigFile.Get("ColumnMappingsFileDirectory", string.Empty); } }
 
         /// <summary>
         /// The name of the zip file containing files mapping column names to sequence numbers
         /// </summary>
-        public const string ColumnMappingsFileName = "2005-2009_SummaryFileXLS";
+        public static string ColumnMappingsFileName { get { return Settings.ConfigFile.Get("ColumnMappingsFileName", string.Empty); } }
 
-        public const string ColumnMappingsFileExtension = ".zip";
-
-        /// <summary>
-        /// Full URL of the zip file containing files mapping column names to sequence numbers
-        /// </summary>
-        public const string CurrentColumnMappingsFileUrl =
-            CensusFtpRoot + "/" +
-            CurrentAcsDirectory + "/" +
-            SummaryFileDirectory + "/" +
-            ColumnMappingsFileDirectory + "/" +
-            ColumnMappingsFileName + ColumnMappingsFileExtension;
+        public static string ColumnMappingsFileExtension { get { return Settings.ConfigFile.Get("ColumnMappingsFileExtension", ".zip"); } }
 
         /// <summary>
         /// Directory containing the raw data tables by state, relative to SummaryFileDirectory
         /// </summary>
-        public const string CurrentAcsAllStateTablesDirectory = "2005-2009_ACSSF_By_State_All_Tables";
+        public static string CurrentAcsAllStateTablesDirectory { get { return Settings.ConfigFile.Get("CurrentAcsAllStateTablesDirectory", string.Empty); } }
 
+
+        /// <summary>
+        /// Full URL of the zip file containing files mapping column names to sequence numbers
+        /// </summary>
+        public static string CurrentColumnMappingsFileUrl 
+        {            
+            get
+            {
+                var url = Settings.ConfigFile.Get("CurrentColumnMappingsFileUrl", string.Empty);
+                            return FillInTokenString(url);
+            }
+        }
 
         /// <summary>
         /// URL pointing to the folder containing all the ACS state tables
@@ -133,68 +152,129 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             get
             {
-                return string.Concat(CensusFtpRoot,
-                '/', CurrentAcsDirectory,
-                '/', SummaryFileDirectory,
-                '/', CurrentAcsAllStateTablesDirectory
-                    );
+                var url = Settings.ConfigFile.Get("CurrentAcsAllStateTablesUrl", string.Empty);
+                return FillInTokenString(url);
             }
         }
 
         /// <summary>
-        /// Currently the files in CurrentAcsAllStateTablesDirectory are named by the convention [state name] + BlockGroupsDataTableSuffix
+        /// Assumes a string contains one or more {configKey} tokens, and replaces them with relevant values from the config
         /// </summary>
-        public const string BlockGroupsDataTableSuffix = "_Tracts_Block_Groups_Only";
+        /// <param name="formatStr"></param>
+        /// <returns></returns>
+        public static string FillInTokenString(string formatStr)
+        {
+            var keys = Settings.ConfigFile.Keys;
+            if (keys != null)
+            {
+                foreach (var key in keys)
+                {
+                    formatStr = formatStr.Replace(string.Concat("{", key, "}"), Settings.ConfigFile[key] + string.Empty);
+                }
+            }
+            return formatStr;
+        }
+
+
+
 
         /// <summary>
         /// Currently the files in CurrentAcsAllStateTablesDirectory are named by the convention [state name] + BlockGroupsDataTableSuffix
         /// </summary>
-        public const string BlockGroupsFileTypeExtension = ".zip";
+        public static string BlockGroupsDataTableSuffix { get { return Settings.ConfigFile.Get("BlockGroupsDataTableSuffix", string.Empty); } }
+
+        /// <summary>
+        /// Currently the files in CurrentAcsAllStateTablesDirectory are named by the convention [state name] + BlockGroupsDataTableSuffix
+        /// </summary>
+        public static string BlockGroupsFileTypeExtension { get { return Settings.ConfigFile.Get("BlockGroupsFileTypeExtension", ".zip"); } }
 
         /// <summary>
         /// Used in the ShapeFile*Filename variables as a placeholder for the state fips code
         /// </summary>
-        public const string FipsPlaceholder = "{FIPS-code}";
+        public static string FipsPlaceholder { get { return Settings.ConfigFile.Get("FipsPlaceholder", "{FIPS-code}"); } }
 
-        public const string ShapeFileBlockGroupURL = "http://www.census.gov/geo/cob/bdy/bg/bg00shp/";
-        public const string ShapeFileBlockGroupFilename = "bg{FIPS-code}_d00_shp.zip";
+        public static string ShapeFileBlockGroupURL { get { return Settings.ConfigFile.Get("ShapeFileBlockGroupURL", string.Empty); } }
+        public static string ShapeFileBlockGroupFilename { get { return Settings.ConfigFile.Get("ShapeFileBlockGroupFilename", string.Empty); } }
 
-        public const string ShapeFileTractURL = "http://www.census.gov/geo/cob/bdy/tr/tr00shp/";
-        public const string ShapeFileTractFilename = "tr{FIPS-code}_d00_shp.zip";
+        public static string ShapeFileTractURL { get { return Settings.ConfigFile.Get("ShapeFileTractURL", string.Empty); } }
+        public static string ShapeFileTractFilename { get { return Settings.ConfigFile.Get("ShapeFileTractFilename", string.Empty); } }
 
-        public const string ShapeFileCountySubdivisionsURL = "http://www.census.gov/geo/cob/bdy/cs/cs00shp/";
-        public const string ShapeFileCountySubdivisionsFilename = "cs{FIPS-code}_d00_shp.zip";
+        public static string ShapeFileCountySubdivisionsURL { get { return Settings.ConfigFile.Get("ShapeFileCountySubdivisionsURL", string.Empty); } }
+        public static string ShapeFileCountySubdivisionsFilename { get { return Settings.ConfigFile.Get("ShapeFileCountySubdivisionsFilename", string.Empty); } }
 
         //3 digit zips
-        public const string ShapeFileThreeDigitZipsURL = "http://www.census.gov/geo/cob/bdy/zt/z300shp/";
-        public const string ShapeFileThreeDigitZipsFilename = "z3{FIPS-code}_d00_shp.zip";
+        public static string ShapeFileThreeDigitZipsURL { get { return Settings.ConfigFile.Get("ShapeFileThreeDigitZipsURL", string.Empty); } }
+        public static string ShapeFileThreeDigitZipsFilename { get { return Settings.ConfigFile.Get("ShapeFileThreeDigitZipsFilename", string.Empty); } }
 
         //5 digit zips
-        public const string ShapeFileFiveDigitZipsURL = "http://www.census.gov/geo/cob/bdy/zt/z500shp/";
-        public const string ShapeFileFiveDigitZipsFilename = "zt{FIPS-code}_d00_shp.zip";
+        public static string ShapeFileFiveDigitZipsURL { get { return Settings.ConfigFile.Get("ShapeFileFiveDigitZipsURL", string.Empty); } }
+        public static string ShapeFileFiveDigitZipsFilename { get { return Settings.ConfigFile.Get("ShapeFileFiveDigitZipsFilename", string.Empty); } }
 
         //voting
-        public const string ShapeFileVotingURL = "http://www.census.gov/geo/cob/bdy/vt/vt00shp/";
-        public const string ShapeFileVotingFilename = "vt{FIPS-code}_d00_shp.zip";
+        public static string ShapeFileVotingURL { get { return Settings.ConfigFile.Get("ShapeFileVotingURL", string.Empty); } }
+        public static string ShapeFileVotingFilename { get { return Settings.ConfigFile.Get("ShapeFileVotingFilename", string.Empty); } }
 
         //counties
-        public const string ShapeFileCountiesURL = "http://www.census.gov/geo/cob/bdy/co/co00shp/";
-        public const string ShapeFileCountiesFilename = "co{FIPS-code}_d00_shp.zip";
+        public static string ShapeFileCountiesURL { get { return Settings.ConfigFile.Get("ShapeFileCountiesURL", string.Empty); } }
+        public static string ShapeFileCountiesFilename { get { return Settings.ConfigFile.Get("ShapeFileCountiesFilename", string.Empty); } }
 
 
-        /// <summary>
-        /// Path to the ACS prj file for the ACS shapefiles
-        /// </summary>
-        public static readonly string AcsPrjFilePath; 
-        
+
         /// <summary>
         /// Default projection to use if AcsPrjFilePath is missing or invalid
         /// </summary>
-        public const string DefaultPrj = "GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]";
+        public static string DefaultPrj { get { return Settings.ConfigFile.Get("DefaultPrj", string.Empty); } }
 
         /// <summary>
         /// Time to wait in milliseconds for a net connection request to timeout before giving up
-        /// </summary>
-        public const int TimeOutMs = 10000;
+        /// </summary>        
+        public static int TimeOutMs { get { return Settings.ConfigFile.Get("TimeOutMs", 10000); } }
+
+
+        public static void RestoreDefaults()
+        {
+            var c = Settings.ConfigFile;
+            c.Set("CensusFtpRoot", "http:www2.census.gov");
+            c.Set("CurrentAcsDirectory", "acs2005_2009_5yr");
+            c.Set("CurrentAcsAllStateTablesDirectory", "2005-2009_ACSSF_By_State_All_Tables");
+            c.Set("ColumnMappingsFileName", "2005-2009_SummaryFileXLS");
+
+            c.Set("SummaryFileDirectory", "summaryfile");
+            c.Set("ColumnMappingsFileDirectory", "UserTools");
+            c.Set("ColumnMappingsFileExtension", ".zip");
+            c.Set("BlockGroupsDataTableSuffix", "_Tracts_Block_Groups_Only");
+            c.Set("BlockGroupsFileTypeExtension", ".zip");
+
+            c.Set("CurrentColumnMappingsFileUrl", "{CensusFtpRoot}/{CurrentAcsDirectory}/{SummaryFileDirectory}/{ColumnMappingsFileDirectory}/{ColumnMappingsFileName}{ColumnMappingsFileExtension}");
+            c.Set("CurrentAcsAllStateTablesUrl", "{CensusFtpRoot}/{CurrentAcsDirectory}/{SummaryFileDirectory}/{CurrentAcsAllStateTablesDirectory}");
+
+            c.Set("FipsPlaceholder", "{FIPS-code}");
+            c.Set("DefaultPrj", "GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]");
+            c.Set("TimeOutMs", 10000);
+
+            c.Set("ShapeFileBlockGroupURL", "http://www.census.gov/geo/cob/bdy/bg/bg00shp/");
+            c.Set("ShapeFileBlockGroupFilename", "bg{FIPS-code}_d00_shp.zip");
+
+            c.Set("ShapeFileTractURL", "http://www.census.gov/geo/cob/bdy/tr/tr00shp/");
+            c.Set("ShapeFileTractFilename", "tr{FIPS-code}_d00_shp.zip");
+
+            c.Set("ShapeFileCountySubdivisionsURL", "http://www.census.gov/geo/cob/bdy/cs/cs00shp/");
+            c.Set("ShapeFileCountySubdivisionsFilename", "cs{FIPS-code}_d00_shp.zip");
+
+            c.Set("ShapeFileThreeDigitZipsURL", "http://www.census.gov/geo/cob/bdy/zt/z300shp/");
+            c.Set("ShapeFileThreeDigitZipsFilename", "z3{FIPS-code}_d00_shp.zip");
+
+            c.Set("ShapeFileFiveDigitZipsURL", "http://www.census.gov/geo/cob/bdy/zt/z500shp/");
+            c.Set("ShapeFileFiveDigitZipsFilename", "zt{FIPS-code}_d00_shp.zip");
+
+            c.Set("ShapeFileVotingURL", "http://www.census.gov/geo/cob/bdy/vt/vt00shp/");
+            c.Set("ShapeFileVotingFilename", "vt{FIPS-code}_d00_shp.zip");
+
+            c.Set("ShapeFileCountiesURL", "http://www.census.gov/geo/cob/bdy/co/co00shp/");
+            c.Set("ShapeFileCountiesFilename", "co{FIPS-code}_d00_shp.zip");
+
+            c.Save();
+        }
+
     }
 }

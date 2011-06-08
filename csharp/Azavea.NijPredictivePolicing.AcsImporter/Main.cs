@@ -47,7 +47,13 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         protected static void LoadConfigFile()
         {
             Settings.ConfigFile = new Config("importer.config");
+            if (Settings.ConfigFile.IsEmpty())
+            {
+                Settings.RestoreDefaults();
+            }
         }
+
+
 
         protected static void DisplayOptions()
         {
@@ -66,6 +72,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         static void Main(string[] args)
         {
             Init();
+            LoadConfigFile();
             ShowWelcomeScreen();
 
 
@@ -87,7 +94,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
 
             _log.Debug("Done! Press ANY KEY to Quit");
-            //Console.ReadKey();
+            Console.ReadKey();
         }
 
         

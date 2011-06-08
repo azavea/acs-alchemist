@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using Newtonsoft.Json;
 using log4net;
+using Newtonsoft.Json.Linq;
 
 namespace Azavea.NijPredictivePolicing.Common
 {
@@ -15,13 +16,12 @@ namespace Azavea.NijPredictivePolicing.Common
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        //public Dictionary<string, object> _storage = new Dictionary<string, object>();
-        protected JavaScriptObject _data = null;
+        protected Dictionary<string, object> _data = null;
         protected string _filename;
 
         public Config()
         {
-            _data = new JavaScriptObject();
+            _data = new Dictionary<string, object>();
         }
 
         public Config(string filename)
@@ -32,15 +32,19 @@ namespace Azavea.NijPredictivePolicing.Common
         public bool Load(string filename)
         {
             _filename = filename;
-            //_storage = new Dictionary<string, object>();
             _data = null;
             if (File.Exists(filename))
             {
                 string fileContents = File.ReadAllText(filename);
                 if (!string.IsNullOrEmpty(fileContents))
                 {
-                    _data = (JavaScriptObject)JavaScriptConvert.DeserializeObject(fileContents);
-                    return (_data != null) && (_data is JavaScriptObject);
+                    JsonSerializerSettings s = new JsonSerializerSettings();
+                    s.TypeNameHandling = TypeNameHandling.All;
+                    s.TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple;
+
+                    _data = (Dictionary<string, object>)JsonConvert.DeserializeObject(fileContents, s);
+
+                    return (_data != null) && (_data is Dictionary<string, object>);
                 }
                 else
                 {
@@ -55,19 +59,31 @@ namespace Azavea.NijPredictivePolicing.Common
             return false;
         }
 
+        public bool Save()
+        {
+            return Save(string.Empty);
+        }
+
         public bool Save(string filename)
         {
             try
             {
-                _filename = filename;
+                if (!string.IsNullOrEmpty(filename))
+                {
+                    _filename = filename;
+                }
 
                 if (File.Exists(filename))
                 {
                     File.Delete(filename);
                 }
 
-                string fileContents = JavaScriptConvert.SerializeObject(this._data, null);
-                File.WriteAllText(filename, fileContents);
+                JsonSerializerSettings s = new JsonSerializerSettings();
+                s.TypeNameHandling = TypeNameHandling.All;
+                s.TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple;
+                
+                string fileContents = JsonConvert.SerializeObject(this._data, Formatting.Indented, s);
+                File.WriteAllText(_filename, fileContents);
                 return true;
             }
             catch (Exception ex)
@@ -81,7 +97,7 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             try
             {
-                return JavaScriptConvert.SerializeObject(this._data);
+                return JsonConvert.SerializeObject(this._data, Formatting.Indented);
             }
             catch (Exception ex)
             {
@@ -101,18 +117,20 @@ namespace Azavea.NijPredictivePolicing.Common
 
         public List<object> GetList(string key)
         {
-            if ((_data != null) && (_data.ContainsKey(key)))
+            
+            if (_data != null) //&& (_data.ContainsKey(key)))
             {
                 var o = _data[key];
-                if (o is JavaScriptArray)
-                {
-                    return (o as JavaScriptArray);
-                }
-                else if (o is Array)
-                {
+
+                //if (o is JArray)
+                //{
+                    //return (o as JArray);
                     return new List<object>(o as IEnumerable<object>);
-                    
-                }
+                //}
+                //else if (o is Array)
+                //{
+                //    return new List<object>(o as IEnumerable<object>);                    
+                //}
             }
             return null;
         }
@@ -127,13 +145,28 @@ namespace Azavea.NijPredictivePolicing.Common
 
         public void Set<T>(string key, T value)
         {
+            if (_data == null)
+            {
+                _data = new Dictionary<string, object>();
+            }
+
             if (_data != null)
             {
                 _data[key] = value;
             }
         }
 
+        public Dictionary<string, object>.KeyCollection Keys
+        {
+            get
+            {
+                return (_data != null) ? _data.Keys : null;
+            }
+        }
 
-
+        public bool IsEmpty()
+        {
+            return ((_data == null) || (_data.Count == 0));
+        }
     }
 }
