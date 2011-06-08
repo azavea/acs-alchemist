@@ -93,6 +93,16 @@ namespace Azavea.NijPredictivePolicing.Common
             }
         }
 
+        private static T Get<T>(string key, T ifEmpty)
+        {
+            if (Settings.ConfigFile == null)
+            {
+                Settings.ConfigFile = new Config("defaults.config");
+                Settings.RestoreDefaults();
+            }
+            return Settings.ConfigFile.Get<T>(key, ifEmpty);
+        }
+
 
         /*
          * 
@@ -103,34 +113,34 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <summary>
         /// URL for the US Census FTP site root
         /// </summary>
-        public static string CensusFtpRoot { get { return Settings.ConfigFile.Get("CensusFtpRoot", string.Empty); } }
+        public static string CensusFtpRoot { get { return Settings.Get("CensusFtpRoot", string.Empty); } }
 
         /// <summary>
         /// Directory containing the current ACS multi-year predictive data, relative to CensusFtpRoot
         /// </summary>
-        public static string CurrentAcsDirectory { get { return Settings.ConfigFile.Get("CurrentAcsDirectory", string.Empty); } }
+        public static string CurrentAcsDirectory { get { return Settings.Get("CurrentAcsDirectory", string.Empty); } }
 
         /// <summary>
         /// Directory containing the summary files, relative to CurrentAcsDirectory
         /// </summary>
-        public static string SummaryFileDirectory { get { return Settings.ConfigFile.Get("SummaryFileDirectory", string.Empty); } }
+        public static string SummaryFileDirectory { get { return Settings.Get("SummaryFileDirectory", string.Empty); } }
 
         /// <summary>
         /// Directory containing the zip file with files mapping column names to sequence numbers, relative to SummaryFileDirectory
         /// </summary>
-        public static string ColumnMappingsFileDirectory { get { return Settings.ConfigFile.Get("ColumnMappingsFileDirectory", string.Empty); } }
+        public static string ColumnMappingsFileDirectory { get { return Settings.Get("ColumnMappingsFileDirectory", string.Empty); } }
 
         /// <summary>
         /// The name of the zip file containing files mapping column names to sequence numbers
         /// </summary>
-        public static string ColumnMappingsFileName { get { return Settings.ConfigFile.Get("ColumnMappingsFileName", string.Empty); } }
+        public static string ColumnMappingsFileName { get { return Settings.Get("ColumnMappingsFileName", string.Empty); } }
 
-        public static string ColumnMappingsFileExtension { get { return Settings.ConfigFile.Get("ColumnMappingsFileExtension", ".zip"); } }
+        public static string ColumnMappingsFileExtension { get { return Settings.Get("ColumnMappingsFileExtension", ".zip"); } }
 
         /// <summary>
         /// Directory containing the raw data tables by state, relative to SummaryFileDirectory
         /// </summary>
-        public static string CurrentAcsAllStateTablesDirectory { get { return Settings.ConfigFile.Get("CurrentAcsAllStateTablesDirectory", string.Empty); } }
+        public static string CurrentAcsAllStateTablesDirectory { get { return Settings.Get("CurrentAcsAllStateTablesDirectory", string.Empty); } }
 
 
         /// <summary>
@@ -140,7 +150,7 @@ namespace Azavea.NijPredictivePolicing.Common
         {            
             get
             {
-                var url = Settings.ConfigFile.Get("CurrentColumnMappingsFileUrl", string.Empty);
+                var url = Settings.Get("CurrentColumnMappingsFileUrl", string.Empty);
                             return FillInTokenString(url);
             }
         }
@@ -152,7 +162,7 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             get
             {
-                var url = Settings.ConfigFile.Get("CurrentAcsAllStateTablesUrl", string.Empty);
+                var url = Settings.Get("CurrentAcsAllStateTablesUrl", string.Empty);
                 return FillInTokenString(url);
             }
         }
@@ -181,54 +191,54 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <summary>
         /// Currently the files in CurrentAcsAllStateTablesDirectory are named by the convention [state name] + BlockGroupsDataTableSuffix
         /// </summary>
-        public static string BlockGroupsDataTableSuffix { get { return Settings.ConfigFile.Get("BlockGroupsDataTableSuffix", string.Empty); } }
+        public static string BlockGroupsDataTableSuffix { get { return Settings.Get("BlockGroupsDataTableSuffix", string.Empty); } }
 
         /// <summary>
         /// Currently the files in CurrentAcsAllStateTablesDirectory are named by the convention [state name] + BlockGroupsDataTableSuffix
         /// </summary>
-        public static string BlockGroupsFileTypeExtension { get { return Settings.ConfigFile.Get("BlockGroupsFileTypeExtension", ".zip"); } }
+        public static string BlockGroupsFileTypeExtension { get { return Settings.Get("BlockGroupsFileTypeExtension", ".zip"); } }
 
         /// <summary>
         /// Used in the ShapeFile*Filename variables as a placeholder for the state fips code
         /// </summary>
-        public static string FipsPlaceholder { get { return Settings.ConfigFile.Get("FipsPlaceholder", "{FIPS-code}"); } }
+        public static string FipsPlaceholder { get { return Settings.Get("FipsPlaceholder", "{FIPS-code}"); } }
 
-        public static string ShapeFileBlockGroupURL { get { return Settings.ConfigFile.Get("ShapeFileBlockGroupURL", string.Empty); } }
-        public static string ShapeFileBlockGroupFilename { get { return Settings.ConfigFile.Get("ShapeFileBlockGroupFilename", string.Empty); } }
+        public static string ShapeFileBlockGroupURL { get { return Settings.Get("ShapeFileBlockGroupURL", string.Empty); } }
+        public static string ShapeFileBlockGroupFilename { get { return Settings.Get("ShapeFileBlockGroupFilename", string.Empty); } }
 
-        public static string ShapeFileTractURL { get { return Settings.ConfigFile.Get("ShapeFileTractURL", string.Empty); } }
-        public static string ShapeFileTractFilename { get { return Settings.ConfigFile.Get("ShapeFileTractFilename", string.Empty); } }
+        public static string ShapeFileTractURL { get { return Settings.Get("ShapeFileTractURL", string.Empty); } }
+        public static string ShapeFileTractFilename { get { return Settings.Get("ShapeFileTractFilename", string.Empty); } }
 
-        public static string ShapeFileCountySubdivisionsURL { get { return Settings.ConfigFile.Get("ShapeFileCountySubdivisionsURL", string.Empty); } }
-        public static string ShapeFileCountySubdivisionsFilename { get { return Settings.ConfigFile.Get("ShapeFileCountySubdivisionsFilename", string.Empty); } }
+        public static string ShapeFileCountySubdivisionsURL { get { return Settings.Get("ShapeFileCountySubdivisionsURL", string.Empty); } }
+        public static string ShapeFileCountySubdivisionsFilename { get { return Settings.Get("ShapeFileCountySubdivisionsFilename", string.Empty); } }
 
         //3 digit zips
-        public static string ShapeFileThreeDigitZipsURL { get { return Settings.ConfigFile.Get("ShapeFileThreeDigitZipsURL", string.Empty); } }
-        public static string ShapeFileThreeDigitZipsFilename { get { return Settings.ConfigFile.Get("ShapeFileThreeDigitZipsFilename", string.Empty); } }
+        public static string ShapeFileThreeDigitZipsURL { get { return Settings.Get("ShapeFileThreeDigitZipsURL", string.Empty); } }
+        public static string ShapeFileThreeDigitZipsFilename { get { return Settings.Get("ShapeFileThreeDigitZipsFilename", string.Empty); } }
 
         //5 digit zips
-        public static string ShapeFileFiveDigitZipsURL { get { return Settings.ConfigFile.Get("ShapeFileFiveDigitZipsURL", string.Empty); } }
-        public static string ShapeFileFiveDigitZipsFilename { get { return Settings.ConfigFile.Get("ShapeFileFiveDigitZipsFilename", string.Empty); } }
+        public static string ShapeFileFiveDigitZipsURL { get { return Settings.Get("ShapeFileFiveDigitZipsURL", string.Empty); } }
+        public static string ShapeFileFiveDigitZipsFilename { get { return Settings.Get("ShapeFileFiveDigitZipsFilename", string.Empty); } }
 
         //voting
-        public static string ShapeFileVotingURL { get { return Settings.ConfigFile.Get("ShapeFileVotingURL", string.Empty); } }
-        public static string ShapeFileVotingFilename { get { return Settings.ConfigFile.Get("ShapeFileVotingFilename", string.Empty); } }
+        public static string ShapeFileVotingURL { get { return Settings.Get("ShapeFileVotingURL", string.Empty); } }
+        public static string ShapeFileVotingFilename { get { return Settings.Get("ShapeFileVotingFilename", string.Empty); } }
 
         //counties
-        public static string ShapeFileCountiesURL { get { return Settings.ConfigFile.Get("ShapeFileCountiesURL", string.Empty); } }
-        public static string ShapeFileCountiesFilename { get { return Settings.ConfigFile.Get("ShapeFileCountiesFilename", string.Empty); } }
+        public static string ShapeFileCountiesURL { get { return Settings.Get("ShapeFileCountiesURL", string.Empty); } }
+        public static string ShapeFileCountiesFilename { get { return Settings.Get("ShapeFileCountiesFilename", string.Empty); } }
 
 
 
         /// <summary>
         /// Default projection to use if AcsPrjFilePath is missing or invalid
         /// </summary>
-        public static string DefaultPrj { get { return Settings.ConfigFile.Get("DefaultPrj", string.Empty); } }
+        public static string DefaultPrj { get { return Settings.Get("DefaultPrj", string.Empty); } }
 
         /// <summary>
         /// Time to wait in milliseconds for a net connection request to timeout before giving up
         /// </summary>        
-        public static int TimeOutMs { get { return Settings.ConfigFile.Get("TimeOutMs", 10000); } }
+        public static int TimeOutMs { get { return Settings.Get("TimeOutMs", 10000); } }
 
 
         public static void RestoreDefaults()
