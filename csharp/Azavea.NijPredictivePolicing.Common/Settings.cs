@@ -244,7 +244,7 @@ namespace Azavea.NijPredictivePolicing.Common
         public static void RestoreDefaults()
         {
             var c = Settings.ConfigFile;
-            c.Set("CensusFtpRoot", "http:www2.census.gov");
+            c.Set("CensusFtpRoot", "http://www2.census.gov");
             c.Set("CurrentAcsDirectory", "acs2005_2009_5yr");
             c.Set("CurrentAcsAllStateTablesDirectory", "2005-2009_ACSSF_By_State_All_Tables");
             c.Set("ColumnMappingsFileName", "2005-2009_SummaryFileXLS");
