@@ -240,6 +240,34 @@ namespace Azavea.NijPredictivePolicing.Common
         /// </summary>        
         public static int TimeOutMs { get { return Settings.Get("TimeOutMs", 10000); } }
 
+        /// <summary>
+        /// Prefix in front of ACS GEOIDs
+        /// </summary>
+        public static string GeoidPrefix { get { return Settings.Get("GeoidPrefix", "15000US"); } }
+
+        /// <summary>
+        /// Comma separated list of reserved shapefile column names
+        /// </summary>
+        public static HashSet<string> ReservedColumnNames 
+        { 
+            get 
+            {
+                if (_reservedColumnNames == null)
+                {
+                    string names = Settings.Get("ReservedColumnNames", "GEOID,GEOID_STRP");
+                    _reservedColumnNames = new HashSet<string>();
+                    foreach(string name in names.Split(','))
+                    {
+                        _reservedColumnNames.Add(name);
+                    }
+                }
+
+                return _reservedColumnNames;
+            } 
+        }
+
+        private static HashSet<string> _reservedColumnNames = null;
+
 
         public static void RestoreDefaults()
         {
@@ -261,6 +289,8 @@ namespace Azavea.NijPredictivePolicing.Common
             c.Set("FipsPlaceholder", "{FIPS-code}");
             c.Set("DefaultPrj", "GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]");
             c.Set("TimeOutMs", 10000);
+            c.Set("GeoidPrefix", "15000US");
+            c.Set("ReservedColumnNames", "GEOID,GEOID_STRP");
 
             c.Set("ShapeFileBlockGroupURL", "http://www.census.gov/geo/cob/bdy/bg/bg00shp/");
             c.Set("ShapeFileBlockGroupFilename", "bg{FIPS-code}_d00_shp.zip");

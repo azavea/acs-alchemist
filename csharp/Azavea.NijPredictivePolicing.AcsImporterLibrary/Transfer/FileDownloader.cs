@@ -22,10 +22,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public static bool GetFileByURL(string desiredURL, string filePath)
         {
+            bool preExists = false;
             if (File.Exists(filePath))
             {
                 //don't keep harassing the server if the file is less than one week old, for Pete's sake.
                 TimeSpan elapsed = (DateTime.Now - File.GetCreationTime(filePath));
+                preExists = true;
                 if (elapsed.TotalDays < 7)
                 {
                     _log.DebugFormat("File {0} is less than 7 days old, skipping", Path.GetFileName(filePath));
@@ -36,7 +38,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
             int retries = 0;
 
-            while (!File.Exists(filePath) && retries < 4)
+            while ((!File.Exists(filePath) || preExists) && retries < 4)
             {
                 try
                 {

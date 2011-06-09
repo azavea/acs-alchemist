@@ -41,11 +41,12 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new CmdLineArg() { Flag = "outputProjection", Description = "Provide the .prj file of a desired projection to operate in", DataType=typeof(string), PropertyName="OutputProjection"},
             new CmdLineArg() { Flag = "includeEmptyGridCells", Description = "Keeps empty grid cells during export", DataType=typeof(string), PropertyName="IncludeEmptyGridCells"},
 
-            new CmdLineArg() { Flag = "outputFolder", Description = "Specify where you'd like the results saved", DataType=typeof(string), PropertyName="OutputFolder"},
+            new CmdLineArg() { Flag = "outputFolder", Description = "Specify where you'd like the results saved", DataType=typeof(string), PropertyName = "OutputFolder"},
             new CmdLineArg() { Flag = "preserveJam", Description = "Optional flag to preserve jam values", DataType=typeof(string), PropertyName="PreserveJam"},
             
             new CmdLineArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
             new CmdLineArg() { Flag = "listSummaryLevels", Description = "Displays a list of available census summary levels", DataType=typeof(string), PropertyName="DisplaySummaryLevels"},
+            new CmdLineArg() { Flag = "stripGEOIDcolumn", Description = "Adds an extra column to the shapefile output named GEOID_STRP that contains the same data as the GEOID column but without the \"15000US\" prefix", DataType=typeof(string), PropertyName = "AddStrippedGEOIDcolumn" }
             //This command is now kind of useless now that we discovered how mangled these variable names actually are
             //new CmdLineArg() { Flag = "exportVariables", Description = "Exports a CSV of all variables to allVariables.csv", DataType=typeof(string), PropertyName="ExportVariables"}
         };
@@ -71,6 +72,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public string IncludeEmptyGridCells { get; set; }
         public string OutputFolder { get; set; }
         public string PreserveJam { get; set; }
+        public string AddStrippedGEOIDcolumn { get; set; }
         
         
 
@@ -218,12 +220,31 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         manager.OutputFolder = this.OutputFolder;
                         if (!string.IsNullOrEmpty(OutputFolder) && !Directory.Exists(OutputFolder))
                         {
-                            _log.FatalFormat("The output folder you specified ( {0} ) doesn't exist, exiting",
-                                OutputFolder);
-                            return false;
+                            //Let's be nice and try to create it for them
+                            bool error = false;
+                            DirectoryInfo outDir = null;
+                            try
+                            {
+                                outDir = Directory.CreateDirectory(OutputFolder);
+                            }
+                            catch
+                            {
+                                error = true;
+                            }
+                            error |= (outDir == null);
+
+                            if (error)
+                            {
+                                _log.FatalFormat("The output folder you specified ( {0} ) doesn't exist, exiting",
+                                    OutputFolder);
+                                return false;
+                            }
+                            else
+                                return true;
                         }
 
                         manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
+                        manager.AddStrippedGEOIDcolumn = (!string.IsNullOrEmpty(this.AddStrippedGEOIDcolumn));
                         //manager.SRID = Utilities.GetAs<int>(this.ExportFilterSRID, -1);
 
                         if (string.IsNullOrEmpty(this.OutputProjection))

@@ -96,9 +96,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         /// SRID to use for shapefile filter
         /// </summary>
         //public int SRID;
+
+        /// <summary>
+        /// If true, add column GEOID_STRP to the shapefile output with values the same as GEOID except without the "15000US" prefix
+        /// </summary>
+        public bool AddStrippedGEOIDcolumn = false;
         
-
-
         
         public IDataClient DbClient;
 
@@ -1177,6 +1180,11 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         t.AddAttribute("GEOID", shapeDict[id]["GEOID"]);
                     }
 
+                    if (this.AddStrippedGEOIDcolumn)
+                    {
+                        t.AddAttribute("GEOID_STRP", (t["GEOID"] as string).Replace(Settings.GeoidPrefix, ""));
+                    }
+
                     features.Add(new Feature(geom, t));
                 }
 
@@ -1212,9 +1220,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                             //produces more sane results.
                             t.AddAttribute(Utilities.EnsureMaxLength(col.ColumnName, 10), null);
                         }
+
                         if (!variablesHaveGeoID)
                         {
                             t.AddAttribute("GEOID", shapeDict[id]["GEOID"]);
+                        }
+
+                        if (this.AddStrippedGEOIDcolumn)
+                        {
+                            t.AddAttribute("GEOID_STRP", (t["GEOID"] as string).Replace(Settings.GeoidPrefix, ""));
                         }
                         t["LOGRECNO"] = id;
                         features.Add(new Feature(geom, t));
@@ -1243,10 +1257,13 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName + " where 0 = 1 ");
                     header = ShapefileHelper.SetupHeader(variablesDT);
                 }
+
                 ShapefileHelper.AddColumn(header, "GEOID", typeof(string));
+                if (this.AddStrippedGEOIDcolumn)
+                {
+                    ShapefileHelper.AddColumn(header, "GEOID_STRP", typeof(string));
+                }
 
-
-                
                 header.NumRecords = exportFeatures.Count;
 
                 string newShapefilename = Path.Combine(Environment.CurrentDirectory, tableName);
