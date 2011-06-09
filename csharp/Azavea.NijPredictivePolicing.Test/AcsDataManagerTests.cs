@@ -11,6 +11,7 @@ using Azavea.NijPredictivePolicing.Common;
 using Azavea.NijPredictivePolicing.Common.DB;
 using System.Text;using System;using log4net.Core;
 using System.Data;
+using System.Data.Common;
 namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 {
     [TestFixture]
@@ -84,55 +85,41 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
                     man.CreateColumnMappingsTable(conn);
                 }
 
+                /* Failures */
+                AssertFailedImport(Invalid101Lines, man, conn);
+                AssertFailedImport(InvalidAllDupes, man, conn);
+                AssertFailedImport(InvalidAllms, man, conn);
+                AssertFailedImport(InvalidEmpty, man, conn);
+                AssertFailedImport(InvalidLotsOfDupes, man, conn);
+                AssertFailedImport(InvalidTruncCollisions, man, conn);
+
+                /* Successes */
                 DataTable dt = null;
-
-                Assert.IsTrue(File.Exists(Invalid101Lines));
-                man.DesiredVariablesFilename = Invalid101Lines;
-                dt = man.GetRequestedVariables(conn);
-                Assert.IsTrue(dt == null);
-
-                Assert.IsTrue(File.Exists(InvalidAllDupes));
-                man.DesiredVariablesFilename = InvalidAllDupes;
-                dt = man.GetRequestedVariables(conn);
-                Assert.IsTrue(dt == null);
-
-                Assert.IsTrue(File.Exists(InvalidAllms));
-                man.DesiredVariablesFilename = InvalidAllms;
-                dt = man.GetRequestedVariables(conn);
-                Assert.IsTrue(dt == null);
-
-                Assert.IsTrue(File.Exists(InvalidEmpty));
-                man.DesiredVariablesFilename = InvalidEmpty;
-                dt = man.GetRequestedVariables(conn);
-                Assert.IsTrue(dt == null);
-
-                Assert.IsTrue(File.Exists(InvalidLotsOfDupes));
-                man.DesiredVariablesFilename = InvalidLotsOfDupes;
-                dt = man.GetRequestedVariables(conn);
-                Assert.IsTrue(dt == null);
-
-                Assert.IsTrue(File.Exists(InvalidTruncCollisions));
-                man.DesiredVariablesFilename = InvalidTruncCollisions;
-                dt = man.GetRequestedVariables(conn);
-                Assert.IsTrue(dt == null);
-
                 //105 should really be 100, but there are duplicate rows in columnMappings
                 //See http://192.168.1.2/FogBugz/default.asp?19869
                 //If/when that bug gets fixed, 105 should be changed to 100 and this comment deleted
-                Assert.IsTrue(File.Exists(Valid100Lines));
+                Assert.IsTrue(File.Exists(Valid100Lines), "Could not find test file " + Valid100Lines);
                 man.DesiredVariablesFilename = Valid100Lines;
                 dt = man.GetRequestedVariables(conn);
-                Assert.AreEqual(dt.Rows.Count, 105);
+                Assert.AreEqual(dt.Rows.Count, 105, 
+                    "Unexpected number of rows returned for file " + Valid100Lines);
 
                 dt = null;
-
-                Assert.IsTrue(File.Exists(ValidNoNames));
+                Assert.IsTrue(File.Exists(ValidNoNames), "Could not find test file " + ValidNoNames);
                 man.DesiredVariablesFilename = ValidNoNames;
                 dt = man.GetRequestedVariables(conn);
-                Assert.AreEqual(dt.Rows.Count, 105);
+                Assert.AreEqual(dt.Rows.Count, 105, 
+                    "Unexpected number of rows returned for file " + ValidNoNames);
             }
         }
 
+        private void AssertFailedImport(string filename, AcsDataManager man, DbConnection conn)
+        {
+            Assert.IsTrue(File.Exists(filename), "Could not find test file " + filename);
+            man.DesiredVariablesFilename = filename;
+            DataTable dt = man.GetRequestedVariables(conn);
+            Assert.IsTrue(dt == null, "Non-null DataTable returned for file " + filename);
+        }
 
         //private List<string> GetParsingLog(string columnFile)
         //{
