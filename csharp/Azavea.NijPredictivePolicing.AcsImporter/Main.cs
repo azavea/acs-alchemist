@@ -6,6 +6,7 @@ using log4net;
 using log4net.Appender;
 using log4net.Layout;
 using Azavea.NijPredictivePolicing.Common;
+using System.IO;
 
 namespace Azavea.NijPredictivePolicing.AcsDataImporter
 {
@@ -46,7 +47,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         protected static void LoadConfigFile()
         {
-            Settings.ConfigFile = new Config("importer.config");
+            Settings.ConfigFile = new Config(Path.Combine(Settings.ApplicationPath, "importer.config"));
             if (Settings.ConfigFile.IsEmpty())
             {
                 Settings.RestoreDefaults();
@@ -92,9 +93,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 DisplayOptions();
             }
 
-
+#if DEBUG
             _log.Debug("Done! Press ANY KEY to Quit");
             Console.ReadKey();
+#endif
         }
 
         
