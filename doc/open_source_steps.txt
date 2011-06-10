@@ -1,0 +1,15 @@
+
+Jeff: Step 1: Talk to Robert ;-)
+
+Jeff: Step 2: Go over the code with a fine-toothed comb, making sure every potentially embarrassing comment or variable name is fixed. I'd generally suggest getting someone not from your team to help with that, because it's too easy to overlook your own stuff
+
+Jeff: Step 3: Make sure you've got the correct license header on every file
+
+Jeff: Hmm I would have sworn we had a wiki page with the license info, but I can't find it
+
+http://fastdao.git.sourceforge.net/git/gitweb.cgi?p=fastdao/Azavea.Open.DAO;a=blob;f=Azavea.Open.DAO.LICENSE.txt
+Jeff: Step 4: Make sure when if you build any releases to include the license file with the binaries, not just with the source
+
+
+
+http://fastdao.git.sourceforge.net/git/gitweb.cgi?p=fastdao/Azavea.Open.DAO;a=blob;f=Azavea.Open.DAO.LICENSE.txt

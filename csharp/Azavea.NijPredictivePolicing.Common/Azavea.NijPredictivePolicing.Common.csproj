@@ -93,6 +93,7 @@
     <Compile Include="CmdLineJobBase.cs" />
     <Compile Include="ColNameToSeqNumberTable.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Data\CommaSeparatedValueReader.cs" />
     <Compile Include="Data\CommaSeparatedValueWriter.cs" />
     <Compile Include="Data\FileWriterHelpers.cs" />

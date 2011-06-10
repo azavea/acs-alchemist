@@ -92,6 +92,7 @@
     <Compile Include="AcsDataManagerTests.cs" />
     <Compile Include="AcsImporterLibrary\AreaDownloaderTests.cs" />
     <Compile Include="AcsImporterLibrary\ShapefileHelperTests.cs" />
+    <Compile Include="Common\CmdLineJobBaseTests.cs" />
     <Compile Include="Common\ConfigTests.cs" />
     <Compile Include="Common\Data\CommaSeparatedValueTests.cs" />
     <Compile Include="Common\Data\FixedWidthColumnFileTests.cs" />
