@@ -68,15 +68,27 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
             man.WorkingPath = Path.Combine(man.WorkingPath, "ColumnFiles");
             man.CheckColumnMappingsFile();
 
-            string Invalid101Lines = Path.Combine(man.WorkingPath,          "Invalid101Lines.txt");
-            string InvalidAllDupes = Path.Combine(man.WorkingPath,          "InvalidAllDupes.txt");
-            string InvalidAllms = Path.Combine(man.WorkingPath,             "InvalidAllms.txt");
-            string InvalidEmpty = Path.Combine(man.WorkingPath,             "InvalidEmpty.txt");
-            string InvalidLotsOfDupes = Path.Combine(man.WorkingPath,       "InvalidLotsOfDupes.txt");
-            string InvalidTruncCollisions = Path.Combine(man.WorkingPath,   "InvalidTruncCollisions.txt");
+            List<string> invalidInputs = new List<string>(16);
+
+            invalidInputs.Add("Invalid101Lines.txt");
+            invalidInputs.Add("InvalidAllDupes.txt");
+            invalidInputs.Add("InvalidEmpty.txt");
+            invalidInputs.Add("InvalidLotsOfDupes.txt");
+            invalidInputs.Add("InvalidMoECollisions.txt");
+            invalidInputs.Add("InvalidReservedCollisions.txt");
+            invalidInputs.Add("InvalidTruncCollisions.txt");
+
+            for(int i = 0; i < invalidInputs.Count; i++)
+            {
+                invalidInputs[i] = Path.Combine(man.WorkingPath, invalidInputs[i]);
+            }
+
+            /************************************************************************************/
+
             string Valid100Lines = Path.Combine(man.WorkingPath,            "Valid100Lines.txt");
             string ValidNoNames = Path.Combine(man.WorkingPath,             "ValidNoNames.txt");
 
+            /************************************************************************************/
 
             using (var conn = man.DbClient.GetConnection())
             {
@@ -86,15 +98,14 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
                 }
 
                 /* Failures */
-                AssertFailedImport(Invalid101Lines, man, conn);
-                AssertFailedImport(InvalidAllDupes, man, conn);
-                AssertFailedImport(InvalidAllms, man, conn);
-                AssertFailedImport(InvalidEmpty, man, conn);
-                AssertFailedImport(InvalidLotsOfDupes, man, conn);
-                AssertFailedImport(InvalidTruncCollisions, man, conn);
+                foreach (string file in invalidInputs)
+                {
+                    AssertFailedImport(file, man, conn);
+                }
 
                 /* Successes */
                 DataTable dt = null;
+
                 //105 should really be 100, but there are duplicate rows in columnMappings
                 //See http://192.168.1.2/FogBugz/default.asp?19869
                 //If/when that bug gets fixed, 105 should be changed to 100 and this comment deleted
