@@ -255,11 +255,7 @@ namespace Azavea.NijPredictivePolicing.Common
                 if (_reservedColumnNames == null)
                 {
                     string names = Settings.Get("ReservedColumnNames", "GEOID,GEOID_STRP");
-                    _reservedColumnNames = new HashSet<string>();
-                    foreach(string name in names.Split(','))
-                    {
-                        _reservedColumnNames.Add(name);
-                    }
+                    _reservedColumnNames = new HashSet<string>(names.Split(','));
                 }
 
                 return _reservedColumnNames;
