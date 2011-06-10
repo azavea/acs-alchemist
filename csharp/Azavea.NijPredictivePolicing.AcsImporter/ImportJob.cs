@@ -218,29 +218,11 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
                         manager.OutputProjectionFilename = this.OutputProjection;
                         manager.OutputFolder = this.OutputFolder;
-                        if (!string.IsNullOrEmpty(OutputFolder) && !Directory.Exists(OutputFolder))
+                        if (FileUtilities.SafePathEnsure(OutputFolder) != OutputFolder)
                         {
-                            //Let's be nice and try to create it for them
-                            bool error = false;
-                            DirectoryInfo outDir = null;
-                            try
-                            {
-                                outDir = Directory.CreateDirectory(OutputFolder);
-                            }
-                            catch
-                            {
-                                error = true;
-                            }
-                            error |= (outDir == null);
-
-                            if (error)
-                            {
-                                _log.FatalFormat("The output folder you specified ( {0} ) doesn't exist, exiting",
-                                    OutputFolder);
-                                return false;
-                            }
-                            else
-                                return true;
+                            _log.FatalFormat("The output folder you specified ( {0} ) doesn't exist, exiting",
+                                OutputFolder);
+                            return false;
                         }
 
                         manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));

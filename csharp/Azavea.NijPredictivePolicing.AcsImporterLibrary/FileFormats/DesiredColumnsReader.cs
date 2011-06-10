@@ -80,10 +80,11 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                     string varTruncAlias = varRealAlias;
                     string mvarTruncAlias = Utilities.EnsureMaxLength(Settings.MoEPrefix + varTruncAlias, 10);
                     duplicateMoeAliases.Add(mvarTruncAlias);
+
                     if (varRealAlias.Length > 10)
                     {
                         //Shapefiles have a 10 character column name limit :(
-                        _log.WarnFormat("Line:{0}, \"{1}\" name was too long, truncating to 10 characters", line, varRealAlias);
+                        _log.WarnFormat("Line {0}: \"{1}\" name was too long, truncating to 10 characters", line, varRealAlias);
                         varTruncAlias = Utilities.EnsureMaxLength(varRealAlias, 10);
                     }
 
