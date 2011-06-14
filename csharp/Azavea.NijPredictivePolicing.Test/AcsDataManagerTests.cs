@@ -45,18 +45,19 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 
             features = man.GetFilteringGeometries(GetShapePath(man, "DoesNotExist.shp"), 
                 GeographicCoordinateSystem.WGS84);
-            Assert.AreEqual(features, null);
+            Assert.AreEqual(null, features, "Shapefile shouldn't exist!");
 
             features = man.GetFilteringGeometries(GetShapePath(man, "bg42_d00.shp"), GeographicCoordinateSystem.WGS84);
-            Assert.AreEqual(features, null);
+            Assert.AreEqual(null, features, "Shapefile shouldn't exist!");
 
             features = man.GetFilteringGeometries(GetShapePath(man, "bg42_d00_nosrid.shp"), 
                 GeographicCoordinateSystem.WGS84);
-            Assert.IsTrue(features.Count > 0);
+
+            Assert.Greater(features.Count, 0, "Should be more than zero features!");
 
             features = man.GetFilteringGeometries(GetShapePath(man, "bg42_d00_srid.shp"), 
                 GeographicCoordinateSystem.WGS84);
-            Assert.IsTrue(features.Count > 0);
+            Assert.Greater(features.Count, 0, "Should be more than zero features!");
 
             features2 = man.GetFilteringGeometries(GetShapePath(man, "bg42_d00_srid.shp"),
                 GeographicCoordinateSystem.WGS84);

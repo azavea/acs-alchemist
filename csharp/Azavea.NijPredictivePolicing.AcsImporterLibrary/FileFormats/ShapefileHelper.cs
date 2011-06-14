@@ -15,6 +15,9 @@ using GeoAPI.CoordinateSystems;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 {
+    /// <summary>
+    /// This class contains a number of small utilities to simplify the use of shapefiles in the importer
+    /// </summary>
     public static class ShapefileHelper
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);

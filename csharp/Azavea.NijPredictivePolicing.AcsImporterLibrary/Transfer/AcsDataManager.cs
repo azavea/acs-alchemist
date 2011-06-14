@@ -671,7 +671,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public List<IGeometry> GetFilteringGeometries(string filename, ICoordinateSystem outputCrs)
         {
-            if ((!string.IsNullOrEmpty(filename)) || (!File.Exists(filename)))
+            if ((string.IsNullOrEmpty(filename)) || (!File.Exists(filename)))
             {
                 _log.ErrorFormat("GetFilteringGeometries failed, shapefile is empty or does not exist {0} ", filename);
                 return null;

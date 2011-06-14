@@ -8,32 +8,24 @@ using System.IO;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 {
+    /// <summary>
+    /// This class contains fixed width column definitons for reading the ACS geography file
+    /// </summary>
     public class GeographyFileReader : IDisposable
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         protected FixedWidthColumnReader _reader;
         public bool HasFile = false;
 
+        /// <summary>
+        /// Opens a geography file
+        /// </summary>
+        /// <param name="filename"></param>
         public GeographyFileReader(string filename)
         {
             this.HasFile = File.Exists(filename);
             _reader = new FixedWidthColumnReader(filename, GeographyFileReader.Columns);
         }
-
-        //public GeographyFileReader(AcsState aState)
-        //{
-        //    string filename = FileLocator.GetStateBlockGroupGeographyFilename(aState);
-        //    if (!string.IsNullOrEmpty(filename))
-        //    {
-        //        _reader = new FixedWidthColumnReader(filename, GeographyFileReader.Columns);
-        //        this.HasFile = File.Exists(filename);
-        //    }
-        //    else
-        //    {
-        //        _log.ErrorFormat("Couldn't locate geography file for state {0}", aState);
-        //    }            
-        //}
-
 
         public FixedWidthColumnReader GetReader()
         {

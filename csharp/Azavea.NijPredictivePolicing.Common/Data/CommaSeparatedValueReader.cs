@@ -161,6 +161,13 @@ namespace Azavea.NijPredictivePolicing.Common.Data
                 GetColumns();
             }
 
+            public enum MagicReturnValues
+            {
+                ISCOMMA = -1,
+                ISNEWLINE = -2,
+                ISEOF = -3
+            }
+
             /// <summary>
             /// Used to seek to next comma or newline.  If the current char is a , or a newline, it returns -a value less than 0 and advances to the next field (either 1 or 2 places depending on CRLF).  Otherwise, it advances 1 and returns the character read.
             /// </summary>
@@ -169,30 +176,27 @@ namespace Azavea.NijPredictivePolicing.Common.Data
             protected static int IsCurrentCommaOrNewLine(FileStream fs)
             {
                 int temp = fs.ReadByte();
-                char c = (char)temp;
-
-                if (c == Delim)
-                    return -1;
-                else if (c == '\n')
-                    return -2;
-                else if (temp == -1)
-                    return -3;
-
-                //Could be followed by '\n' (stupid windows) so we have to check
-                else if (c == '\r')
+                if (temp == -1)
                 {
-                    int next = fs.ReadByte();
-
-                    if ((char)next != '\n')
-                    {
-                        //Oops, went too far, go back one
-                        fs.Seek(-1, SeekOrigin.Current);
-                    }
-
-                    return -2;
+                    return (int)MagicReturnValues.ISEOF;
                 }
 
-                return (int)c;
+                char c = (char)temp;
+                switch (c)
+                {
+                    case Delim: return (int)MagicReturnValues.ISCOMMA;
+                    case '\n': return (int)MagicReturnValues.ISNEWLINE;
+                    case '\r':
+                        int next = fs.ReadByte();
+                        if ((char)next != '\n')
+                        {
+                            //Oops, went too far, go back one
+                            fs.Seek(-1, SeekOrigin.Current);
+                        }
+                        return (int)MagicReturnValues.ISNEWLINE;
+                    default:
+                        return c;
+                }
             }
 
             /// <summary>
@@ -207,31 +211,31 @@ namespace Azavea.NijPredictivePolicing.Common.Data
 
                 int first;
                 if (fs.CanRead && (fs.Position < fs.Length))
+                {
                     first = IsCurrentCommaOrNewLine(fs);
-                //EOF
+                }                
                 else
                 {
+                    //EOF
                     lastFieldInRow = true;
                     return "";
                 }
-
-                //Comma
-                if (first == -1)
+                
+                if (first == (int)MagicReturnValues.ISCOMMA)
                 {
+                    //Comma
                     lastFieldInRow = false;
                     return "";
                 }
-
-                //Newline
-                else if (first == -2)
+                else if (first == (int)MagicReturnValues.ISNEWLINE)
                 {
+                    //Newline
                     lastFieldInRow = true;
                     return "";
-                }
-
-                //EOF (Should never get here)
-                else if (first == -3)
+                }                
+                else if (first == (int)MagicReturnValues.ISEOF)
                 {
+                    //EOF (Should never get here)
                     lastFieldInRow = true;
                     return "";
                 }
@@ -241,43 +245,33 @@ namespace Azavea.NijPredictivePolicing.Common.Data
                 {
                     while (fs.CanRead && (fs.Position < fs.Length))
                     {
-                        //Calling IsCurrentCommaOrNewLine allows us to convert all newlines to '\n'
-                        int next = IsCurrentCommaOrNewLine(fs);
+                        int next = fs.ReadByte();
+                        c = (char)next;
                         if (next == -1)
                         {
-                            buffer.Append(Delim);
-                            continue;
+                            throw new Exception("EOF hit inside a quoted string, unterminated \"s");
                         }
-                        else if (next == -2)
-                        {
-                            buffer.Append('\n');
-                            continue;
-                        }
-                        else if (next < 0) throw new Exception("Error in CSV parser, please debug");
-
-                        c = (char)next;
-                        if (c == '\"')
+                        else if (next == '\"')
                         {
                             next = fs.ReadByte();
                             c = (char)next;
 
-                            //End of input, we're done
+
                             if (next < 0)
                             {
+                                //End of input, we're done
                                 lastFieldInRow = true;
                                 break;
                             }
-
-                            //First " was escaped, add one quote and keep going
                             else if (c == '\"')
                             {
+                                //First " was escaped, add one quote and keep going
                                 buffer.Append('\"');
                                 continue;
                             }
-
-                            //End of quoted string, seek until next , and then exit
                             else
                             {
+                                //End of quoted string, seek until next , and then exit
                                 //Seek to end of field
                                 if (c == Delim)
                                 {
@@ -295,7 +289,11 @@ namespace Azavea.NijPredictivePolicing.Common.Data
                             }
                         }
                         else
+                        {
                             buffer.Append(c);
+                        }
+
+
                     }
                 }
                 else
