@@ -19,41 +19,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private static readonly Regex _forbiddenShapefiles;
-
-        static ShapefileHelper()
-        {
-            StringBuilder newRegex = new StringBuilder(512);
-
-            string [] levels = new string[] {
-                Settings.ShapeFileBlockGroupFilename,
-                Settings.ShapeFileTractFilename,
-                Settings.ShapeFileCountySubdivisionsFilename,
-                Settings.ShapeFileVotingFilename,
-                Settings.ShapeFileThreeDigitZipsFilename,
-                Settings.ShapeFileFiveDigitZipsFilename,
-                Settings.ShapeFileCountiesFilename
-                };
-
-            foreach (string level in levels)
-            {
-                string temp = level.Replace(Settings.FipsPlaceholder, "\\d{2}").Replace("_shp.zip", "");
-                newRegex.Append("^").Append(temp).Append("$").Append("|");
-            }
-
-            ShapefileHelper._forbiddenShapefiles = new Regex(newRegex.ToString(0, newRegex.Length - 1));
-        }
-
-        public static bool OpenShapefile(string filename, string tableName)
-        {
-            string databaseFileName = Path.Combine(Path.GetDirectoryName(filename), "shape.dat");
-            var client = new SqliteDataClient(databaseFileName);
-
-            using (DbConnection conn = client.GetConnection())
-            {
-                return ShapefileHelper.ImportShapefile(conn, client, filename, tableName);
-            }
-        }
 
         /// <summary>
         /// Imports a shapefile into the database.  Do not use this to load census shapefiles.
@@ -66,46 +31,42 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             CRS = null;
             if ((string.IsNullOrEmpty(filename)) || (!File.Exists(filename)))
             {
-                _log.ErrorFormat("Couldn't find file {0}", filename);
-                return false;
-            }
-
-            if (ShapefileHelper.IsForbiddenShapefileName(Path.GetFileNameWithoutExtension(filename)))
-            {
-                _log.ErrorFormat("{0} conflicts with a census shapefile name, please rename", filename);
+                _log.ErrorFormat("LoadShapefile failed: filename was empty or file does not exist {0}", filename);
                 return false;
             }
 
             try
             {
+                string fileWithoutExt = Path.GetFileNameWithoutExtension(filename);
+                string prjFileName = Path.Combine(Path.GetDirectoryName(filename), fileWithoutExt) + ".prj";
+
+                if (ShapefileHelper.IsForbiddenShapefileName(fileWithoutExt))
+                {
+                    _log.ErrorFormat("LoadShapefile failed: {0} conflicts with a reserved census shapefile name, please rename", fileWithoutExt);
+                    return false;
+                }
+
+                if (File.Exists(prjFileName))
+                {
+                    CRS = Utilities.GetCoordinateSystemByWKTFile(prjFileName);
+                }
+                else
+                {
+                    _log.ErrorFormat("LoadShapefile failed: shapefile {0} is missing a .prj file.", filename);
+                    return false;
+                }
+
                 //string workingDirectory = FileUtilities.SafePathEnsure(TempPath, Path.GetFileNameWithoutExtension(filename));
                 using (DbConnection conn = DbClient.GetConnection())
                 {
-                    string prjFileName = Path.Combine(Path.GetDirectoryName(filename),
-                        Path.GetFileNameWithoutExtension(filename)) + ".prj";
-                    if (File.Exists(prjFileName))
+                    if (!ShapefileHelper.ImportShapefile(conn, DbClient, filename, fileWithoutExt))
                     {
-                        CRS = Utilities.GetCoordinateSystemByWKTFile(prjFileName);
-                    }
-                    else
-                    {
-                        _log.ErrorFormat("Could not locate the .prj file for {0}.  Please use a shapefile with a specified coordinate system", filename);
-                        return false;
-                    }
-
-                    if (ShapefileHelper.ImportShapefile(conn, DbClient, filename, Path.GetFileNameWithoutExtension(filename)))
-                    {
-                        
-
-                        _log.Debug("Shapefile imported successfully...");
-                    }
-                    else
-                    {
-                        _log.Error("Error while importing shapefile.");
+                        _log.Error("LoadShapefile failed: unable to import shapefile.");
                         return false;
                     }
                 }
 
+                _log.Debug("Shapefile imported successfully...");
                 return true;
             }
             catch (Exception ex)
@@ -117,8 +78,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         }
 
 
-        public static bool ImportShapefile(DbConnection conn, IDataClient client, 
-            string filename, string tableName)
+        /// <summary>
+        /// Imports the provided shapefile into a sqlite database using the VirtualShape extension
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="client"></param>
+        /// <param name="filename"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        public static bool ImportShapefile(DbConnection conn, IDataClient client, string filename, string tableName)
         {
             try
             {
@@ -127,28 +95,30 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                     client.GetCommand("DROP TABLE " + tableName).ExecuteNonQuery();
                 }
 
-                //string databaseFileName = Path.Combine(Path.GetDirectoryName(filename), "shape.dat");
-
                 //trim off the '.shp' from the end
                 filename = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename));
                 string sql = string.Format("CREATE VIRTUAL TABLE " + tableName + " USING VirtualShape('{0}', CP1252, foo);", filename);
                 client.GetCommand(sql, conn).ExecuteNonQuery();
-                
+
                 _log.DebugFormat("Imported Shapefile {0} into table {1}",
                     Path.GetFileNameWithoutExtension(filename),
                     tableName);
 
                 return true;
-
             }
             catch (Exception ex)
             {
-                _log.Error("Error loading shapefile", ex);
+                _log.Error("ImportShapefile failed: Error while loading shapefile ", ex);
             }
             return false;
         }
 
 
+        /// <summary>
+        /// Helper function for checking structure of existing Db
+        /// </summary>
+        /// <param name="client"></param>
+        /// <returns></returns>
         public static DataTable GetSchema(SqliteDataClient client)
         {
             if (client == null)
@@ -156,7 +126,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
             using (DbConnection conn = client.GetConnection())
             {
-                var dt = conn.GetSchema();
+                //var dt = conn.GetSchema();
                 return conn.GetSchema("Tables");
             }
         }
@@ -168,8 +138,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         /// <returns></returns>
         public static bool MakeCensusProjFile(string filename)
         {
-            string prjFileName = Path.Combine(Path.GetDirectoryName(filename), 
+            string prjFileName = Path.Combine(Path.GetDirectoryName(filename),
                 Path.GetFileNameWithoutExtension(filename)) + ".prj";
+
             try
             {
                 if (!File.Exists(Settings.AcsPrjFilePath))
@@ -184,8 +155,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                     File.Copy(Settings.AcsPrjFilePath, prjFileName);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                _log.Error("MakeCensusProjFile failed: An exception was thrown ", ex);
                 return false;
             }
 
@@ -193,19 +165,26 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         }
 
         /// <summary>
-        /// A .prj file seems to be exactly what we're asking for as input, so copy er over.
+        /// Copies an existing .prj file next to an existing shapefile (with correct destination name)
         /// </summary>
         /// <param name="wktProjFilename"></param>
         /// <param name="newShapefilename"></param>
         /// <returns></returns>
-        public static bool MakeOutputProjFile(string wktProjFilename, string filename)
+        public static bool MakeOutputProjFile(string sourceProjectionFilename, string destShapefilename)
         {
-            string prjFileName = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)) + ".prj";
-            File.WriteAllText(prjFileName, File.ReadAllText(wktProjFilename));
+            string prjFileName = Path.Combine(
+                Path.GetDirectoryName(destShapefilename), 
+                Path.GetFileNameWithoutExtension(destShapefilename)) + ".prj";
+
+            File.Copy(sourceProjectionFilename, prjFileName, true);        //File.WriteAllText(prjFileName, File.ReadAllText(wktProjFilename));
             return true;
         }
 
 
+        /// <summary>
+        /// Constructs the default GeometryFactory for 4269 (census projection)
+        /// </summary>
+        /// <returns></returns>
         public static GeometryFactory GetGeomFactory()
         {
             //Geographic - 4269 - North America NAD83, Geographic, decimal degrees
@@ -213,13 +192,23 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             return new GeometryFactory(new PrecisionModel(), 4269);
         }
 
+        ///// <summary>
+        ///// Helper function for cre
+        ///// </summary>
+        ///// <param name="shapefilename"></param>
+        ///// <param name="acsState"></param>
+        ///// <returns></returns>
+        //public static System.Data.DataTable GetTable(string shapefilename, AcsState acsState)
+        //{
+        //    return Shapefile.CreateDataTable(shapefilename, acsState.ToString(), ShapefileHelper.GetGeomFactory());
+        //}
 
-        public static System.Data.DataTable GetTable(string shapefilename, AcsState acsState)
-        {
-            return Shapefile.CreateDataTable(shapefilename, acsState.ToString(), ShapefileHelper.GetGeomFactory());
-        }
 
-
+        /// <summary>
+        /// Consumes an ADO.net datatable and correctly initializes a Shapefile header object
+        /// </summary>
+        /// <param name="table"></param>
+        /// <returns></returns>
         public static DbaseFileHeader SetupHeader(DataTable table)
         {
             DbaseFileHeader header = new DbaseFileHeader();
@@ -234,6 +223,49 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             return header;
         }
 
+        /// <summary>
+        /// Helper function for SetupHeader, correctly maps C# data types to DbaseFileHeader types
+        /// </summary>
+        /// <param name="header"></param>
+        /// <param name="columnName"></param>
+        /// <param name="t"></param>
+        public static void AddColumn(DbaseFileHeader header, string columnName, Type t)
+        {
+            columnName = Utilities.EnsureMaxLength(columnName, 10);
+
+            if (t == typeof(bool))
+            {
+                header.AddColumn(columnName, 'L', 1, 0);
+            }
+            else if (t == typeof(string))
+            {
+                header.AddColumn(columnName, 'C', 254, 0);
+            }
+            else if (t == typeof(DateTime))
+            {
+                // D stores only the date
+                //retVal.AddColumn(shapefileColumnName, 'D', 8, 0);
+                header.AddColumn(columnName, 'C', 22, 0);
+            }
+            else if (t == typeof(float) || t == typeof(double) || t == typeof(decimal))
+            {
+                header.AddColumn(columnName, 'N', 18, 10);
+            }
+            else if (t == typeof(short) || t == typeof(int) || t == typeof(long)
+                || t == typeof(ushort) || t == typeof(uint) || t == typeof(ulong))
+            {
+                header.AddColumn(columnName, 'N', 18, 0);
+            }
+
+        }
+
+
+        /// <summary>
+        /// Helper function for constructing the correct census URL for a particular Boundary Level / State
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="stateFips"></param>
+        /// <returns></returns>
         public static string GetRemoteShapefileURL(BoundaryLevels level, string stateFips)
         {
             string url = string.Empty;
@@ -276,60 +308,51 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             return url;
         }
 
-
-        //public static void DisplayBoundaryLevels()
-        //{
-        //    Type enumType = typeof(BoundaryLevels);
-        //    var levels = Enum.GetValues(enumType);
-
-        //    _log.Debug("Boundary Levels: ");
-        //    foreach (var value in levels)
-        //    {
-        //        _log.Debug(value);
-        //    }
-        //}
-
-
+        /// <summary>
+        /// Checks to make sure a given table name doesn't conflict
+        /// with any of the census shapefiles
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static bool IsForbiddenShapefileName(string name)
         {
-            return ShapefileHelper._forbiddenShapefiles.IsMatch(name.ToLower().Replace(".shp", ""));
+            string[] levels = new string[] {
+                Settings.ShapeFileBlockGroupFilename,
+                Settings.ShapeFileTractFilename,
+                Settings.ShapeFileCountySubdivisionsFilename,
+                Settings.ShapeFileVotingFilename,
+                Settings.ShapeFileThreeDigitZipsFilename,
+                Settings.ShapeFileFiveDigitZipsFilename,
+                Settings.ShapeFileCountiesFilename
+                };
+
+            StringBuilder newRegex = new StringBuilder(512);
+            foreach (string level in levels)
+            {
+                string temp = level.Replace(Settings.FipsPlaceholder, "\\d{2}").Replace("_shp.zip", "");
+                newRegex.Append("^").Append(temp).Append("$").Append("|");
+            }
+
+            var regex = new Regex(newRegex.ToString(0, newRegex.Length - 1));
+            return regex.IsMatch(name.ToLower().Replace(".shp", ""));
         }
 
-
-
-
-
-
-        public static void AddColumn(DbaseFileHeader header, string columnName, Type t)
+        /// <summary>
+        /// Helper function for testing the shapefile importer
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        public static bool OpenShapefile(string filename, string tableName)
         {
-            columnName = Utilities.EnsureMaxLength(columnName, 10);
-            
-            if (t == typeof(bool))
-            {
-                header.AddColumn(columnName, 'L', 1, 0);
-            }
-            else if (t == typeof(string))
-            {
-                header.AddColumn(columnName, 'C', 254, 0);
-            }
-            else if (t == typeof(DateTime))
-            {
-                // D stores only the date
-                //retVal.AddColumn(shapefileColumnName, 'D', 8, 0);
-                header.AddColumn(columnName, 'C', 22, 0);
-            }
-            else if (t == typeof(float) || t == typeof(double) || t == typeof(decimal))
-            {
-                header.AddColumn(columnName, 'N', 18, 10);
-            }
-            else if (t == typeof(short) || t == typeof(int) || t == typeof(long)
-                || t == typeof(ushort) || t == typeof(uint) || t == typeof(ulong))
-            {
-                header.AddColumn(columnName, 'N', 18, 0);
-            }
+            string databaseFileName = Path.Combine(Path.GetDirectoryName(filename), "shape.dat");
+            var client = new SqliteDataClient(databaseFileName);
 
+            using (DbConnection conn = client.GetConnection())
+            {
+                return ShapefileHelper.ImportShapefile(conn, client, filename, tableName);
+            }
         }
-
 
 
     }

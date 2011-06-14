@@ -95,7 +95,10 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
             {
                 if (!DataClient.HasTable(conn, man.DbClient, "columnMappings"))
                 {
-                    man.CreateColumnMappingsTable(conn);
+                    if (!man.CreateColumnMappingsTable(conn))
+                    {
+                        Assert.Fail("Could not import sequence files");
+                    }
                 }
 
                 /* Failures */

@@ -8,11 +8,15 @@ using Azavea.NijPredictivePolicing.Common.Data;
 using System.Data.Common;
 using Azavea.NijPredictivePolicing.Common.DB;
 using Azavea.NijPredictivePolicing.Common;
+using System.Data;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 {
     /// <summary>
-    /// Input should be a csv list of (CENSUS_TABLE_ID, Name) pairs, where CENSUS_TABLE_ID is a foreign key into columnMappings.CENSUS_TABLE_ID.  Name is it's description, and is optional.
+    /// Input should be a csv list of (CENSUS_TABLE_ID, Name) pairs, 
+    /// where:
+    /// CENSUS_TABLE_ID: is a foreign key into columnMappings.CENSUS_TABLE_ID
+    /// Name: is an optional alias
     /// </summary>
     public class DesiredColumnsReader : CommaSeparatedValueReader
     {
@@ -21,206 +25,207 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         public string tempTableName;
 
         public const string DropTableSQL = "DROP TABLE IF EXISTS {0};";
-        public const string CreateTableSQL = @"DROP TABLE IF EXISTS {0}; CREATE TABLE {0} (
+        public const string CreateTableSQL = 
+            @"DROP TABLE IF EXISTS {0}; CREATE TABLE {0} (
             CENSUS_TABLE_ID VARCHAR(32) NOT NULL PRIMARY KEY,
             CUSTOM_COLUMN_NAME VARCHAR(10));";
 
-        //public string GetCreateTableSQL(string tablename)
-        //{
-        //    return string.Format(CreateTableSQL, tablename);
-        //}
+        public void RemoveTemporaryTable(DbConnection conn, IDataClient client)
+        {
+            client.GetCommand(string.Format(DropTableSQL, tempTableName), conn).ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Helper function for ImportDesiredVariables
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <param name="line"></param>
+        /// <param name="keys"></param>
+        private void AddIntToDict(Dictionary<string, List<int>> dict, int line, params string[] keys)
+        {
+            if ((keys == null) || (keys.Length == 0))
+                return;
+
+            for (int i = 0; i < keys.Length; i++)
+            {
+                string key = keys[i];
+                if (!dict.ContainsKey(key))
+                    dict[key] = new List<int>();
+
+                dict[key].Add(line);
+            }
+        }
+
+        /// <summary>
+        /// Helper function for ImportDesiredVariables
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <param name="line"></param>
+        /// <param name="keys"></param>
+        private void IfSetAddIntToDict(HashSet<string> set, Dictionary<string, List<int>> dict, int line, params string[] keys)
+        {
+            if ((keys == null) || (keys.Length == 0))
+                return;
+
+            for (int i = 0; i < keys.Length; i++)
+            {
+                string key = keys[i];
+
+                if (!set.Contains(key))
+                {
+                    continue;
+                }
+
+                if (!dict.ContainsKey(key))
+                    dict[key] = new List<int>();
+
+                dict[key].Add(line);
+            }
+        }
+
+        
 
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="client"></param>
+        /// <param name="filename"></param>
+        /// <param name="tablename"></param>
+        /// <returns></returns>
         public bool ImportDesiredVariables(DbConnection conn, IDataClient client, string filename, string tablename)
         {
+            int line = 0;
+
             if ((string.IsNullOrEmpty(filename)) || (!File.Exists(filename)))
             {
-                _log.Debug("No Variable File Found");
+                _log.DebugFormat("ImportDesiredVariables failed: provided filename was empty or did not exist \"{0}\" ", filename);
                 return false;
             }
 
-            int line = 0;
-
             try
             {
-                tempTableName = tablename;
-                var duplicateLines = new Dictionary<string, List<int>>(256);
-                var reservedLines = new List<int>(256);
-                var duplicateInputAliases = new HashSet<string>();
-                var duplicateMoeAliases = new HashSet<string>();
-
                 //empty/create our temporary table
+                tempTableName = tablename;
                 client.GetCommand(string.Format(CreateTableSQL, tempTableName), conn).ExecuteNonQuery();
 
                 string selectAllSQL = string.Format("select * from {0}", tempTableName);
                 var dt = DataClient.GetMagicTable(conn, client, selectAllSQL);
+                dt.Columns.Add("errorColumn", typeof(string));    //TEMP
+                dt.Columns.Add("Line", typeof(int));    //TEMP
 
-                //Constraints will help us catch errors (Also: Iron helps us play.)
-                //dt.Constraints.Add("CENSUS_TABLE_ID Primary Key", dt.Columns["CENSUS_TABLE_ID"], true);
-                //dt.Constraints.Add("CUSTOM_COLUMN_NAME Unique", dt.Columns["CUSTOM_COLUMN_NAME"], false);
-               
-               if (string.IsNullOrEmpty(_filename))
+                if (string.IsNullOrEmpty(_filename))
                 {
                     this.LoadFile(filename);
                 }
 
+                var reservedColumns = Settings.ReservedColumnNames;
+                var uniqueColumnNames = new HashSet<string>();
+                var columnConflicts = new Dictionary<string, List<int>>();
+                var reservedConflicts = new Dictionary<string, List<int>>();
 
+                
                 foreach (List<string> row in this)
                 {
-                    line++;
+                    line++;     //base 1
 
                     if ((row.Count < 1) || (string.IsNullOrEmpty(row[0])))
+                    {
+                        //skip blank lines
                         continue;
+                    }
                     if (row.Count > 2)
-                        _log.WarnFormat("Line {0} has more than two fields, all fields after the first two will be ignored", line);
-
-
-                    string varName = row[0];
-                    string varRealAlias = (row.Count > 1) ? row[1] : row[0];
-                    string varTruncAlias = varRealAlias;
-                    string mvarTruncAlias = Utilities.EnsureMaxLength(Settings.MoEPrefix + varTruncAlias, 10);
-                    duplicateMoeAliases.Add(mvarTruncAlias);
-
-                    if (varRealAlias.Length > 10)
                     {
-                        //Shapefiles have a 10 character column name limit :(
-                        _log.WarnFormat("Line {0}: \"{1}\" name was too long, truncating to 10 characters", line, varRealAlias);
-                        varTruncAlias = Utilities.EnsureMaxLength(varRealAlias, 10);
+                        _log.WarnFormat("Line {0}: too many fields ({1}) provided, using first two", line, row.Count);
                     }
 
 
-                    if (!duplicateLines.ContainsKey(varTruncAlias))
+                    string variableID = row[0];
+                    string variableAlias = (row.Count > 1) ? row[1] : row[0];
+                    string marginErrorAlias = Utilities.EnsureMaxLength(Settings.MoEPrefix + variableAlias, 10);
+                    if (variableAlias.Length > 10)
                     {
-                        duplicateLines.Add(varTruncAlias, new List<int>(4));
-                        duplicateLines[varTruncAlias].Add(line);
-                    }
-                    else
-                    {
-                        duplicateLines[varTruncAlias].Add(line);
-                        duplicateInputAliases.Add(varTruncAlias);
+                        _log.WarnFormat("Line {0}: \"{1}\" name was too long, truncating to 10 characters", line, variableAlias);
+                        variableAlias = Utilities.EnsureMaxLength(variableAlias, 10);
                     }
 
+                    ////Track duplicates
+                    AddIntToDict(columnConflicts, line, variableAlias, marginErrorAlias);
+                    IfSetAddIntToDict(reservedColumns, reservedConflicts, line, variableAlias, marginErrorAlias);
 
-                    //Make sure m + name isn't here either, b/c we create it later.
-                    if (!duplicateLines.ContainsKey(mvarTruncAlias))
-                    {
-                        duplicateLines.Add(mvarTruncAlias, new List<int>(4));
-                        duplicateLines[mvarTruncAlias].Add(line);
-                    }
-                    else
-                    {
-                        duplicateLines[mvarTruncAlias].Add(line);
-                    }
+                    //uniqueColumnNames.Add(variableAlias);
+                    //uniqueColumnNames.Add(marginErrorAlias);
 
-                    if (Settings.ReservedColumnNames.Contains(varTruncAlias)
-                        || Settings.ReservedColumnNames.Contains(mvarTruncAlias))
-                    {
-                        reservedLines.Add(line);
-                    }
 
-                    dt.Rows.Add(varName, varTruncAlias);
+                    dt.Rows.Add(variableID, variableAlias);//, marginErrorAlias, line);
                 }
 
                 if ((dt == null) || (dt.Rows.Count == 0))
                 {
-                    _log.Error("No variables imported!");
+                    _log.Error("No variable names provided!");
                     return false;
                 }
 
-                bool success = true;
-                StringBuilder error = new StringBuilder(1024);
-                error.AppendFormat("Some errors were encountered while reading file {0}\n", filename);
 
-                //PRE: duplicateMoeAliases contains the name of every MoE column generated
-                //POST: duplicateMoeAliases contains only the names of duplicated MoE columns
-                duplicateMoeAliases.IntersectWith(duplicateInputAliases);
 
-                //PRE: duplicateInputAliases contains the name of every duplicated column
-                //POST: duplicateInputAliases contains the name of every duplicated column 
-                //  except those that were also duplicated MoE columns
-                duplicateInputAliases.ExceptWith(duplicateMoeAliases);
+                bool noConflicts = true;
 
-                if (duplicateInputAliases.Count > 0)
+                StringBuilder dupsSB = new StringBuilder();
+                foreach (string column in columnConflicts.Keys)
                 {
-                    error.Append("The following duplicate variables were found:\n");
-                    foreach (string name in duplicateInputAliases.OrderBy(x => x))
-                    {
-                        error.Append(name).Append(" (lines ");
-                        foreach (int myLine in duplicateLines[name])
-                        {
-                            error.Append(myLine).Append(", ");
-                        }
-                        error.Remove(error.Length - 2, 2);
-                        error.Append(")\n");
+                    var lines = columnConflicts[column];
+                    if (lines.Count > 1)
+                    {                        
+                        dupsSB.Append(column).Append(": line(s) ");
+                        for (int i = 0; i < lines.Count; i++) { if (i > 0) { dupsSB.Append(","); } dupsSB.Append(lines[i]); }
+                        dupsSB.Append(Environment.NewLine);
                     }
-                    error.Append("\n");
-
-                    success = false;
+                }
+                if (dupsSB.Length > 0)
+                {
+                    _log.ErrorFormat("The File {0} contained duplicate or conflicting columns.\r\nPlease resolve these conflicts to continue:\r\n{1}", filename, dupsSB.ToString());                                        
+                    _log.ErrorFormat("Note that all variables include a Margin of Error column named \"{0}\" + [column name] which can cause duplicates to be created.", Settings.MoEPrefix);
+                    noConflicts = false;
                 }
 
-
-                if (duplicateMoeAliases.Count > 0)
+                StringBuilder reservedSB = new StringBuilder();
+                foreach (string column in reservedConflicts.Keys)
                 {
-                    error.Append("The following variables were automatically generated and resulted in duplicates:\n");
-                    foreach (string name in duplicateMoeAliases.OrderBy(x => x))
+                    var lines = reservedConflicts[column];
+                    if (lines.Count >= 1)
                     {
-                        error.Append(name).Append(" duplicated on lines (");
-                        foreach (int myLine in duplicateLines[name])
-                        {
-                            error.Append(myLine).Append(", ");
-                        }
-                        error.Remove(error.Length - 2, 2);
-                        error.Append(")\n");
+                        reservedSB.Append(column).Append(": line(s) ");
+                        for (int i = 0; i < lines.Count; i++) { if (i > 0) { reservedSB.Append(","); } reservedSB.Append(lines[i]); }
+                        reservedSB.Append(Environment.NewLine);
                     }
-                    error.Append("\n");
-
-                    success = false;
                 }
-
-                if (reservedLines.Count > 0)
+                if (reservedSB.Length > 0)
                 {
-                    error.Append("The following lines contained names that are reserved by the importer (names that are reserved include ");
-
-                    foreach (string name in Settings.ReservedColumnNames.OrderBy(x => x))
-                    {
-                        error.Append(name).Append(", ");
-                    }
-                    error.Remove(error.Length - 2, 2);
-                    error.Append("):\n");
-
-                    foreach (int myLine in reservedLines)
-                    {
-                        error.Append(myLine).Append(", ");
-                    }
-                    error.Remove(error.Length - 2, 2);
-                    error.Append("\n\n");
-
-                    success = false;
-                }
-
-                if (!success)
-                {
-                    error.AppendFormat("Please modify your column specification file to remove duplicates.  Note that all columns with a given name have a corresponding Margin of Error column named \"{0}\" + [column name] which can cause duplicates to be created.\n", Settings.MoEPrefix);
+                    _log.ErrorFormat("The File {0} contained reserved column names that cannot be used.\r\nPlease remove these conflicts to continue:\r\n{1} ", filename, reservedSB.ToString());
+                    _log.Debug("For reference, the following columns are reserved: " + Settings.ReservedColumnNamesString);                    
+                    noConflicts = false;
                 }
 
                 if (dt.Rows.Count > 100)
                 {
-                    error.AppendFormat("The maximum number of variables this utility can use is 100, but this file contained {0} entries.  Please split your requested variables into multiple files and try again.\n", dt.Rows.Count);
-                    success = false;
+                    _log.ErrorFormat(@"This file contained {0} variables. \n "
+                     + "A maximum of 100 variables are allowed per export job. \n"
+                     + "Please split your requested variables into multiple files and try again.",
+                        dt.Rows.Count);
+
+                    noConflicts = false;
                 }
 
-                if (success == false)
+                if (noConflicts)
                 {
-                    _log.Error(error.ToString());
-                    return false;
+                    _log.Debug("Saving...");
+                    var adapter = DataClient.GetMagicAdapter(conn, client, selectAllSQL);
+                    adapter.Update(dt);
+                    dt.AcceptChanges();
+
+                    return true;
                 }
-
-                _log.Debug("Saving...");
-                var adapter = DataClient.GetMagicAdapter(conn, client, selectAllSQL);
-                adapter.Update(dt);
-                dt.AcceptChanges();
-
-                return true;
             }
             catch (Exception ex)
             {
@@ -233,10 +238,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         }
 
 
-        public void RemoveTemporaryTable(DbConnection conn, IDataClient client)
-        {
-            client.GetCommand(string.Format(DropTableSQL, tempTableName), conn).ExecuteNonQuery();
-        }
+
 
         
     }

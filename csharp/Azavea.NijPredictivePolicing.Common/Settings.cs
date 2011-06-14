@@ -246,23 +246,28 @@ namespace Azavea.NijPredictivePolicing.Common
         public static string GeoidPrefix { get { return Settings.Get("GeoidPrefix", "15000US"); } }
 
         /// <summary>
-        /// Comma separated list of reserved shapefile column names
+        /// set of reserved shapefile column names
         /// </summary>
-        public static HashSet<string> ReservedColumnNames 
-        { 
-            get 
+        public static HashSet<string> ReservedColumnNames
+        {
+            get
             {
-                if (_reservedColumnNames == null)
-                {
-                    string names = Settings.Get("ReservedColumnNames", "GEOID,GEOID_STRP");
-                    _reservedColumnNames = new HashSet<string>(names.Split(','));
-                }
-
-                return _reservedColumnNames;
-            } 
+                return new HashSet<string>(Settings.ReservedColumnNamesString.Split(','));
+            }
         }
 
-        private static HashSet<string> _reservedColumnNames = null;
+        /// <summary>
+        /// list of reserved shapefile column names
+        /// </summary>
+        public static string ReservedColumnNamesString
+        {
+            get
+            {
+                return Settings.Get("ReservedColumnNames", "GEOID,GEOID_STRP");                
+            }
+        }
+
+        
 
 
         public static void RestoreDefaults()
