@@ -39,17 +39,19 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <returns>The path to the deepest subdirectory</returns>
         public static string PathEnsure(string basepath, params string[] chunks)
         {
-            if ((chunks == null) || (chunks.Length == 0))
-            {
+            if (string.IsNullOrEmpty(basepath))
                 return basepath;
-            }
-            for (int i = 0; i < chunks.Length; i++)
-            {
-                basepath = Path.Combine(basepath, chunks[i]);
 
-                if (!Directory.Exists(basepath))
+            if (!Directory.Exists(basepath))
+                Directory.CreateDirectory(basepath);
+
+            if ((chunks != null) && (chunks.Length > 0))
+            {
+                for (int i = 0; i < chunks.Length; i++)
                 {
-                    Directory.CreateDirectory(basepath);
+                    basepath = Path.Combine(basepath, chunks[i]);
+                    if (!Directory.Exists(basepath))
+                        Directory.CreateDirectory(basepath);
                 }
             }
             return basepath;

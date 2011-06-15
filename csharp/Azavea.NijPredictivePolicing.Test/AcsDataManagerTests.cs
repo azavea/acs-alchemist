@@ -4,7 +4,6 @@ using System.IO;
 using System.Collections.Generic;
 using Azavea.NijPredictivePolicing.Test.Helpers;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
-using SharpMap.CoordinateSystems;
 using GeoAPI.Geometries;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary;
 using Azavea.NijPredictivePolicing.Common;
@@ -12,6 +11,7 @@ using Azavea.NijPredictivePolicing.Common.DB;
 using System.Text;using System;using log4net.Core;
 using System.Data;
 using System.Data.Common;
+using ProjNet.CoordinateSystems;
 namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 {
     [TestFixture]

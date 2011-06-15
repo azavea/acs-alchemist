@@ -17,9 +17,9 @@ using Azavea.NijPredictivePolicing.Common.Data;
 using GisSharpBlog.NetTopologySuite.Features;
 using GeoAPI.Geometries;
 using System.Collections;
-using SharpMap.CoordinateSystems;
 using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.CoordinateSystems;
+using ProjNet.CoordinateSystems;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
@@ -307,7 +307,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                         ShapefileHelper.MakeCensusProjFile(fullShapefilename);
                         ShapefileHelper.ImportShapefile(conn, this.DbClient,
-                            fullShapefilename, tablename);
+                            fullShapefilename, tablename, 4269);
 
                         //TODO: multiple shape files in one zip?
                         break;
@@ -677,14 +677,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 return null;
             }
 
-
-            
-            
-
-
             //inputCrs should be valid if LoadShapefile returns true
             ICoordinateSystem inputCrs;
-            if (!ShapefileHelper.LoadShapefile(filename, DbClient, out inputCrs))
+            if (!ShapefileHelper.LoadShapefile(filename, Path.GetFileNameWithoutExtension(filename), DbClient, out inputCrs))
             {
                 _log.Error("Could not load filtering geometries!");
                 return null;
@@ -1234,6 +1229,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 {
                     newShapefilename = Path.Combine(OutputFolder, tableName);
                 }
+                string destPath = Path.GetDirectoryName(newShapefilename);
+                FileUtilities.SafePathEnsure(destPath);
+
                 
                 var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
                 writer.Header = header;

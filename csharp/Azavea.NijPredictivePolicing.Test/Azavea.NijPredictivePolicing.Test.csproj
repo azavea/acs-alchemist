@@ -51,15 +51,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\excelDataReader\Excel.dll</HintPath>
     </Reference>
-    <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">
+    <Reference Include="GeoAPI, Version=1.2.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\geoapi\GeoAPI.dll</HintPath>
+      <HintPath>..\..\lib\nettopologysuite\GeoAPI.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\log4net\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="NetTopologySuite, Version=1.7.3.20585, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="NetTopologySuite, Version=1.8.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\nettopologysuite\NetTopologySuite.dll</HintPath>
     </Reference>
@@ -67,7 +67,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\nunit\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="ProjNET, Version=1.1.2854.24700, Culture=neutral, PublicKeyToken=a1f5bdcd9c6f5740, processorArchitecture=MSIL">
+    <Reference Include="PowerCollections, Version=1.0.2141.24679, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\nettopologysuite\PowerCollections.dll</HintPath>
+    </Reference>
+    <Reference Include="ProjNET, Version=1.2.4157.15258, Culture=neutral, PublicKeyToken=a1f5bdcd9c6f5740, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\nettopologysuite\ProjNET.dll</HintPath>
     </Reference>

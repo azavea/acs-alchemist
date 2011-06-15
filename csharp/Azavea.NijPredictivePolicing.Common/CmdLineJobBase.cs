@@ -63,7 +63,7 @@ namespace Azavea.NijPredictivePolicing.Common
             {
                 int nextSpace = line.IndexOf(' ', idx + 1);
 
-                string flag = line.Substring(idx + 1, nextSpace - (idx + 1));
+                string flag = line.Substring(idx + 1, nextSpace - (idx + 1)).ToLower();
                 string contents = string.Empty;
 
                 idx += 1 + flag.Length;
@@ -120,7 +120,7 @@ namespace Azavea.NijPredictivePolicing.Common
                 for (int p = 0; p < availFlags.Length; p++)
                 {
                     var arg = availFlags[p];
-                    if (arg.Flag == flag)
+                    if (arg.Flag.Equals(flag, StringComparison.CurrentCultureIgnoreCase))
                     {
                         var prop = thisType.GetProperty(arg.PropertyName);
                         prop.SetValue(dest, Utilities.GetAsType(prop.PropertyType, contents, null), null);

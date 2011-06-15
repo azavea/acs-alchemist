@@ -29,7 +29,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         /// <param name="filename">The path of the file to import</param>
         /// <param name="DbClient">The database to load the file into</param>
         /// <returns>True on success, False on failure</returns>
-        public static bool LoadShapefile(string filename, IDataClient DbClient, out ICoordinateSystem CRS)
+        public static bool LoadShapefile(string filename, string tableName, IDataClient DbClient, out ICoordinateSystem CRS)
         {
             CRS = null;
             if ((string.IsNullOrEmpty(filename)) || (!File.Exists(filename)))
@@ -62,7 +62,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                 //string workingDirectory = FileUtilities.SafePathEnsure(TempPath, Path.GetFileNameWithoutExtension(filename));
                 using (DbConnection conn = DbClient.GetConnection())
                 {
-                    if (!ShapefileHelper.ImportShapefile(conn, DbClient, filename, fileWithoutExt))
+                    if (!ShapefileHelper.ImportShapefile(conn, DbClient, filename, tableName, (int)CRS.AuthorityCode))
                     {
                         _log.Error("LoadShapefile failed: unable to import shapefile.");
                         return false;
@@ -89,10 +89,16 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         /// <param name="filename"></param>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        public static bool ImportShapefile(DbConnection conn, IDataClient client, string filename, string tableName)
+        public static bool ImportShapefile(DbConnection conn, IDataClient client, string filename, string tableName, int srid)
         {
             try
             {
+                if (!File.Exists(filename))
+                {
+                    _log.ErrorFormat("ImportShapefile Failed!: File does not exist {0}", filename);
+                    return false;
+                }
+
                 if (DataClient.HasTable(conn, client, tableName))
                 {
                     client.GetCommand("DROP TABLE " + tableName).ExecuteNonQuery();
@@ -100,7 +106,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
                 //trim off the '.shp' from the end
                 filename = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename));
-                string sql = string.Format("CREATE VIRTUAL TABLE " + tableName + " USING VirtualShape('{0}', CP1252, foo);", filename);
+                string sql = string.Format("CREATE VIRTUAL TABLE " + tableName + " USING VirtualShape('{0}', CP1252, {1});", filename, srid);
                 client.GetCommand(sql, conn).ExecuteNonQuery();
 
                 _log.DebugFormat("Imported Shapefile {0} into table {1}",
@@ -353,7 +359,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
             using (DbConnection conn = client.GetConnection())
             {
-                return ShapefileHelper.ImportShapefile(conn, client, filename, tableName);
+                return ShapefileHelper.ImportShapefile(conn, client, filename, tableName, -1);
             }
         }
 

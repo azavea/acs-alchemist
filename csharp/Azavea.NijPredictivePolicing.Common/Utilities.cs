@@ -7,11 +7,11 @@ using Newtonsoft.Json;
 using log4net;
 using GeoAPI.Geometries;
 using GisSharpBlog.NetTopologySuite.Geometries;
-using SharpMap.CoordinateSystems.Transformations;
-using SharpMap.CoordinateSystems;
 using GeoAPI.CoordinateSystems;
 using GeoAPI.CoordinateSystems.Transformations;
 using GisSharpBlog.NetTopologySuite.Features;
+using ProjNet.CoordinateSystems;
+using ProjNet.CoordinateSystems.Transformations;
 
 namespace Azavea.NijPredictivePolicing.Common
 {
