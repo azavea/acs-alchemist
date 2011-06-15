@@ -70,7 +70,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             _log.Debug("");
         }
 
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             Init();
             LoadConfigFile();
@@ -81,7 +81,11 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             if ((args != null) && (args.Length > 0))
             {
                 _log.Debug("Loading arguments...");
-                job.Load(args);
+                if (!job.Load(args))
+                {
+                    _log.Debug("Error while loading arguments. Exiting.");
+                    return -1;
+                }
 
                 if (!job.ExecuteJob())
                 {
@@ -97,6 +101,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             _log.Debug("Done! Press ANY KEY to Quit");
             Console.ReadKey();
 #endif
+            return 0;
         }
 
         

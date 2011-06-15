@@ -85,7 +85,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         }
 
 
-        public void Load(string[] args)
+        public bool Load(string[] args)
         {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < args.Length; i++)
@@ -111,6 +111,11 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         sb.Append(chunk).Append(" ");
                     }
                     line = sb.ToString();
+                }
+                else
+                {
+                    _log.ErrorFormat("The arguments file you provided doesn't exist: {0}", args[0]);
+                    return false;
                 }
             }
 
@@ -154,6 +159,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     }
                 }
             }
+            return true;
         }
 
         #endregion Command Line Stuff
