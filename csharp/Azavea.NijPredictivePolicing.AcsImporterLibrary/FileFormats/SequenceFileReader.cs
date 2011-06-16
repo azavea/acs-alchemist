@@ -9,12 +9,15 @@ using Azavea.NijPredictivePolicing.Common.Data;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 {
+    /// <summary>
+    /// This class contains the column definitions for the ACS Sequence file
+    /// </summary>
     public class SequenceFileReader : IDisposable
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        protected ExcelBinaryReader _reader;
 
+        protected ExcelBinaryReader _reader;
         public bool HasFile = false;
 
         public SequenceFileReader(string filename)

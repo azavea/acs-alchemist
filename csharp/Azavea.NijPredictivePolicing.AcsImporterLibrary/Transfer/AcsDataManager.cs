@@ -17,9 +17,9 @@ using Azavea.NijPredictivePolicing.Common.Data;
 using GisSharpBlog.NetTopologySuite.Features;
 using GeoAPI.Geometries;
 using System.Collections;
-using SharpMap.CoordinateSystems;
 using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.CoordinateSystems;
+using ProjNet.CoordinateSystems;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
@@ -27,17 +27,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        /// <summary>
+        /// Gets selected State FIPS code as a string
+        /// </summary>
+        public string StateFIPS { get { return ((int)(this.State)).ToString("00"); } }
+
+        /// <summary>
+        /// Selected State
+        /// </summary>
         public AcsState State = AcsState.None;
-
-        public const string DesiredColumnsTableName = "desiredColumns";
-
-        public string StateFIPS
-        {
-            get
-            {
-                return ((int)(this.State)).ToString("00");
-            }
-        }
 
         public string WorkingPath;
         public string ShapePath;
@@ -102,7 +100,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         /// </summary>
         public bool AddStrippedGEOIDcolumn = false;
         
-        
+        /// <summary>
+        /// 
+        /// </summary>
         public IDataClient DbClient;
 
 
@@ -117,11 +117,13 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             Init();
         }
 
-
+        /// <summary>
+        /// Initialize our properties, and ensure our path structure is intact
+        /// </summary>
         public void Init()
         {
             this.WorkingPath = FileLocator.GetStateWorkingDir(this.State);
-            
+
             FileUtilities.PathEnsure(this.WorkingPath, "database");
             this.DBFilename = FileUtilities.PathCombine(this.WorkingPath, "database", Settings.CurrentAcsDirectory + ".sqlite");
 
@@ -133,19 +135,22 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             //this.ShpPath = FileLocator.GetStateBlockGroupDataDir(this.State);            
             //this.DBPath = FileUtilities.PathCombine(this.DataPath, this.State.ToString() + ".sqlite");
 
-            this.DbClient = DataClient.GetDefaultClient(this.DBFilename);            
+            this.DbClient = DataClient.GetDefaultClient(this.DBFilename);
         }
+
 
         public string GetLocalBlockGroupZipFileName()
         {
             return FileUtilities.PathCombine(this.WorkingPath, FileLocator.GetStateBlockGroupFileName(this.State));
         }
-
         public string GetLocalGeographyFileName()
         {
             return FileLocator.GetStateBlockGroupGeographyFilename(this.CurrentDataPath);
         }
-
+        public string GetLocalColumnMappingsDirectory()
+        {
+            return FileUtilities.PathCombine(FileLocator.TempPath, Settings.ColumnMappingsFileName);
+        }
         
 
 
@@ -163,66 +168,61 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         //    return Path.Combine(this.WorkingPath, template);
         //}
 
-        public string GetLocalColumnMappingsDirectory()
-        {
-            return FileUtilities.PathCombine(FileLocator.TempPath, Settings.ColumnMappingsFileName);
-        }
-
-
-        /// <summary>
-        /// Downloads the DATA FILE
-        /// </summary>
-        /// <returns></returns>
-        public bool CheckBlockGroupFile()
-        {
-            _log.DebugFormat("Downloading block group file for {0}", this.State);
-
-            string desiredUrl = FileLocator.GetStateBlockGroupUrl(this.State);
-            string destFilepath = GetLocalBlockGroupZipFileName();
-
-            if (FileDownloader.GetFileByURL(desiredUrl, destFilepath))
-            {                
-                if (FileLocator.ExpandZipFile(destFilepath, this.CurrentDataPath))
-                {                    
-                    return true;
-                }
-                else
-                {
-                    _log.Error("Error during decompression, TODO: destroy directory");
-                }
-            }
-            else
-            {
-                _log.Error("An error was encountered while downloading block group data, exiting.");
-            }
-            return false;
-        }
 
         public bool CheckColumnMappingsFile()
         {
             _log.DebugFormat("Downloading column mappings file ({0})", Settings.ColumnMappingsFileName);
 
             string desiredUrl = Settings.CurrentColumnMappingsFileUrl;
-            string destFilepath = FileUtilities.PathCombine(FileLocator.TempPath, 
+            string destFilepath = FileUtilities.PathCombine(FileLocator.TempPath,
                 Settings.ColumnMappingsFileName + Settings.ColumnMappingsFileExtension);
 
-            if (FileDownloader.GetFileByURL(desiredUrl, destFilepath))
-            {                
-                if (FileLocator.ExpandZipFile(destFilepath, GetLocalColumnMappingsDirectory()))
-                {
-                    return true;
-                }
-                else
-                {
-                    _log.Error("Error during decompression, TODO: destroy directory");
-                }
-            }
-            else
+
+            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath))
             {
-                _log.Error("An error was encountered while downloading column mappings file, exiting.");
+                _log.ErrorFormat("Downloading sequence files failed: unable to retrieve {0} ", desiredUrl);
+                return false;
             }
-            return false;
+
+            if (!FileLocator.ExpandZipFile(destFilepath, GetLocalColumnMappingsDirectory()))
+            {
+                _log.ErrorFormat("Downloading sequence files failed: unable to expand file {0}", destFilepath);
+                return false;
+            }
+
+            _log.Debug("Downloading sequence files... Done!");
+            return true;
         }
+
+        /// <summary>
+        /// Downloads the census DATA for the given state
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckBlockGroupFile()
+        {
+            _log.DebugFormat("Downloading census data for {0}", this.State);
+
+            string desiredUrl = FileLocator.GetStateBlockGroupUrl(this.State);
+            string destFilepath = GetLocalBlockGroupZipFileName();
+
+
+            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath))
+            {
+                _log.ErrorFormat("Downloading census data failed: unable to retrieve {0} ", desiredUrl);
+                return false;
+            }
+
+            if (!FileLocator.ExpandZipFile(destFilepath, this.CurrentDataPath))
+            {
+                _log.ErrorFormat("Downloading census data failed: unable to expand file {0}", destFilepath);
+                return false;
+            }
+
+            _log.Debug("Downloading census data... Done!");
+            return true;
+        }
+
+
 
         /// <summary>
         /// Downloads the SHAPE FILEs, must be run before initializing the database!  
@@ -246,7 +246,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 string localPath = Path.Combine(this.WorkingPath, Path.GetFileName(url));
                 string name = level.ToString();
 
-                if (!GetAndBuildShapefile(url, localPath, name, name))
+                if (!DownloadAndImportShapefile(url, localPath, name, name))
                 {
                     return false;
                 }
@@ -255,171 +255,107 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             return true;
         }
 
-
-        public bool GetAndBuildShapefile(string desiredUrl, string destFilepath, string niceName, string tablename)
+        /// <summary>
+        /// Helper function for retrieving a given zip file from a URL, 
+        /// decompressing it, finding a shapefile in it, and importing that into the database
+        /// </summary>
+        /// <param name="desiredUrl"></param>
+        /// <param name="destFilepath"></param>
+        /// <param name="niceName"></param>
+        /// <param name="tablename"></param>
+        /// <returns></returns>
+        public bool DownloadAndImportShapefile(string desiredUrl, string destFilepath, string niceName, string tablename)
         {
             _log.DebugFormat("Downloading shapefile of {0} for {1}", niceName, this.State);
 
-            if (FileDownloader.GetFileByURL(desiredUrl, destFilepath))
+            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath))
             {
-                if (FileLocator.ExpandZipFile(destFilepath, this.ShapePath))
+                _log.ErrorFormat("Shapefile download failed: Could not download {0}", niceName);
+                return false;
+            }
+
+            if (!FileLocator.ExpandZipFile(destFilepath, this.ShapePath))
+            {
+                _log.ErrorFormat("Shapefile import failed: Could not decompress {0}", niceName);
+                return false;
+            }
+            _log.DebugFormat("State {0} decompressed successfully", niceName);
+
+
+            var client = DbClient;
+            using (var conn = client.GetConnection())
+            {
+                if (DataClient.HasTable(conn, client, tablename))
                 {
-                    _log.DebugFormat("State {0} decompressed successfully", niceName);
-
-                    var client = DbClient;
-                    using (var conn = client.GetConnection())
-                    {
-                        if (!DataClient.HasTable(conn, client, tablename))
-                        {
-                            _log.DebugFormat("{0} table not found, importing...", tablename);
-
-                            var filenames = FileUtilities.FindFileNameInZipLike(destFilepath, "*.shp");
-                            if ((filenames != null) && (filenames.Count > 0))
-                            {
-                                foreach (string filename in filenames)
-                                {
-                                    string fullShapefilename = Path.Combine(this.ShapePath, filename);
-
-                                    ShapefileHelper.MakeCensusProjFile(fullShapefilename);
-                                    ShapefileHelper.ImportShapefile(conn, this.DbClient,
-                                        fullShapefilename, tablename);
-
-                                    //TODO: multiple shape files in one zip?
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    _log.DebugFormat("{0} table already exists, skipping...", tablename);
                     return true;
                 }
                 else
                 {
-                    _log.Error("Error during decompression, TODO: destroy directory");
+                    _log.DebugFormat("{0} table not found, importing...", tablename);
+
+                    var filenames = FileUtilities.FindFileNameInZipLike(destFilepath, "*.shp");
+                    if ((filenames == null) || (filenames.Count == 0))
+                    {
+                        _log.ErrorFormat("Compressed file {0} didn't contain a shapefile!", destFilepath);
+                        return false;
+                    }
+
+                    foreach (string filename in filenames)
+                    {
+                        string fullShapefilename = Path.Combine(this.ShapePath, filename);
+
+                        ShapefileHelper.MakeCensusProjFile(fullShapefilename);
+                        ShapefileHelper.ImportShapefile(conn, this.DbClient,
+                            fullShapefilename, tablename, 4269);
+
+                        //TODO: multiple shape files in one zip?
+                        break;
+                    }
                 }
             }
-            else
-            {
-                _log.ErrorFormat("An error was encountered while downloading {0}, exiting.", niceName);
-            }
-            return false;
+            return true;
         }
 
 
 
-        ///// <summary>
-        ///// Downloads the SHAPE FILE, must be run before initializing the database!  
-        ///// Since this will be imported into the database!
-        ///// </summary>
-        ///// <returns></returns>
-        //public bool CheckShapefile()
-        //{
-        //     _log.DebugFormat("Downloading shapefile of block groups for {0}", this.State);
-
-        //    string desiredUrl = this.GetRemoteStateShapefileURL();
-        //    string destFilepath = GetLocalBlockGroupShapefilename();
-
-        //    if (FileDownloader.GetFileByURL(desiredUrl, destFilepath))
-        //    {
-        //        _log.Debug("Download successful");
-
-        //        if (FileLocator.ExpandZipFile(destFilepath, this.ShapePath))
-        //        {
-        //            _log.Debug("State block group file decompressed successfully");
-
-        //            var client = DbClient;
-        //            using (var conn = client.GetConnection())
-        //            {
-        //                if (!DataClient.HasTable(conn, client, "shapetable"))
-        //                {
-        //                    _log.Debug("Shapefile table not found, importing...");
-        //                    CreateShapefileTable(conn, "shapeblockgroups");
-        //                }
-        //            }
-
-        //            return true;
-        //        }
-        //        else
-        //        {
-        //            _log.Error("Error during decompression, TODO: destroy directory");
-        //        }
-        //    }
-        //    else
-        //    {
-        //        _log.Error("An error was encountered while downloading block group data, exiting.");
-        //    }
-        //    return false;
-        //}
-
-        public bool CreateShapefileTable(DbConnection conn, string tableName)
-        {
-            string filename = Directory.GetFiles(this.ShapePath, "*.shp")[0];
-            return ShapefileHelper.ImportShapefile(conn, this.DbClient, filename, tableName);
-        }
-
-        //public string GetLocalShapefileName()
-        //{
-        //    var files = Directory.GetFiles(this.ShapePath, "bg*.shp");
-        //    if ((files != null) && (files.Length > 0))
-        //    {
-        //        return Path.Combine(this.ShapePath, Path.GetFileNameWithoutExtension(files[0]));
-        //    }
-        //    return null;
-        //}
-
-
-        //public DataTable GetShapefileData()
-        //{
-        //    DataTable dt = null;
-        //    try
-        //    {
-        //        string filename = GetLocalShapefileName();
-        //        if (!string.IsNullOrEmpty(filename))
-        //        {
-        //            dt = Shapefile.CreateDataTable(filename, this.State.ToString(), ShapefileHelper.GetGeomFactory());
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _log.Error("Error opening shapefile", ex);
-        //    }
-        //
-        //    return dt;
-        //}
-
-
-
-
+        /// <summary>
+        /// Checks to see if the database exists, and if not, initializes it with the provided inputs
+        /// </summary>
+        /// <returns></returns>
         public bool CheckDatabase()
         {
+            _log.DebugFormat("Looking for local {0} database", this.State);
+
             if (!File.Exists(this.DBFilename))
             {
-                _log.DebugFormat("Database not generated for {0}, building...", this.State);                
-            }
-            else
-            {
-                _log.DebugFormat("Database already generated for {0}", this.State);
+                _log.DebugFormat("Building local {0} database...", this.State);
             }
 
-            this.InitDatabase();
+            if (!this.InitDatabase())
+            {
+                _log.Error("Building local {0} database... Failed!  There was a problem detected.");
+                return false;
+            }
 
             return (DbClient.TestDatabaseConnection());
         }
 
         
 
-        public void CreateGeographiesTable(DbConnection conn)
+        public bool CreateGeographiesTable(DbConnection conn)
         {
-            string geographyTablename = "geographies";
-            string createGeographyTable = DataClient.GenerateTableSQLFromFields(geographyTablename, 
-                GeographyFileReader.Columns);
-            DbClient.GetCommand(createGeographyTable, conn).ExecuteNonQuery();
+            //create the table
+            string createGeographyTableSQL = DataClient.GenerateTableSQLFromFields(DbConstants.TABLE_Geographies,  GeographyFileReader.Columns);
+            DbClient.GetCommand(createGeographyTableSQL, conn).ExecuteNonQuery();
 
+            //parse in the file
             string geographyFilename = GetLocalGeographyFileName();
             GeographyFileReader geoReader = new GeographyFileReader(geographyFilename);
             if (geoReader.HasFile)
             {
                 _log.Debug("Importing Geographies File...");
-                string tableSelect = string.Format("select * from {0}", geographyTablename);
+                string tableSelect = string.Format("select * from {0}", DbConstants.TABLE_Geographies);
                 var adapter = DataClient.GetMagicAdapter(conn, DbClient, tableSelect);
                 var table = DataClient.GetMagicTable(conn, DbClient, tableSelect);
 
@@ -448,23 +384,23 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     table.AcceptChanges();
                 }
 
-
-
-                _log.Debug("Done!");
+                _log.Debug("Importing Geographies File... Done!");
+                return true;
             }
             else
             {
-                _log.Debug("Could not find geographies file, table not initialized!");
+                _log.Debug("Could not find geographies file, table could not be initialized!");
+                return false;
             }
         }
 
-        public void CreateColumnMappingsTable(DbConnection conn)
+        public bool CreateColumnMappingsTable(DbConnection conn)
         {
-            string tableName = "columnMappings";
-            string createSql = DataClient.GenerateTableSQLFromFields(tableName, SequenceFileReader.Columns);
-            DbClient.GetCommand(createSql, conn).ExecuteNonQuery();
+            //create table
+            string createMappingsTableSql = DataClient.GenerateTableSQLFromFields(DbConstants.TABLE_ColumnMappings, SequenceFileReader.Columns);
+            DbClient.GetCommand(createMappingsTableSql, conn).ExecuteNonQuery();
 
-            string tableSelect = string.Format("select * from {0}", tableName);
+            string tableSelect = string.Format("select * from {0}", DbConstants.TABLE_ColumnMappings);
             var adapter = DataClient.GetMagicAdapter(conn, DbClient, tableSelect);
             var table = DataClient.GetMagicTable(conn, DbClient, tableSelect);
 
@@ -547,13 +483,18 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     table.AcceptChanges();
                 }
                 else
+                {
                     _log.Error("Could not read any of the sequence files!");
+                    return false;
+                }
 
-                _log.Debug("Done!");
+                _log.Debug("Importing Sequence Files... Done!");
+                return true;
             }
             else
             {
                 _log.Error("Could not find column mappings directory file, table not initialized!");
+                return false;
             }
         }
 
@@ -576,7 +517,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         {
             if (!DbClient.TestDatabaseConnection())
             {
-                _log.Error("Unable to connect to database");
+                _log.Error("InitDatabase failed: Unable to connect to database");
                 return false;
             }
 
@@ -585,13 +526,21 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 _log.Debug("Checking for geographies table...");
                 if (!DataClient.HasTable(conn, DbClient, "geographies"))
                 {
-                    CreateGeographiesTable(conn);
+                    if (!CreateGeographiesTable(conn))
+                    {
+                        //error message is in guard function
+                        return false;
+                    }
                 }
 
                 _log.Debug("Checking for columnMappings table...");
                 if (!DataClient.HasTable(conn, DbClient, "columnMappings"))
                 {
-                    CreateColumnMappingsTable(conn);
+                    if (!CreateColumnMappingsTable(conn))
+                    {
+                        //error message is in guard function
+                        return false;
+                    }
                 }
             }
 
@@ -655,14 +604,16 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         /// <returns></returns>
         public DataTable GetRequestedVariables(DbConnection conn)
         {
-            _log.Debug("Filtering requested variables");
+            _log.Debug("Processing requested variables... ");
 
             DataTable dt = null;
             if (!string.IsNullOrEmpty(DesiredVariablesFilename))
             {
                 DesiredColumnsReader fileReader = new DesiredColumnsReader();
-                if (fileReader.ImportDesiredVariables(conn, DbClient, 
-                    this.DesiredVariablesFilename, AcsDataManager.DesiredColumnsTableName))
+                bool importSucceeded = fileReader.ImportDesiredVariables(conn, DbClient,
+                    this.DesiredVariablesFilename, DbConstants.TABLE_DesiredColumns);
+
+                if (importSucceeded)
                 {
                     _log.DebugFormat("Variable file {0} imported successfully", this.DesiredVariablesFilename);
                     string getRequestedVariablesSQL = string.Format(
@@ -672,19 +623,22 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                                   {0}.CUSTOM_COLUMN_NAME AS COLNAME 
                         FROM      columnMappings, {0} 
                         WHERE     columnMappings.CENSUS_TABLE_ID = {0}.CENSUS_TABLE_ID;",
-                        AcsDataManager.DesiredColumnsTableName);
+                        DbConstants.TABLE_DesiredColumns);
 
                     dt = DataClient.GetMagicTable(conn, DbClient, getRequestedVariablesSQL);
                     if (dt == null || dt.Rows == null || dt.Rows.Count == 0)
+                    {
                         dt = null;
+                    }
                 }
                 else
                 {
-                    //Just one less error that's spit out when this fails
-                    //_log.Warn("Unable to read/build requested variables list");
+                    _log.Warn("Processing requested variables... Failed!");
+                    return null;
                 }
             }
 
+            _log.Debug("Processing requested variables... Done!");
             return dt;
         }
 
@@ -717,64 +671,61 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public List<IGeometry> GetFilteringGeometries(string filename, ICoordinateSystem outputCrs)
         {
-            List<IGeometry> results = null;
-            ICoordinateSystem inputCrs;
-            if (!string.IsNullOrEmpty(filename))
+            if ((string.IsNullOrEmpty(filename)) || (!File.Exists(filename)))
             {
-                if (!File.Exists(filename))
-                {
-                    _log.Error("Provided shapefile doesn't exist");
-                    return null;
-                }
-
-                //inputCrs is guaranteed to be valid if LoadShapefile returns true
-                if (!ShapefileHelper.LoadShapefile(filename, DbClient, out inputCrs))
-                {
-                    _log.Error("Could not load filtering geometries!");
-                    return null;
-                }
-
-                string tableName = Path.GetFileNameWithoutExtension(filename);
-                string sqlcmd = "SELECT AsBinary(Geometry) AS Geometry FROM " + tableName;
-                var wholeShapeTable = DataClient.GetMagicTable(DbClient.GetConnection(), DbClient, sqlcmd);
-                results = new List<IGeometry>(wholeShapeTable.Rows.Count);
-                ICoordinateTransformation reprojector = null;
-                if (outputCrs != null)
-                {
-                    reprojector = Utilities.BuildTransformationObject(inputCrs, outputCrs);
-                }
-                
-                GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
-                    new GeometryFactory());
-
-                foreach (DataRow row in wholeShapeTable.Rows)
-                {
-                    byte[] geomBytes = (byte[])row["Geometry"];
-                    IGeometry geom = binReader.Read(geomBytes);
-                    if (geom == null || geom.Dimension != Dimensions.Surface)
-                    {
-                        continue;
-                    }
-
-                    if (reprojector != null)
-                    {
-                        geom = Utilities.ReprojectGeometry(geom, reprojector);
-                    }
-
-                    results.Add(geom);
-                }
-
-                //Cleanup so we don't store lots of crap in database
-                sqlcmd = "DROP TABLE " + tableName;
-                var droptable = DbClient.GetCommand(sqlcmd);
-                droptable.ExecuteNonQuery();
-
-                if (results.Count == 0)
-                {
-                    _log.Error("Could not use shapefile to create filter because no two dimensional geometries were found");
-                    return null;
-                }
+                _log.ErrorFormat("GetFilteringGeometries failed, shapefile is empty or does not exist {0} ", filename);
+                return null;
             }
+
+            //inputCrs should be valid if LoadShapefile returns true
+            ICoordinateSystem inputCrs;
+            if (!ShapefileHelper.LoadShapefile(filename, Path.GetFileNameWithoutExtension(filename), DbClient, out inputCrs))
+            {
+                _log.Error("Could not load filtering geometries!");
+                return null;
+            }
+
+            string tableName = Path.GetFileNameWithoutExtension(filename);
+            string sqlcmd = "SELECT AsBinary(Geometry) AS Geometry FROM " + tableName;
+            var wholeShapeTable = DataClient.GetMagicTable(DbClient.GetConnection(), DbClient, sqlcmd);
+            List<IGeometry> results = new List<IGeometry>(wholeShapeTable.Rows.Count);
+            ICoordinateTransformation reprojector = null;
+            if (outputCrs != null)
+            {
+                reprojector = Utilities.BuildTransformationObject(inputCrs, outputCrs);
+            }
+
+            GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
+                new GeometryFactory());
+
+            foreach (DataRow row in wholeShapeTable.Rows)
+            {
+                byte[] geomBytes = (byte[])row["Geometry"];
+                IGeometry geom = binReader.Read(geomBytes);
+                if (geom == null || geom.Dimension != Dimensions.Surface)
+                {
+                    continue;
+                }
+
+                if (reprojector != null)
+                {
+                    geom = Utilities.ReprojectGeometry(geom, reprojector);
+                }
+
+                results.Add(geom);
+            }
+
+            //Cleanup so we don't store lots of crap in database
+            sqlcmd = "DROP TABLE " + tableName;
+            var droptable = DbClient.GetCommand(sqlcmd);
+            droptable.ExecuteNonQuery();
+
+            if (results.Count == 0)
+            {
+                _log.Error("Could not use shapefile to create filter because no two dimensional geometries were found");
+                return null;
+            }
+
 
             return results;
         }
@@ -1239,14 +1190,21 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             }
         }
 
-
+        /// <summary>
+        /// Retrieves the contents of the specified table, and writes them to a shapefile
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
         public bool ExportShapefile(string tableName)
         {
             try
             {
+                _log.DebugFormat("Retrieving contents of job {0}", tableName);
+
                 var exportFeatures = GetShapeFeaturesToExport(tableName, true);
                 if ((exportFeatures == null) || (exportFeatures.Count == 0))
                 {
+                    _log.Error("Export of Job \"{0}\" failed, no features to export!");
                     return false;
                 }
 
@@ -1271,16 +1229,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 {
                     newShapefilename = Path.Combine(OutputFolder, tableName);
                 }
+                string destPath = Path.GetDirectoryName(newShapefilename);
+                FileUtilities.SafePathEnsure(destPath);
+
                 
                 var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
                 writer.Header = header;
 
                 if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
                 {
-                    //Reproject everything in this file to the requested projection...
-                    //_log.Debug("Reprojecting...");
-                    //exportFeatures = Utilities.ReprojectFeaturesTo(exportFeatures, this.OutputProjectionFilename);
-
                     ShapefileHelper.MakeOutputProjFile(this.OutputProjectionFilename, newShapefilename);
                 }
                 else
@@ -1302,41 +1259,34 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
 
 
-
+        /// <summary>
+        /// Retrieves the contents of the specified table, and writes them to a shapefile
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
         public bool ExportGriddedShapefile(string tableName)
         {
             try
             {
+                _log.DebugFormat("Retrieving contents of job {0}", tableName);
                 //don't filter out geometries, we'll do that at the cell level
                 var exportFeatures = GetShapeFeaturesToExport(tableName, false);
+                if ((exportFeatures == null) || (exportFeatures.Count == 0))
+                {
+                    _log.Error("Export of Job \"{0}\" failed, no features to export!");
+                    return false;
+                }
+
                 ICoordinateSystem outputCrs = GeographicCoordinateSystem.WGS84;
                 if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
                 {
                     outputCrs = Utilities.GetCoordinateSystemByWKTFile(this.OutputProjectionFilename);
                 }
 
-
-                if ((exportFeatures == null) || (exportFeatures.Count == 0))
-                {
-                    return false;
-                }
-
                 //if we need to reproject:
-                List<IGeometry> filteringGeoms = GetFilteringGeometries(
-                    this.ExportFilterFilename, outputCrs);         
-       
-                //if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
-                //{
-                //    //Reproject everything in this file to the requested projection...                    
-                //    //exportFeatures = Utilities.ReprojectFeaturesTo(exportFeatures, this.OutputProjectionFilename);
-                    
-                //    //THESE MUST BE PROVIDED ALREADY PROJECTED!
-                //    //filteringGeoms = Utilities.ReprojectFeaturesTo(filteringGeoms, this.OutputProjectionFilename);
-                //}
+                List<IGeometry> filteringGeoms = GetFilteringGeometries(this.ExportFilterFilename, outputCrs);         
 
-
-
-
+                //put everything into a basic spatial index
                 Envelope env = new Envelope();
                 var index = new GisSharpBlog.NetTopologySuite.Index.Strtree.STRtree();
                 for (int i = 0; i < exportFeatures.Count; i++)
@@ -1367,7 +1317,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
 
 
-                //progress tracking stuff
+                //progress tracking
                 DateTime start = DateTime.Now, lastCheck = DateTime.Now;
                 int lastProgress = 0;
 
@@ -1401,10 +1351,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName + " where 0 = 1 ");
                     header = ShapefileHelper.SetupHeader(variablesDT);
                 }
-                header.AddColumn("CELLID", 'C', 254, 0);
-                header.AddColumn("GEOID", 'C', 
-                    GeographyFileReader.Columns.Find((x) => (x.ColumnName == "GEOID")).End, 0);
-
+                ShapefileHelper.AddColumn(header, "CELLID", typeof(string));
+                ShapefileHelper.AddColumn(header, "GEOID", typeof(string));
+                if (this.AddStrippedGEOIDcolumn)
+                {
+                    ShapefileHelper.AddColumn(header, "GEOID_STRP", typeof(string));
+                }
 
                 int cellCount = 0;
                 int xidx = 0;
@@ -1566,7 +1518,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             {
                 //Don't need this hanging around...
                 DbClient.
-                    GetCommand(string.Format("DROP TABLE IF EXISTS {0};", AcsDataManager.DesiredColumnsTableName)).
+                    GetCommand(string.Format("DROP TABLE IF EXISTS {0};", DbConstants.TABLE_DesiredColumns)).
                     ExecuteNonQuery();
             }
         }

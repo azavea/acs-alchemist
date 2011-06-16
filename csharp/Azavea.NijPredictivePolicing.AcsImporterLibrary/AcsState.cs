@@ -7,7 +7,8 @@ using Azavea.NijPredictivePolicing.Common;
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
 {
     /// <summary>
-    /// http://www.itl.nist.gov/fipspubs/fip5-2.htm
+    /// Contains an enumeration of the State fips codes,
+    /// as defined here: http://www.itl.nist.gov/fipspubs/fip5-2.htm
     /// </summary>
     public enum AcsState
     {
@@ -68,6 +69,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         None = -1
     }
 
+    /// <summary>
+    /// Encapsulates common operations with the States enum
+    /// </summary>
     public class States
     {
         /// <summary>

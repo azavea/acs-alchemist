@@ -4,7 +4,6 @@ using System.IO;
 using System.Collections.Generic;
 using Azavea.NijPredictivePolicing.Test.Helpers;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
-using SharpMap.CoordinateSystems;
 using GeoAPI.Geometries;
 using Azavea.NijPredictivePolicing.AcsImporterLibrary;
 using Azavea.NijPredictivePolicing.Common;
@@ -12,12 +11,14 @@ using Azavea.NijPredictivePolicing.Common.DB;
 using System.Text;using System;using log4net.Core;
 using System.Data;
 using System.Data.Common;
+using ProjNet.CoordinateSystems;
 namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 {
     [TestFixture]
     public class AcsDataManagerTests
     {
         private static ILog _log = null;
+        public const string WorkingPath = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test";
         
 
         /// <summary>
@@ -44,18 +45,19 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
 
             features = man.GetFilteringGeometries(GetShapePath(man, "DoesNotExist.shp"), 
                 GeographicCoordinateSystem.WGS84);
-            Assert.AreEqual(features, null);
+            Assert.AreEqual(null, features, "Shapefile shouldn't exist!");
 
             features = man.GetFilteringGeometries(GetShapePath(man, "bg42_d00.shp"), GeographicCoordinateSystem.WGS84);
-            Assert.AreEqual(features, null);
+            Assert.AreEqual(null, features, "Shapefile shouldn't exist!");
 
             features = man.GetFilteringGeometries(GetShapePath(man, "bg42_d00_nosrid.shp"), 
                 GeographicCoordinateSystem.WGS84);
-            Assert.IsTrue(features.Count > 0);
+
+            Assert.Greater(features.Count, 0, "Should be more than zero features!");
 
             features = man.GetFilteringGeometries(GetShapePath(man, "bg42_d00_srid.shp"), 
                 GeographicCoordinateSystem.WGS84);
-            Assert.IsTrue(features.Count > 0);
+            Assert.Greater(features.Count, 0, "Should be more than zero features!");
 
             features2 = man.GetFilteringGeometries(GetShapePath(man, "bg42_d00_srid.shp"),
                 GeographicCoordinateSystem.WGS84);
@@ -68,17 +70,17 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
             man.WorkingPath = Path.Combine(man.WorkingPath, "ColumnFiles");
             man.CheckColumnMappingsFile();
 
-            List<string> invalidInputs = new List<string>(16);
+            var invalidInputs = new string[] {
+                "Invalid101Lines.txt",
+                "InvalidAllDupes.txt",
+                "InvalidEmpty.txt",
+                "InvalidLotsOfDupes.txt",
+                "InvalidMoECollisions.txt",
+                "InvalidReservedCollisions.txt",
+                "InvalidTruncCollisions.txt"
+            };            
 
-            invalidInputs.Add("Invalid101Lines.txt");
-            invalidInputs.Add("InvalidAllDupes.txt");
-            invalidInputs.Add("InvalidEmpty.txt");
-            invalidInputs.Add("InvalidLotsOfDupes.txt");
-            invalidInputs.Add("InvalidMoECollisions.txt");
-            invalidInputs.Add("InvalidReservedCollisions.txt");
-            invalidInputs.Add("InvalidTruncCollisions.txt");
-
-            for(int i = 0; i < invalidInputs.Count; i++)
+            for(int i = 0; i < invalidInputs.Length; i++)
             {
                 invalidInputs[i] = Path.Combine(man.WorkingPath, invalidInputs[i]);
             }
@@ -94,7 +96,10 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
             {
                 if (!DataClient.HasTable(conn, man.DbClient, "columnMappings"))
                 {
-                    man.CreateColumnMappingsTable(conn);
+                    if (!man.CreateColumnMappingsTable(conn))
+                    {
+                        Assert.Fail("Could not import sequence files");
+                    }
                 }
 
                 /* Failures */
@@ -112,14 +117,14 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
                 Assert.IsTrue(File.Exists(Valid100Lines), "Could not find test file " + Valid100Lines);
                 man.DesiredVariablesFilename = Valid100Lines;
                 dt = man.GetRequestedVariables(conn);
-                Assert.AreEqual(dt.Rows.Count, 105, 
+                Assert.AreEqual(105, dt.Rows.Count,
                     "Unexpected number of rows returned for file " + Valid100Lines);
 
-                dt = null;
+                
                 Assert.IsTrue(File.Exists(ValidNoNames), "Could not find test file " + ValidNoNames);
                 man.DesiredVariablesFilename = ValidNoNames;
                 dt = man.GetRequestedVariables(conn);
-                Assert.AreEqual(dt.Rows.Count, 105, 
+                Assert.AreEqual(105, dt.Rows.Count,  
                     "Unexpected number of rows returned for file " + ValidNoNames);
             }
         }
@@ -128,6 +133,7 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
         {
             Assert.IsTrue(File.Exists(filename), "Could not find test file " + filename);
             man.DesiredVariablesFilename = filename;
+
             DataTable dt = man.GetRequestedVariables(conn);
             Assert.IsTrue(dt == null, "Non-null DataTable returned for file " + filename);
         }
@@ -169,9 +175,7 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
         [Test]
         public void CheckTooManyColumnsFail()
         {
-            string basePath = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test\TestData";
-            FileUtilities.PathEnsure(basePath);
-            const string JobName = "TestTooMany";
+            string basePath = FileUtilities.PathEnsure(WorkingPath, "TestData");
             string TooManyVariablesFile = Path.Combine(basePath, "TooManyColumns.txt");
 
             if (!File.Exists(TooManyVariablesFile))
@@ -188,21 +192,18 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
             var manager = new AcsDataManager(AcsState.Wyoming);
             manager.WorkingPath = basePath;
             manager.DesiredVariablesFilename = TooManyVariablesFile;
-            Assert.IsFalse(manager.CheckBuildVariableTable(JobName));
+            Assert.IsFalse(manager.CheckBuildVariableTable("TestTooMany"));
         }
 
 
         protected AcsDataManager GetManager()
         {
-            AcsDataManager m = new AcsDataManager(AcsState.Wyoming);
+            AcsDataManager m = new AcsDataManager(AcsState.Wyoming);            
+            m.WorkingPath = FileUtilities.PathEnsure(WorkingPath, "TestData");
 
-            m.WorkingPath = Path.Combine(
-                @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test", 
-                "TestData");
-            FileUtilities.PathEnsure(m.WorkingPath, "database");
+            string dbPath = FileUtilities.PathEnsure(m.WorkingPath, "database");
+            m.DBFilename = FileUtilities.PathCombine(dbPath, Settings.CurrentAcsDirectory + ".sqlite");
 
-            m.DBFilename = FileUtilities.PathCombine(m.WorkingPath, "database", 
-                Settings.CurrentAcsDirectory + ".sqlite");
             m.ShapePath = FileUtilities.PathEnsure(m.WorkingPath, "shapes");
             m.CurrentDataPath = m.WorkingPath;
 

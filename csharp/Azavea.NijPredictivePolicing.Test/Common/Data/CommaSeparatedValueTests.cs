@@ -53,30 +53,31 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
             CommaSeparatedValueReader reader = new CommaSeparatedValueReader();
             string filename = Path.Combine(InputDirectory, WellFormedCsvFile);
 
-            var expected = new List<string[]>();
-            expected.Add(new string[] { "foo", "bar", "  whitespace  ", @" quotes "" , and commas " });
-            expected.Add(new string[] { "quoted, with\nnewline" });
-            expected.Add(new string[] { "" });                  //empty line
-            expected.Add(new string[] { "", "" });              //single ,
-            expected.Add(new string[] { "", "", "" });          //,,
-            expected.Add(new string[] { "blarg" });
-            expected.Add(new string[] { "blarg", "quoted, with\nnewline" });
-            expected.Add(new string[] { "quoted, with\nnewline", "blarg" });
-            expected.Add(new string[] { "blarg", "quoted, with\nnewline", "blarg" });
-
+            var expected = new List<string[]>(new string[][] {
+                new string[] { "foo", "bar", "  whitespace  ", @" quotes "" , and commas " },
+                new string[] { "quoted, with\r\nnewline" },
+                new string[] { "" },                  //empty line
+                new string[] { "", "" },              //single ,
+                new string[] { "", "", "" },          //,,
+                new string[] { "blarg" },
+                new string[] { "blarg", "quoted, with\r\nnewline" },
+                new string[] { "quoted, with\r\nnewline", "blarg" },
+                new string[] { "blarg", "quoted, with\r\nnewline", "blarg" }
+            });
+                    
             reader.LoadFile(filename);
 
             int i = 0;
             foreach (var row in reader)
             {
                 IList<string> expectedRow = expected[i] as IList<string>;
-                Assert.AreEqual(row.Count, expectedRow.Count,
+
+                Assert.AreEqual(expectedRow.Count, row.Count, 
                     string.Format("Number of actual fields differs from number of expected at line {0} in file {1}", i, filename));
 
-                int count = row.Count;
-                for (int j = 0; j < count; j++)
+                for (int j = 0; j < row.Count; j++)
                 {
-                    Assert.AreEqual(row[j], expectedRow[j]);
+                    Assert.AreEqual(expectedRow[j], row[j]);
                 }
 
                 i++;

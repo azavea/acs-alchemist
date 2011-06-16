@@ -96,7 +96,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         }
 
 
-
+        /// <summary>
+        /// wrapper function for unzipping a file to a destination
+        /// </summary>
+        /// <param name="sourceFile"></param>
+        /// <param name="destPath"></param>
+        /// <returns></returns>
         public static bool ExpandZipFile(string sourceFile, string destPath)
         {
             try

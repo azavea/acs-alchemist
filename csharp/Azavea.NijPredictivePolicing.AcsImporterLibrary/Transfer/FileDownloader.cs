@@ -9,6 +9,9 @@ using Azavea.NijPredictivePolicing.Common;
 
 namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 {
+    /// <summary>
+    /// This class contains the logic for caching, and downloading a url
+    /// </summary>
     public static class FileDownloader
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -20,6 +23,14 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         /// </summary>
         public const int WaitTimeMs = 2000;
 
+        /// <summary>
+        /// Attempts to download the desiredURL, and save it to filePath.  Does not attempt to download the file
+        /// unless the file creation time on the server is more recent than any existing copy, and the file hasn't been
+        /// checked for over 7 days.
+        /// </summary>
+        /// <param name="desiredURL"></param>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         public static bool GetFileByURL(string desiredURL, string filePath)
         {
             bool preExists = false;

@@ -85,7 +85,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         }
 
 
-        public void Load(string[] args)
+        public bool Load(string[] args)
         {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < args.Length; i++)
@@ -111,6 +111,11 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         sb.Append(chunk).Append(" ");
                     }
                     line = sb.ToString();
+                }
+                else
+                {
+                    _log.ErrorFormat("The arguments file you provided doesn't exist: {0}", args[0]);
+                    return false;
                 }
             }
 
@@ -154,6 +159,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     }
                 }
             }
+            return true;
         }
 
         #endregion Command Line Stuff
@@ -175,139 +181,98 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     return true;
                 }
 
-                if (this.State != AcsState.None)
+                if (this.State == AcsState.None)
                 {
-                    if (string.IsNullOrEmpty(this.JobName))
-                    {
-                        this.JobName = string.Format("{0}_{1}", this.State, DateTime.Now.ToShortDateString().Replace('/', '_'));
-                        _log.DebugFormat("Jobname was empty, using {0}", this.JobName);
-                    }
-
-                    var manager = new AcsDataManager(this.State);
-
-                    //if (!string.IsNullOrEmpty(ExportVariables))
-                    //{
-                    //    _log.Debug("Exporting table of all available variables to allVariables.csv");
-
-                    //    var variablesDT = manager.GetAllSequenceVariables();
-
-                    //    CommaSeparatedValueWriter writer = new CommaSeparatedValueWriter("allVariables.csv");
-                    //    FileWriterHelpers.WriteDataTable(writer, variablesDT);
-
-                    //    _log.Debug("Done!");
-                    //    return true;
-                    //}
-
-                    _log.Debug("");
-                    _log.Debug("Loading Prerequisites...");
-
-
-                    if ((manager.CheckColumnMappingsFile())
-                        && (manager.CheckBlockGroupFile())
-                        && (manager.CheckDatabase())
-                        && (manager.CheckShapefiles())
-                        )
-                    {
-                        _log.Debug("Done Loading Prerequisites!");
-                        _log.Debug("");
-
-                        //TODO: check for garbage inputs
-                        manager.SummaryLevel = this.SummaryLevel;
-                        manager.ExportFilterFilename = this.ExportFilterShapefile;
-                        manager.DesiredVariablesFilename = IncludedVariableFile;
-                        manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
-                        manager.OutputProjectionFilename = this.OutputProjection;
-                        manager.OutputFolder = this.OutputFolder;
-                        if (FileUtilities.SafePathEnsure(OutputFolder) != OutputFolder)
-                        {
-                            _log.FatalFormat("The output folder you specified ( {0} ) doesn't exist, exiting",
-                                OutputFolder);
-                            return false;
-                        }
-
-                        manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
-                        manager.AddStrippedGEOIDcolumn = (!string.IsNullOrEmpty(this.AddStrippedGEOIDcolumn));
-                        //manager.SRID = Utilities.GetAs<int>(this.ExportFilterSRID, -1);
-
-                        if (string.IsNullOrEmpty(this.OutputProjection))
-                        {
-                            _log.Warn("*********************");
-                            _log.Warn(
-@"IMPORTANT!:  
-    You have not specified an output projection, meaning the resulting shapefile will
-be in unprojected WGS84.  Your filtering geometries, envelope, grid cell sizes, 
-and all other parameters must match that projection.");
-                            _log.Warn("*********************");
-                        }
-
-                        manager.IncludeEmptyGridCells = (!string.IsNullOrEmpty(this.IncludeEmptyGridCells));
-                        
-
-                        if (!string.IsNullOrEmpty(IncludedVariableFile) && !string.IsNullOrEmpty(this.JobName))
-                        {
-                            _log.Debug("Importing all requested variables...");
-
-                            if (!manager.CheckBuildVariableTable(this.JobName))
-                            {
-                                _log.Error("There was a problem building the variable table, exiting");
-                                return false;
-                            }
-                            _log.Debug("Done!");
-                        }
-
-                        if (!string.IsNullOrEmpty(ExportToShapefile))
-                        {
-                            _log.Debug("Exporting all requested variables to shapefile");
-                            if (manager.ExportShapefile(this.JobName))
-                            {
-                                _log.Debug("Exported successfully");
-                            }
-                            else
-                            {
-                                _log.Debug("There was an error while exporting the shapefile");
-                            }
-                            _log.Debug("Done!");
-                        }
-
-                        if (!string.IsNullOrEmpty(ExportToGrid))
-                        {
-                            manager.GridEnvelopeFilename = GridEnvelope;
-                            manager.SetGridParam(ExportToGrid);
-
-                            _log.DebugFormat("Exporting all requested variables to fishnet shapefile with grid cell size {0} ", ExportToGrid);
-                            manager.ExportGriddedShapefile(this.JobName);
-                            _log.Debug("Done!");
-                        }
-
-                        
-
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    _log.Error("Invalid State selected, please select a state from the list and try again.");
+                    return false;
                 }
 
-                //if (!string.IsNullOrEmpty(this.RunTests))
-                //{
-                //    AcsDataManager manager = new AcsDataManager(AcsState.Wyoming);
-                //    string filename = manager.GetLocalShapefileName();
-                //    ShapefileHelper helper = new ShapefileHelper();
-                //    helper.OpenShapefile(filename);                    
-                //    var schemaDT = helper.GetSchema();
-                //    _log.DebugFormat("Here");
-                //}
+                if (string.IsNullOrEmpty(this.JobName))
+                {
+                    this.JobName = string.Format("{0}_{1}", this.State, DateTime.Now.ToShortDateString().Replace('/', '_'));
+                    _log.DebugFormat("Jobname was empty, using {0}", this.JobName);
+                }
+
+                var manager = new AcsDataManager(this.State);
+                //TODO: check for bad combinations of inputs
+                manager.SummaryLevel = this.SummaryLevel;
+                manager.ExportFilterFilename = this.ExportFilterShapefile;
+                manager.DesiredVariablesFilename = IncludedVariableFile;
+                manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
+                manager.OutputProjectionFilename = this.OutputProjection;
+                manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
+                manager.AddStrippedGEOIDcolumn = (!string.IsNullOrEmpty(this.AddStrippedGEOIDcolumn));
+                manager.OutputFolder = this.OutputFolder;
+                manager.IncludeEmptyGridCells = (!string.IsNullOrEmpty(this.IncludeEmptyGridCells));
+                //manager.SRID = Utilities.GetAs<int>(this.ExportFilterSRID, -1);
+
+                if (FileUtilities.SafePathEnsure(OutputFolder) != OutputFolder)
+                {
+                    _log.FatalFormat("Unable to set or create output folder, ( {0} ) exiting", OutputFolder);
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(this.OutputProjection))
+                {
+                    _log.Warn(Constants.Warning_MissingProjection);
+                }
 
 
 
+                _log.Debug("\r\nLoading Prerequisites...");
+                if (!manager.CheckColumnMappingsFile()
+                    || !manager.CheckBlockGroupFile()
+                    || !manager.CheckDatabase()
+                    || !manager.CheckShapefiles())
+                {
+                    _log.Debug("Loading Prerequisites... Failed!");
+                    _log.Error("Import cannot continue, one or more prerequisites failed!");
+                    return false;
+                }
+                _log.Debug("Loading Prerequisites... Done!\r\n");
 
+
+
+                if (!string.IsNullOrEmpty(IncludedVariableFile) && !string.IsNullOrEmpty(this.JobName))
+                {
+                    _log.Info("Importing requested variables...");
+                    if (!manager.CheckBuildVariableTable(this.JobName))
+                    {
+                        _log.Error("Importing requested variables... Failed! A problem was detected, exiting.");
+                        return false;
+                    }
+                    _log.Debug("mporting requested variables... Done!");
+                }
+
+                if (!string.IsNullOrEmpty(ExportToShapefile))
+                {
+                    _log.Info("Exporting to shapefile...");
+                    if (!manager.ExportShapefile(this.JobName))
+                    {
+                        _log.Error("There was an error while exporting the shapefile");
+                    }
+
+                    _log.Debug("Exporting to shapefile... Done!");
+                }
+
+                if (!string.IsNullOrEmpty(ExportToGrid))
+                {
+                    _log.Info("Exporting to gridded shapefile...");
+                    manager.GridEnvelopeFilename = GridEnvelope;
+                    manager.SetGridParam(ExportToGrid);
+
+                    _log.DebugFormat("Exporting all requested variables to fishnet shapefile with grid cell size {0} ", ExportToGrid);
+                    manager.ExportGriddedShapefile(this.JobName);
+
+                    _log.Debug("Exporting to gridded shapefile... Done!");
+                }
 
 
                 return true;
             }
             catch (Exception ex)
             {
-                _log.Error("Error while executing job", ex);
+                _log.Error("Error thrown during import job ", ex);
             }
             finally
             {
