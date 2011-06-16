@@ -114,7 +114,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 }
                 else
                 {
-                    _log.ErrorFormat("The arguments file you provided doesn't exist: {0}", args[0]);
+                    _log.ErrorFormat("The arguments file you provided could not be read: {0}", args[0]);
                     return false;
                 }
             }

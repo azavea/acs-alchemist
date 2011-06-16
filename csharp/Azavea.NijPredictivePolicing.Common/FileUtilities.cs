@@ -42,18 +42,18 @@ namespace Azavea.NijPredictivePolicing.Common
             if (string.IsNullOrEmpty(basepath))
                 return basepath;
 
-            if (!Directory.Exists(basepath))
-                Directory.CreateDirectory(basepath);
-
             if ((chunks != null) && (chunks.Length > 0))
             {
                 for (int i = 0; i < chunks.Length; i++)
                 {
                     basepath = Path.Combine(basepath, chunks[i]);
-                    if (!Directory.Exists(basepath))
-                        Directory.CreateDirectory(basepath);
                 }
             }
+
+            //CreateDirectory creates all necessary directories
+            if (!Directory.Exists(basepath))
+                Directory.CreateDirectory(basepath);
+
             return basepath;
         }
 
