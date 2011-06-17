@@ -78,19 +78,12 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
                 "InvalidMoECollisions.txt",
                 "InvalidReservedCollisions.txt",
                 "InvalidTruncCollisions.txt"
-            };            
+            };
 
-            for(int i = 0; i < invalidInputs.Length; i++)
+            for (int i = 0; i < invalidInputs.Length; i++)
             {
                 invalidInputs[i] = Path.Combine(man.WorkingPath, invalidInputs[i]);
             }
-
-            /************************************************************************************/
-
-            string Valid100Lines = Path.Combine(man.WorkingPath,            "Valid100Lines.txt");
-            string ValidNoNames = Path.Combine(man.WorkingPath,             "ValidNoNames.txt");
-
-            /************************************************************************************/
 
             using (var conn = man.DbClient.GetConnection())
             {
@@ -102,10 +95,35 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
                     }
                 }
 
-                /* Failures */
+                /* should fail for assert to pass*/
                 foreach (string file in invalidInputs)
                 {
                     AssertFailedImport(file, man, conn);
+                }
+            }
+        }
+
+        [Test]
+        public void ImportVariablesFileSuccesses()
+        {            
+            var man = GetManager();
+            man.WorkingPath = Path.Combine(man.WorkingPath, "ColumnFiles");
+            man.CheckColumnMappingsFile();
+
+            /************************************************************************************/
+            string Valid100Lines = Path.Combine(man.WorkingPath, "Valid100Lines.txt");
+            string ValidNoNames = Path.Combine(man.WorkingPath, "ValidNoNames.txt");
+            /************************************************************************************/
+
+
+            using (var conn = man.DbClient.GetConnection())
+            {
+                if (!DataClient.HasTable(conn, man.DbClient, "columnMappings"))
+                {
+                    if (!man.CreateColumnMappingsTable(conn))
+                    {
+                        Assert.Fail("Could not import sequence files");
+                    }
                 }
 
                 /* Successes */
@@ -120,14 +138,16 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
                 Assert.AreEqual(105, dt.Rows.Count,
                     "Unexpected number of rows returned for file " + Valid100Lines);
 
-                
+
                 Assert.IsTrue(File.Exists(ValidNoNames), "Could not find test file " + ValidNoNames);
                 man.DesiredVariablesFilename = ValidNoNames;
                 dt = man.GetRequestedVariables(conn);
-                Assert.AreEqual(105, dt.Rows.Count,  
+                Assert.AreEqual(105, dt.Rows.Count,
                     "Unexpected number of rows returned for file " + ValidNoNames);
+
             }
         }
+
 
         private void AssertFailedImport(string filename, AcsDataManager man, DbConnection conn)
         {
