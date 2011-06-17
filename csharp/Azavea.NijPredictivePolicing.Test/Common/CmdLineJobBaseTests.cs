@@ -5,6 +5,8 @@ using System.Text;
 using NUnit.Framework;
 using log4net;
 using Azavea.NijPredictivePolicing.Common;
+using Azavea.NijPredictivePolicing.AcsDataImporter;
+using Azavea.NijPredictivePolicing.AcsImporterLibrary;
 
 namespace Azavea.NijPredictivePolicing.Test.Common
 {
@@ -127,6 +129,25 @@ namespace Azavea.NijPredictivePolicing.Test.Common
 
             CmdLineJobBase cmds = new CmdLineJobBase();
             Assert.IsFalse(cmds.Load(args, Arguments, dest), "Load Succeeded???");  //assert should pass, load should fail
+        }
+
+        /// <summary>
+        /// there the last hyphen is unicode 8211, still a hyphen, just evil.
+        /// </summary>
+        [Test]
+        public void TestStandardLine()
+        {
+            string[] args = ("-s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 "+((char)8211)+"exportToShape").Split(' ');
+            ImportJob job = new ImportJob();
+            if (!job.Load(args))
+            {
+                Assert.Fail("Couldn't parse standard line");
+            }
+
+            Assert.AreEqual(AcsState.Wyoming, job.State, "State is wrong");
+            Assert.AreEqual("myVariablesFile.txt", job.IncludedVariableFile, "variables file is wrong");
+            Assert.AreEqual("Test01", job.JobName, "Job name is wrong");
+            Assert.AreEqual(true.ToString(), job.ExportToShapefile, true.ToString(), "flag param is wrong");
         }
 
         //CmdLineJob job = new CmdLineJob();

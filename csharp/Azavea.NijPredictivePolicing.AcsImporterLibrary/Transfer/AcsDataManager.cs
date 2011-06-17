@@ -1076,11 +1076,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 //go through and add missing shapes if 'shouldAddMissingShapes' is set...
                 bool variablesHaveGeoID = variablesDT.Columns.Contains("GEOID");
 
-                List<IGeometry> filteringGeoms = (spatialFilter) ? GetFilteringGeometries(this.ExportFilterFilename, destCRS) : null;
-                //Die if we're supposed to have a filter but don't
-                if (spatialFilter && filteringGeoms == null)
+                List<IGeometry> filteringGeoms = null;
+                if (!string.IsNullOrEmpty(this.ExportFilterFilename))
                 {
-                    return null;
+                    filteringGeoms = (spatialFilter) ? GetFilteringGeometries(this.ExportFilterFilename, destCRS) : null;
+                    //Die if we're supposed to have a filter but don't
+                    if (spatialFilter && filteringGeoms == null)
+                    {
+                        return null;
+                    }
                 }
 
                 GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
@@ -1204,7 +1208,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 var exportFeatures = GetShapeFeaturesToExport(tableName, true);
                 if ((exportFeatures == null) || (exportFeatures.Count == 0))
                 {
-                    _log.Error("Export of Job \"{0}\" failed, no features to export!");
+                    _log.ErrorFormat("Export of Job \"{0}\" failed, no features to export!", tableName);
                     return false;
                 }
 
@@ -1273,7 +1277,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 var exportFeatures = GetShapeFeaturesToExport(tableName, false);
                 if ((exportFeatures == null) || (exportFeatures.Count == 0))
                 {
-                    _log.Error("Export of Job \"{0}\" failed, no features to export!");
+                    _log.ErrorFormat("Export of Job \"{0}\" failed, no features to export!", tableName);
                     return false;
                 }
 
