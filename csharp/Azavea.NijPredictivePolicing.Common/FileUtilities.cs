@@ -50,7 +50,7 @@ namespace Azavea.NijPredictivePolicing.Common
                 }
             }
 
-            //CreateDirectory creates all necessary directories
+            //CreateDirectory creates all necessary sub-directories
             if (!Directory.Exists(basepath))
                 Directory.CreateDirectory(basepath);
 
@@ -69,7 +69,7 @@ namespace Azavea.NijPredictivePolicing.Common
             {
                 //I'd rather do this here, than directly in the constructor or class definition.
                 //The file system loves to throw exceptions, and I'd rather see em than a app 'exit'!
-                //In Soviet Russia, computer throws things at YOU!
+                //In Soviet Russia, computer throws things at YOU!!
 
                 return FileUtilities.PathEnsure(basepath, chunks);
             }

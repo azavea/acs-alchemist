@@ -92,7 +92,7 @@ namespace Azavea.NijPredictivePolicing.Test.Common
             CmdLineJobBase cmds = new CmdLineJobBase();
             Assert.IsTrue(cmds.Load(args, Arguments, dest), "Load failed!");
 
-            Assert.AreEqual("param", dest.another, "parameter after filename with hypens was klobbered");
+            Assert.AreEqual("param", dest.another, "parameter after filename with hypens was clobbered");
             Assert.AreEqual("this-is-a-terrible-filename.txt", dest.somefile, "failed on filename with hyphens");            
         }
 
@@ -111,7 +111,7 @@ namespace Azavea.NijPredictivePolicing.Test.Common
             CmdLineJobBase cmds = new CmdLineJobBase();
             Assert.IsTrue(cmds.Load(args, Arguments, dest), "Load failed!");
 
-            Assert.AreEqual("param", dest.another, "parameter after filename with hypens was klobbered");
+            Assert.AreEqual("param", dest.another, "parameter after filename with hypens was clobbered");
             Assert.AreEqual("C:\\terrible path\\with spaces\\in it\\terrible_filename.txt", dest.somefile, "failed on filename with quotes");
         }
 
