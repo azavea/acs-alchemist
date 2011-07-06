@@ -13,7 +13,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
     /// <summary>
     /// Contains main() entry point
     /// </summary>
-    class Program
+    public class Program
     {
         private static ILog _log = null;
         protected static void Init()
@@ -70,7 +70,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             _log.Debug("");
         }
 
-        static int Main(string[] args)
+        public static int Main(string[] args)
         {
             Init();
             LoadConfigFile();
