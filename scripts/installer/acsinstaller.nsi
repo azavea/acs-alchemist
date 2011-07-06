@@ -24,6 +24,7 @@ Name "ACS Importer"
 # Included files
 !include Sections.nsh
 !include MUI2.nsh
+#!include ShellLink.nsh
 
 # Variables
 Var StartMenuGroup
@@ -57,6 +58,8 @@ VIAddVersionKey LegalCopyright ""
 InstallDirRegKey HKLM "${REGKEY}" Path
 ShowUninstDetails show
 
+!define SHORTCUTFILE "$SMPROGRAMS\$StartMenuGroup\ACS Importer.lnk"
+
 # Installer sections
 Section -Main SEC0000
     SetOutPath $INSTDIR
@@ -64,8 +67,45 @@ Section -Main SEC0000
     File /r C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\x86\Debug\*
     ;File /r C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug\*
     File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\README.txt
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\Install.doc
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\Manual.doc
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\ACS_Importer_Flowchart.jpg
+	
+	#Licenses#
+	SetOutPath $INSTDIR\Licenses
+	SetOutPath $INSTDIR\Licenses\Ionic
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\dotnetzip\License.txt
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\dotnetzip\PleaseDonate.txt
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\dotnetzip\Readme.txt	
+	SetOutPath $INSTDIR\Licenses\exceldatareader
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\excelDataReader\license.txt	
+	SetOutPath $INSTDIR\Licenses\geoapi
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\geoapi\lgpl-2.1.txt
+	SetOutPath $INSTDIR\Licenses\json
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\json\readme.txt
+	SetOutPath $INSTDIR\Licenses\log4net
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\log4net\LICENSE.txt
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\log4net\NOTICE.txt
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\log4net\README.txt
+	SetOutPath $INSTDIR\Licenses\nettopologysuite
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\nettopologysuite\License.txt
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\nettopologysuite\lgpl-3.0.txt
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\nettopologysuite\lgpl-2.1.txt
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\nettopologysuite\Iesi.Collections.License.txt
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\nettopologysuite\Rtools.Util.License.txt
+	SetOutPath $INSTDIR\Licenses\spatialite
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\spatialite\lgpl-v3.txt
+	SetOutPath $INSTDIR\Licenses\sqlite
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\sqlite\license.txt	
+	
     SetOutPath $SMPROGRAMS\$StartMenuGroup
-    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\ACS Importer.lnk" $INSTDIR
+	
+    CreateShortcut "${SHORTCUTFILE}" "cmd" "/k cd $INSTDIR"
+	ShellLink::SetRunAsAdministrator "${SHORTCUTFILE}"
+	Pop $0
+	ShellLink::SetShortCutWorkingDirectory "${SHORTCUTFILE}" $INSTDIR
+	Pop $0
+	
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
 SectionEnd
 

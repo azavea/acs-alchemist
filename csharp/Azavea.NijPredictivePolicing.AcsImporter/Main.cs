@@ -97,10 +97,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 DisplayOptions();
             }
 
-#if DEBUG
-            _log.Debug("Done! Press ANY KEY to Quit");
-            Console.ReadKey();
-#endif
+//#if DEBUG
+//            _log.Debug("Done! Press ANY KEY to Quit");
+//            Console.ReadKey();
+//#endif
             return 0;
         }
 

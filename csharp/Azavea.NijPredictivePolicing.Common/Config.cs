@@ -81,10 +81,16 @@ namespace Azavea.NijPredictivePolicing.Common
                 JsonSerializerSettings s = new JsonSerializerSettings();
                 s.TypeNameHandling = TypeNameHandling.All;
                 s.TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple;
-                
+
                 string fileContents = JsonConvert.SerializeObject(this._data, Formatting.Indented, s);
                 File.WriteAllText(_filename, fileContents);
                 return true;
+            }
+            catch (UnauthorizedAccessException cantWriteEx)
+            {
+                _log.Error("The importer couldn't write its config file.  Please run this application as an Administrator");
+                _log.Fatal("The importer cannot continue, exiting.");
+                Environment.Exit(-1);
             }
             catch (Exception ex)
             {

@@ -10,17 +10,30 @@ Introduction
 American Community Survey.  Specifically this version targets the 2005-2009
 ACS 5-year data release at the block group level.
 
+ This tool benefits from the use of several other open source projects, please
+jump to the bottom of this readme for more information on those projects.
+  
 Getting Started
 -------------------------------------
 
   Installing the ACS Importer from the install file should be relatively
 quick.  Just run the ACSImporter.exe file, and select the location where
 you'd like the program to be.  From there you'll want to open a command
-prompt to the install location. 
+prompt to the install location.  The importer will be downloading files
+to the working directory or output directory, so make sure you're
+running it as an Administrator.  If you're not, you'll see errors if it
+will be a problem.
 
-1. Click on [Start]->[Run]->
-2. Paste in: cmd /k "cd C:\Program Files\ACS Importer"
-3. You should now have a command prompt in the same folder as the importer.  
+On Windows 7 or Windows Vista:
+1. Right->Click on [Start]->[Programs]->[Acs Importer]->[Acs Importer]
+2. Select Properties -> Advanced -> Run As Administrator
+3. Click on [Start]->[Programs]->[Acs Importer]->[Acs Importer]
+
+You should now have a command prompt in the same folder as the importer.
+
+On Windows XP (no run as admin):
+1. Click on [Start]->[Programs]->[Acs Importer]->[Acs Importer]
+
 
 Getting help
 -------------------------------------
@@ -123,3 +136,35 @@ C:\...> AcsDataImporter.exe -s Wyoming -e 150 -v myVariablesFile.txt -jobName Te
 Frequently Asked Questions
 -------------------------------------
 
+
+Open Source Libraries Used
+-------------------------------------
+
+ Special Thanks to those amazing open source libraries that are so useful!
+Please see the /Licenses folder for the licenses for each respective project,
+and see below for links to each project.  Apologies if these links are 
+incorrect or out-of-date.
+
+ * log4net!
+   * http://logging.apache.org/log4net/
+ * GeoApi!
+   * http://geoapi.codeplex.com/
+ * NetTopologySuite!
+   * http://code.google.com/p/nettopologysuite/
+ * PowerCollections!
+   * http://powercollections.codeplex.com/
+ * ProjNET!
+   * http://projnet.codeplex.com/
+ * Ionic.Zip!
+   * http://dotnetzip.codeplex.com/
+ * Newtonsoft.Json!
+   * http://james.newtonking.com/pages/json-net.aspx
+ * System.Data.SQLite!
+   * http://system.data.sqlite.org
+ * Spatialite!
+   * http://www.gaia-gis.it/spatialite/
+ * Sqlite!
+   * http://www.sqlite.org/
+ * ExcelBinaryReader!
+   * http://exceldatareader.codeplex.com/
+ 

@@ -19,8 +19,9 @@ namespace Azavea.NijPredictivePolicing.Common
         public const string Warning_MissingProjection = @"
 *********************
 IMPORTANT!:  
-  You have not specified an output projection, meaning the resulting shapefile will
-be in unprojected WGS84.  Your filtering geometries, envelope, grid cell sizes, 
+  You have not specified an output projection!
+This means any exported shapefile will be in unprojected WGS84.
+Your filtering geometries, envelope, grid cell sizes, 
 and all other parameters must match that projection.
 *********************";
         
