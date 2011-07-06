@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Azavea.NijPredictivePolicing.Common
 {
+    /// <summary>
+    /// Basic container describing a command line argument we'd like to accept
+    /// </summary>
     public class CmdLineArg
     {
         public string Flag;

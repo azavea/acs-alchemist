@@ -42,7 +42,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new CmdLineArg() { Flag = "includeEmptyGeometries", Description = "Keeps empty grid cells during export", DataType=typeof(string), PropertyName="IncludeEmptyGridCells"},
 
             new CmdLineArg() { Flag = "outputFolder", Description = "Specify where you'd like the results saved", DataType=typeof(string), PropertyName = "OutputFolder"},
-            new CmdLineArg() { Flag = "preserveJam", Description = "Optional flag to preserve jam values", DataType=typeof(string), PropertyName="PreserveJam"},
+            new CmdLineArg() { Flag = "preserveJam", Description = "Optional flag to preserve non-numeric margin of error values", DataType=typeof(string), PropertyName="PreserveJam"},
             
             new CmdLineArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
             new CmdLineArg() { Flag = "listSummaryLevels", Description = "Displays a list of available census summary levels", DataType=typeof(string), PropertyName="DisplaySummaryLevels"},
@@ -51,7 +51,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             //new CmdLineArg() { Flag = "exportVariables", Description = "Exports a CSV of all variables to allVariables.csv", DataType=typeof(string), PropertyName="ExportVariables"}
         };
 
-
+        public string ArgumentLine;
 
         public AcsState State { get; set; }
 
@@ -102,8 +102,9 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             for (int i = 0; i < args.Length; i++)
             {
                 sb.Append(args[i]).Append(' ');
-            }
+            }            
             string line = sb.ToString();
+            this.ArgumentLine = line;
             //char delim = '-';
             char[] delims = new char[] { (char)45, (char)8211 }; //'-', '–';
             int idx = IndexOf(line, 0, delims);     //int idx = line.IndexOf(delim);
@@ -191,7 +192,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 }
                 if (!string.IsNullOrEmpty(DisplayStateCodes))
                 {
-                    Utilities.DisplayEnum("State Codes:", typeof(AcsState));
+                    Utilities.DisplayEnumKeysOnly("State Codes:", typeof(AcsState));
                     return true;
                 }
 
@@ -200,8 +201,22 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     _log.Error("Invalid State selected, please select a state from the list and try again.");
                     return false;
                 }
+                else if (this.State == AcsState.UnitedStates)
+                {
+                    //if it can't be parsed, it'll get assigned to value '0', which in this case is 'UnitedStates'
 
-                if (string.IsNullOrEmpty(this.JobName))
+                    var isOkay = "-s UnitedStates".ToLower();
+                    if (!this.ArgumentLine.Contains(isOkay))
+                    {
+                        _log.Fatal("I couldn't understand which state you wanted, please check the spelling and try again.");
+                        return false;
+                    }
+                }
+
+
+
+
+                if ((string.IsNullOrEmpty(this.JobName)) || (this.JobName == true.ToString()))
                 {
                     this.JobName = string.Format("{0}_{1}", this.State, DateTime.Now.ToShortDateString().Replace('/', '_'));
                     _log.DebugFormat("Jobname was empty, using {0}", this.JobName);

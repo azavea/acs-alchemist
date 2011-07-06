@@ -130,7 +130,7 @@ namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
                 DataTable dt = null;
 
                 //105 should really be 100, but there are duplicate rows in columnMappings
-                //See http://192.168.1.2/FogBugz/default.asp?19869
+                //See #19869
                 //If/when that bug gets fixed, 105 should be changed to 100 and this comment deleted
                 Assert.IsTrue(File.Exists(Valid100Lines), "Could not find test file " + Valid100Lines);
                 man.DesiredVariablesFilename = Valid100Lines;

@@ -7,6 +7,10 @@ using log4net;
 
 namespace Azavea.NijPredictivePolicing.Common
 {
+    /// <summary>
+    /// A generic class for parsing command line input given a collection of CmdLineArg(s).
+    /// Should handle some nice things, like hypens/spaces in quotes, etc, type conversion, etc
+    /// </summary>
     public class CmdLineJobBase
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);

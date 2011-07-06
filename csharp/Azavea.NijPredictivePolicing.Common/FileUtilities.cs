@@ -133,6 +133,12 @@ namespace Azavea.NijPredictivePolicing.Common
         //    return false;
         //}
 
+        /// <summary>
+        /// Uses Ionic.Zip library to expand a file (without overwriting) to a given location
+        /// </summary>
+        /// <param name="basePath"></param>
+        /// <param name="zipFileName"></param>
+        /// <returns></returns>
         public static bool UnzipFileTo(string basePath, string zipFileName)
         {
             try
@@ -154,6 +160,12 @@ namespace Azavea.NijPredictivePolicing.Common
             return false;
         }
 
+        /// <summary>
+        /// Uses Ionic.Zip library to search a compressed file for a given pattern
+        /// </summary>
+        /// <param name="zipFileName"></param>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
         public static List<string> FindFileNameInZipLike(string zipFileName, string pattern)
         {
             var zipFile = new ZipFile(zipFileName);

@@ -9,6 +9,9 @@ using System.Collections;
 
 namespace Azavea.NijPredictivePolicing.Common.Data
 {
+    /// <summary>
+    /// a basic implementation of the IDataFileReader interface, so we can simply export tab separated value files
+    /// </summary>
     public class TabSeparatedValueReader : IDataFileReader, IEnumerable<List<string>>
     {
         private readonly ILog _log = LogManager.GetLogger(new System.Diagnostics.StackTrace().GetFrame(0).GetMethod().DeclaringType.Namespace);

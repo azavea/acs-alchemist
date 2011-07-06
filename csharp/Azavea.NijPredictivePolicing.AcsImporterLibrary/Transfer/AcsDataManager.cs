@@ -52,9 +52,13 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             set
             {
                 _summaryLevel = value;
-                if (_summaryLevel.Length != 3)
+                if ((!string.IsNullOrEmpty(value)) && (value.Length != 3))
                 {
                     _summaryLevel = Utilities.GetAs<int>(value, -1).ToString("000");
+                }
+                else
+                {
+                    _summaryLevel = string.Empty;
                 }
             }
         }
@@ -577,14 +581,16 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             HashSet<string> results = new HashSet<string>();
             if (!string.IsNullOrEmpty(this.SummaryLevel))
             {
-                //sql-injection here: fix maybe?
-                string sql = string.Format("select LOGRECNO from geographies where SUMLEVEL = '{0}'", this.SummaryLevel);
-                using (var reader = DbClient.GetCommand(sql, conn).ExecuteReader())
+                using (var cmd = DbClient.GetCommand("select LOGRECNO from geographies where SUMLEVEL = @sum", conn))
                 {
-                    while (reader.Read())
+                    DbClient.AddParameter(cmd, "sum", this.SummaryLevel);
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        string lrn = reader.GetString(0);
+                        while (reader.Read())
+                        {
+                            string lrn = reader.GetString(0);
                             results.Add(lrn);
+                        }
                     }
                 }
             }
@@ -804,7 +810,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         }
 
                         //These next two if statement checks should probably be removed once
-                        //http://192.168.1.2/FogBugz/default.asp?19869 is resolved
+                        //#19869 is resolved
                         //Until that case is resolved, we can't guarantee rows in reqVariablesDT will be
                         //unique so they should stay.
 

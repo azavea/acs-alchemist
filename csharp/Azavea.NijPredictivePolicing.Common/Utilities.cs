@@ -33,9 +33,9 @@ namespace Azavea.NijPredictivePolicing.Common
                 to.Write(buffer, 0, read);
         }
 
-                /// <summary>
-        /// Copies stream "from" to stream "to" until it can't read anymore data.  This function 
-        /// is built into .NET 4.0 and later, but until we upgrade, this will do.
+        /// <summary>
+        /// Simple Stream to Stream function, logs progress every 5%, as long as at least
+        /// 1 second has passed
         /// </summary>
         /// <param name="from">The stream to read from</param>
         /// <param name="to">The stream to write to</param>
@@ -67,7 +67,13 @@ namespace Azavea.NijPredictivePolicing.Common
         }
 
         
-
+        /// <summary>
+        /// Non-generic version of the function 'GetAs<T>'
+        /// </summary>
+        /// <param name="destType"></param>
+        /// <param name="value"></param>
+        /// <param name="ifEmpty"></param>
+        /// <returns></returns>
         public static object GetAsType(Type destType, object value, object ifEmpty)
         {
             try
@@ -188,6 +194,11 @@ namespace Azavea.NijPredictivePolicing.Common
             return ifEmpty;
         }
 
+        /// <summary>
+        /// Enumerates over an Enumerated type, and outputs the contents to the logger
+        /// </summary>
+        /// <param name="label"></param>
+        /// <param name="enumType"></param>
         public static void DisplayEnum(string label, Type enumType)
         {
             var levels = Enum.GetValues(enumType);
@@ -198,12 +209,37 @@ namespace Azavea.NijPredictivePolicing.Common
             }
         }
 
+        /// <summary>
+        /// Enumerates over an Enumerated type, and outputs the contents to the logger
+        /// </summary>
+        /// <param name="label"></param>
+        /// <param name="enumType"></param>
+        public static void DisplayEnumKeysOnly(string label, Type enumType)
+        {
+            var levels = Enum.GetValues(enumType);
+            _log.Debug(label);
+            foreach (var value in levels)
+            {
+                _log.Debug(value.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Simple helper to ensure a given string is no longer than maxlen
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="maxlen"></param>
+        /// <returns></returns>
         public static string EnsureMaxLength(string str, int maxlen)
         {
             return (str.Length <= maxlen) ? str : str.Substring(0, maxlen);
         }
 
-
+        /// <summary>
+        /// Simple helper to build a polygon using an IEnvelope
+        /// </summary>
+        /// <param name="env"></param>
+        /// <returns></returns>
         public static IGeometry IEnvToIGeometry(IEnvelope env)
         {
             ICoordinate[] coords = new Coordinate[5];
@@ -217,6 +253,13 @@ namespace Azavea.NijPredictivePolicing.Common
             return poly;
         }
 
+        /// <summary>
+        /// Overly elaborate helper function for getting the feet->meter->wgs84 conversion
+        /// </summary>
+        /// <param name="widthFeet"></param>
+        /// <param name="heightFeet"></param>
+        /// <returns></returns>
+        [Obsolete("Replaced with something better")]
         public static Point GetCellFeetForProjection(double widthFeet, double heightFeet)
         {
             const double FEET_PER_METER = 3.2808399;
@@ -237,18 +280,36 @@ namespace Azavea.NijPredictivePolicing.Common
             return new Point(xStep[0], yStep[1]);
         }
 
+        /// <summary>
+        /// Helper function for building a CoordinateSystemFactory using a file
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         public static ICoordinateSystem GetCoordinateSystemByWKTFile(string filename)
         {
             CoordinateSystemFactory csf = new CoordinateSystemFactory();
             return csf.CreateFromWkt(File.ReadAllText(filename));
         }
 
+        /// <summary>
+        /// Helper function for building a transformation between two coordinate systems (useful when reprojecting)
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="dest"></param>
+        /// <returns></returns>
         public static ICoordinateTransformation BuildTransformationObject(ICoordinateSystem src, ICoordinateSystem dest)
         {
             var f = new CoordinateTransformationFactory();
             return f.CreateFromCoordinateSystems(src, dest);
         }
 
+        /// <summary>
+        /// Helper function for applying a reprojection transformation on a collection of Features
+        /// between a given file, and WGS84
+        /// </summary>
+        /// <param name="features"></param>
+        /// <param name="wktFilename"></param>
+        /// <returns></returns>
         public static List<Feature> ReprojectFeaturesTo(List<Feature> features, string wktFilename)
         {
             var destCRS = GetCoordinateSystemByWKTFile(wktFilename);
@@ -263,6 +324,13 @@ namespace Azavea.NijPredictivePolicing.Common
             return ReprojectFeatures(features, trans);
         }
 
+        /// <summary>
+        /// Helper function for applying a reprojection transformation on a collection of IGeometry(s)
+        /// between a given file, and WGS84
+        /// </summary>
+        /// <param name="features"></param>
+        /// <param name="wktFilename"></param>
+        /// <returns></returns>
         public static List<IGeometry> ReprojectFeaturesTo(List<IGeometry> features, string wktFilename)
         {
             var destCRS = GetCoordinateSystemByWKTFile(wktFilename);
@@ -278,10 +346,10 @@ namespace Azavea.NijPredictivePolicing.Common
         }
 
         /// <summary>
-        /// Transforms the provided features in place
+        /// Helper function for applying a reprojection transformation on a list of Features
         /// </summary>
         /// <param name="features"></param>
-        /// <param name="trans"></param>
+        /// <param name="wktFilename"></param>
         /// <returns></returns>
         public static List<Feature> ReprojectFeatures(List<Feature> features, ICoordinateTransformation trans)
         {
@@ -293,10 +361,10 @@ namespace Azavea.NijPredictivePolicing.Common
         }
 
         /// <summary>
-        /// Transforms the provided features in place
+        /// Helper function for applying a reprojection transformation on a list of IGeometry(s)
         /// </summary>
         /// <param name="features"></param>
-        /// <param name="trans"></param>
+        /// <param name="wktFilename"></param>
         /// <returns></returns>
         public static List<IGeometry> ReprojectFeatures(List<IGeometry> features, ICoordinateTransformation trans)
         {
@@ -308,6 +376,12 @@ namespace Azavea.NijPredictivePolicing.Common
         }
         
 
+        /// <summary>
+        /// Helper function for applying a reprojection transformation on a single IGeometry
+        /// </summary>
+        /// <param name="geom"></param>
+        /// <param name="trans"></param>
+        /// <returns></returns>
         public static IGeometry ReprojectGeometry(IGeometry geom, ICoordinateTransformation trans)
         {
             double[] srcPt = new double[2], pt = null;

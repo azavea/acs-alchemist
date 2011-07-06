@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Azavea.NijPredictivePolicing.Common
 {
+    /// <summary>
+    /// Central spot for general string constants, hopefully it'll make localization a little easier
+    /// </summary>
     public static class Constants
     {
         public enum ExitCodes
