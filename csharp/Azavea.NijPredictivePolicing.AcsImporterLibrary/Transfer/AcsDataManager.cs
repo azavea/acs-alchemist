@@ -52,7 +52,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             set
             {
                 _summaryLevel = value;
-                if ((!string.IsNullOrEmpty(value)) && (value.Length != 3))
+                if (!string.IsNullOrEmpty(value))
                 {
                     _summaryLevel = Utilities.GetAs<int>(value, -1).ToString("000");
                 }
@@ -770,7 +770,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     DataTable reqVariablesDT = GetRequestedVariables(conn);
                     if ((reqVariablesDT == null) || (reqVariablesDT.Rows.Count == 0))
                     {
-                        _log.Fatal("No variables requested");
+                        _log.Warn("No variables requested");
                         return false;
                     }
 
@@ -1055,7 +1055,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName);
                 if ((variablesDT == null) || (variablesDT.Rows.Count == 0))
                 {
-                    _log.Fatal("Nothing to export, data table is empty");
+                    _log.Warn("Nothing to export, data table is empty");
                     return null;
                 }
 
@@ -1242,7 +1242,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 string destPath = Path.GetDirectoryName(newShapefilename);
                 FileUtilities.SafePathEnsure(destPath);
 
-                
+
                 var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
                 writer.Header = header;
 
@@ -1258,6 +1258,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                 _log.Debug("Shapefile exported successfully");
                 return true;
+            }
+            catch (FileNotFoundException notFound)
+            {
+                _log.Error("A needed file couldn't be found: " + notFound.FileName);
+                _log.Fatal("The export cannot continue.  Exiting...");
+                Environment.Exit(-1);
             }
             catch (Exception ex)
             {
@@ -1481,6 +1487,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                 _log.Debug("Done! Shapefile exported successfully");
                 return true;
+            }
+            catch (FileNotFoundException notFound)
+            {
+                _log.Error("A needed file couldn't be found: " + notFound.FileName);
+                _log.Fatal("The export cannot continue.  Exiting...");
+                Environment.Exit(-1);
             }
             catch (Exception ex)
             {

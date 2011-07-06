@@ -208,7 +208,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     var isOkay = "-s UnitedStates".ToLower();
                     if (!this.ArgumentLine.Contains(isOkay))
                     {
-                        _log.Fatal("I couldn't understand which state you wanted, please check the spelling and try again.");
+                        _log.Fatal("I couldn't understand which state you wanted, please check the spelling and try again.  Exiting...");
                         return false;
                     }
                 }

@@ -89,7 +89,7 @@ namespace Azavea.NijPredictivePolicing.Common
             catch (UnauthorizedAccessException cantWriteEx)
             {
                 _log.Error("The importer couldn't write its config file.  Please run this application as an Administrator");
-                _log.Fatal("The importer cannot continue, exiting.");
+                _log.Fatal("The importer cannot continue.  Exiting...");
                 Environment.Exit(-1);
             }
             catch (Exception ex)

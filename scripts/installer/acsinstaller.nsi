@@ -67,6 +67,9 @@ Section -Main SEC0000
     File /r C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\x86\Debug\*
     ;File /r C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug\*
     File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\README.txt
+	
+	SetOutPath $INSTDIR\Docs
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\README.txt
 	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\Install.doc
 	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\Manual.doc
 	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\ACS_Importer_Flowchart.jpg
@@ -98,8 +101,8 @@ Section -Main SEC0000
 	SetOutPath $INSTDIR\Licenses\sqlite
 	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\sqlite\license.txt	
 	
-    SetOutPath $SMPROGRAMS\$StartMenuGroup
-	
+    SetOutPath $SMPROGRAMS\$StartMenuGroup	
+	CreateShortcut "$SMPROGRAMS\$StartMenuGroup\View Files.lnk" "$INSTDIR"	
     CreateShortcut "${SHORTCUTFILE}" "cmd" "/k cd $INSTDIR"
 	ShellLink::SetRunAsAdministrator "${SHORTCUTFILE}"
 	Pop $0
