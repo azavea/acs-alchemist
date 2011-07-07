@@ -86,8 +86,8 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
             writer.Close();
             reader.Close();
 
-            Assert.AreEqual(Helpers.Utilities.FileToString(OutputFile), 
-                Helpers.Utilities.FileToString(CheckFile));
+
+            Assert.AreEqual(File.ReadAllText(OutputFile), File.ReadAllText(CheckFile));
         }
     }
 }

@@ -18,6 +18,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
 
         protected ExcelBinaryReader _reader;
+        protected FileStream _input;
         public bool HasFile = false;
 
         public SequenceFileReader(string filename)
@@ -25,8 +26,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             this.HasFile = File.Exists(filename);
             if(HasFile)
             {
-                FileStream input = new FileStream(filename, FileMode.Open, FileAccess.Read);
-                _reader = ExcelReaderFactory.CreateBinaryReader(input) as ExcelBinaryReader;
+                _input = new FileStream(filename, FileMode.Open, FileAccess.Read);
+                _reader = ExcelReaderFactory.CreateBinaryReader(_input) as ExcelBinaryReader;
             }
         }
 
@@ -64,6 +65,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         public void Dispose()
         {
             _reader.Close();
+
+            if (_input != null)
+            {
+                _input.Close();
+                _input.Dispose();
+            }
             _columns = null;
         }
     }
