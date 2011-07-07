@@ -132,22 +132,36 @@ namespace Azavea.NijPredictivePolicing.Test.Common
         }
 
         /// <summary>
-        /// there the last hyphen is unicode 8211, still a hyphen, just evil.
+        /// Check for unicode hyphen (8211) support
         /// </summary>
         [Test]
         public void TestStandardLine()
         {
-            string[] args = ("-s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 "+((char)8211)+"exportToShape").Split(' ');
-            ImportJob job = new ImportJob();
-            if (!job.Load(args))
-            {
-                Assert.Fail("Couldn't parse standard line");
-            }
+            //"-s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 -exportToShape"
+            string[][] argsList = {
+("-s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 " + (char)8211 + "exportToShape").Split(' '),
+("-s Wyoming -e 150 " + (char)8211 + "v myVariablesFile.txt -jobName Test01 -exportToShape").Split(' '),
+((char)8211 + "s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 -exportToShape").Split(' ')
+                              };
 
-            Assert.AreEqual(AcsState.Wyoming, job.State, "State is wrong");
-            Assert.AreEqual("myVariablesFile.txt", job.IncludedVariableFile, "variables file is wrong");
-            Assert.AreEqual("Test01", job.JobName, "Job name is wrong");
-            Assert.AreEqual(true.ToString(), job.ExportToShapefile, true.ToString(), "flag param is wrong");
+            int i = 0;
+            foreach (string[] args in argsList)
+            {
+                i++;
+                ImportJob job = new ImportJob();
+                if (!job.Load(args))
+                {
+                    Assert.Fail("Couldn't parse standard line for argsList[{0}]", i);
+                }
+
+                Assert.AreEqual(AcsState.Wyoming, job.State, 
+                    "State is wrong for argsList[{0}]", i);
+                Assert.AreEqual("myVariablesFile.txt", job.IncludedVariableFile, 
+                    "variables file is wrong for argsList[{0}]", i);
+                Assert.AreEqual("Test01", job.JobName, "Job name is wrong for argsList[{0}]", i);
+                Assert.AreEqual(true.ToString(), job.ExportToShapefile, true.ToString(), 
+                    "flag param is wrong for argsList[{0}]", i);
+            }
         }
 
         //CmdLineJob job = new CmdLineJob();
