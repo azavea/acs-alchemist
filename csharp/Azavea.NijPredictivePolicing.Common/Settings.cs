@@ -252,7 +252,7 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             get
             {
-                return new HashSet<string>(Settings.ReservedColumnNamesString.Split(','));
+                return new HashSet<string>(Settings.ReservedColumnNamesString.ToLower().Split(','));
             }
         }
 

@@ -161,7 +161,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                 }
                 else
                 {
-                    File.Copy(Settings.AcsPrjFilePath, prjFileName);
+                    File.Copy(Settings.AcsPrjFilePath, prjFileName, true);
                 }
             }
             catch (Exception ex)

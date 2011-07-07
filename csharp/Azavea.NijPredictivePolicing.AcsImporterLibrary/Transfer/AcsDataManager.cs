@@ -52,9 +52,13 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             set
             {
                 _summaryLevel = value;
-                if (_summaryLevel.Length != 3)
+                if (!string.IsNullOrEmpty(value))
                 {
                     _summaryLevel = Utilities.GetAs<int>(value, -1).ToString("000");
+                }
+                else
+                {
+                    _summaryLevel = string.Empty;
                 }
             }
         }
@@ -577,14 +581,16 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             HashSet<string> results = new HashSet<string>();
             if (!string.IsNullOrEmpty(this.SummaryLevel))
             {
-                //sql-injection here: fix maybe?
-                string sql = string.Format("select LOGRECNO from geographies where SUMLEVEL = '{0}'", this.SummaryLevel);
-                using (var reader = DbClient.GetCommand(sql, conn).ExecuteReader())
+                using (var cmd = DbClient.GetCommand("select LOGRECNO from geographies where SUMLEVEL = @sum", conn))
                 {
-                    while (reader.Read())
+                    DbClient.AddParameter(cmd, "sum", this.SummaryLevel);
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        string lrn = reader.GetString(0);
+                        while (reader.Read())
+                        {
+                            string lrn = reader.GetString(0);
                             results.Add(lrn);
+                        }
                     }
                 }
             }
@@ -764,7 +770,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     DataTable reqVariablesDT = GetRequestedVariables(conn);
                     if ((reqVariablesDT == null) || (reqVariablesDT.Rows.Count == 0))
                     {
-                        _log.Fatal("No variables requested");
+                        _log.Warn("No variables requested");
                         return false;
                     }
 
@@ -804,7 +810,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         }
 
                         //These next two if statement checks should probably be removed once
-                        //http://192.168.1.2/FogBugz/default.asp?19869 is resolved
+                        //#19869 is resolved
                         //Until that case is resolved, we can't guarantee rows in reqVariablesDT will be
                         //unique so they should stay.
 
@@ -1049,7 +1055,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName);
                 if ((variablesDT == null) || (variablesDT.Rows.Count == 0))
                 {
-                    _log.Fatal("Nothing to export, data table is empty");
+                    _log.Warn("Nothing to export, data table is empty");
                     return null;
                 }
 
@@ -1076,11 +1082,15 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 //go through and add missing shapes if 'shouldAddMissingShapes' is set...
                 bool variablesHaveGeoID = variablesDT.Columns.Contains("GEOID");
 
-                List<IGeometry> filteringGeoms = (spatialFilter) ? GetFilteringGeometries(this.ExportFilterFilename, destCRS) : null;
-                //Die if we're supposed to have a filter but don't
-                if (spatialFilter && filteringGeoms == null)
+                List<IGeometry> filteringGeoms = null;
+                if (!string.IsNullOrEmpty(this.ExportFilterFilename))
                 {
-                    return null;
+                    filteringGeoms = (spatialFilter) ? GetFilteringGeometries(this.ExportFilterFilename, destCRS) : null;
+                    //Die if we're supposed to have a filter but don't
+                    if (spatialFilter && filteringGeoms == null)
+                    {
+                        return null;
+                    }
                 }
 
                 GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
@@ -1204,7 +1214,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 var exportFeatures = GetShapeFeaturesToExport(tableName, true);
                 if ((exportFeatures == null) || (exportFeatures.Count == 0))
                 {
-                    _log.Error("Export of Job \"{0}\" failed, no features to export!");
+                    _log.ErrorFormat("Export of Job \"{0}\" failed, no features to export!", tableName);
                     return false;
                 }
 
@@ -1232,7 +1242,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 string destPath = Path.GetDirectoryName(newShapefilename);
                 FileUtilities.SafePathEnsure(destPath);
 
-                
+
                 var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
                 writer.Header = header;
 
@@ -1248,6 +1258,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                 _log.Debug("Shapefile exported successfully");
                 return true;
+            }
+            catch (FileNotFoundException notFound)
+            {
+                _log.Error("A needed file couldn't be found: " + notFound.FileName);
+                _log.Fatal("The export cannot continue.  Exiting...");
+                Environment.Exit(-1);
             }
             catch (Exception ex)
             {
@@ -1273,7 +1289,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 var exportFeatures = GetShapeFeaturesToExport(tableName, false);
                 if ((exportFeatures == null) || (exportFeatures.Count == 0))
                 {
-                    _log.Error("Export of Job \"{0}\" failed, no features to export!");
+                    _log.ErrorFormat("Export of Job \"{0}\" failed, no features to export!", tableName);
                     return false;
                 }
 
@@ -1471,6 +1487,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                 _log.Debug("Done! Shapefile exported successfully");
                 return true;
+            }
+            catch (FileNotFoundException notFound)
+            {
+                _log.Error("A needed file couldn't be found: " + notFound.FileName);
+                _log.Fatal("The export cannot continue.  Exiting...");
+                Environment.Exit(-1);
             }
             catch (Exception ex)
             {

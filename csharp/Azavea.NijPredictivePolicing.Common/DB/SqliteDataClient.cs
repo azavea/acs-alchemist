@@ -11,6 +11,9 @@ using log4net;
 
 namespace Azavea.NijPredictivePolicing.Common.DB
 {
+    /// <summary>
+    /// See 'IDataClient' for descriptions
+    /// </summary>
     public class SqliteDataClient : IDataClient
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -19,6 +22,9 @@ namespace Azavea.NijPredictivePolicing.Common.DB
         protected int _queryTimeout = 30;
         public int _connsOpened = 0, _connsClosed = 0;
 
+        /// <summary>
+        /// Some spatial reference systems we need (we don't need to load every single one to get these two)
+        /// </summary>
         public string[] defaultSpatialRefs = new string[] {
             "INSERT INTO spatial_ref_sys (srid, auth_name, auth_srid, ref_sys_name, proj4text) VALUES (4269, 'epgs', 4269, 'NAD83', '+proj=longlat +ellps=GRS80 +datum=NAD83 +no_defs ');",
             "INSERT INTO spatial_ref_sys (srid, auth_name, auth_srid, ref_sys_name, proj4text) VALUES (4326, 'epgs', 4326, 'WGS 84', '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ');"
@@ -26,7 +32,13 @@ namespace Azavea.NijPredictivePolicing.Common.DB
 
         public SqliteDataClient(string filename)
         {
-            //Synchronous=Full
+            //NOTE:
+            //These connection string params help make this a bit more performant.  If you want
+            //safer database access, turn 'Synchronous' back on
+            //e.g:
+            //change "Synchronous=Off"
+            //to     "Synchronous=Full"
+            //
             _connectionString = string.Format("Synchronous=Off;Cache Size=64000000;Max Pool Size=100;Data Source={0};", filename);
 
             if (!File.Exists(filename))
@@ -34,13 +46,6 @@ namespace Azavea.NijPredictivePolicing.Common.DB
                 InitializeNewSpatialDatabase();
             }
         }
-
-        //public SqliteDataClient(string filename, string connectionString)
-        //{
-        //    //Synchronous=Full
-        //    _connectionString = string.Format(connectionString, filename);
-        //}
-
 
         public void InitializeNewSpatialDatabase()
         {

@@ -7,10 +7,14 @@ using log4net;
 
 namespace Azavea.NijPredictivePolicing.Common.Data
 {
+    
     public static class FileWriterHelpers
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        /// <summary>
+        /// Helper class for writing a DataTable object to a IDataFileWriter object
+        /// </summary>
         public static bool WriteDataTable(IDataFileWriter writer, DataTable dt)
         {
             try

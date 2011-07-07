@@ -8,6 +8,9 @@ using System.Data;
 
 namespace Azavea.NijPredictivePolicing.Common.DB
 {
+    /// <summary>
+    /// See 'IDataClient' for descriptions
+    /// </summary>
     public class SqlDataClient : IDataClient
     {
         protected string _connectionString;

@@ -21,37 +21,37 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         public static CmdLineArg[] Arguments = new CmdLineArg[] {
             new CmdLineArg() { Flag = "s", Description = "State Code", DataType=typeof(AcsState), PropertyName="State"},
-            new CmdLineArg() { Flag = "v", Description = "Filter data by variable name file", DataType=typeof(string), PropertyName="IncludedVariableFile"},
-            
-            new CmdLineArg() { Flag = "e", Description = "Filter Spatially by Census Summary Level", DataType=typeof(string), PropertyName="SummaryLevel"},
+            new CmdLineArg() { Flag = "e", Description = "Filter Spatially by Census Summary Level", DataType=typeof(string), PropertyName="SummaryLevel"},            
+            new CmdLineArg() { Flag = "v", Description = "Filter data by variable name file", DataType=typeof(string), PropertyName="IncludedVariableFile"},                        
             new CmdLineArg() { Flag = "f", Description = "Filter Spatially by optional shapefile", DataType=typeof(string), PropertyName="ExportFilterShapefile"},
             
             //new CmdLineArg() { Flag = "ExportFilterSRID", Description = "SRID to use for shapefile filter if none is provided in the shapefile", DataType=typeof(string), PropertyName="ExportFilterSRID"},
 
             new CmdLineArg() { Flag = "j", Display=false, DataType=typeof(string), PropertyName="JobName"},
             new CmdLineArg() { Flag = "jobName", Description = "Specify a name for this job / shapefile", DataType=typeof(string), PropertyName="JobName"},
-
             new CmdLineArg() { Flag = "r", Display=false,  DataType=typeof(string), PropertyName="ReplaceTable"},
             new CmdLineArg() { Flag = "replaceJob", Description = "Replace an existing job / shapefile", DataType=typeof(string), PropertyName="ReplaceTable"},
             
+            new CmdLineArg() { Flag = "outputProjection", Description = "Provide the .prj file of a desired projection to operate in", DataType=typeof(string), PropertyName="OutputProjection"},
+
             new CmdLineArg() { Flag = "exportToShape", Description = "Export results to shapefile", DataType=typeof(string), PropertyName="ExportToShapefile"},
             new CmdLineArg() { Flag = "exportToGrid", Description = "Export results to fishnetted shapefile where value = # feet", DataType=typeof(string), PropertyName="ExportToGrid"},
 
-            new CmdLineArg() { Flag = "gridEnvelope", Description = "Align the grid cells to an envelope in a file", DataType=typeof(string), PropertyName="GridEnvelope"},
-            new CmdLineArg() { Flag = "outputProjection", Description = "Provide the .prj file of a desired projection to operate in", DataType=typeof(string), PropertyName="OutputProjection"},
-            new CmdLineArg() { Flag = "includeEmptyGridCells", Description = "Keeps empty grid cells during export", DataType=typeof(string), PropertyName="IncludeEmptyGridCells"},
+            new CmdLineArg() { Flag = "gridEnvelope", Description = "Align the grid cells to an envelope in a file", DataType=typeof(string), PropertyName="GridEnvelope"},            
+            new CmdLineArg() { Flag = "includeEmptyGridCells", Display=false,   DataType=typeof(string), PropertyName="IncludeEmptyGridCells"},
+            new CmdLineArg() { Flag = "includeEmptyGeometries", Description = "Keeps empty grid cells during export", DataType=typeof(string), PropertyName="IncludeEmptyGridCells"},
 
             new CmdLineArg() { Flag = "outputFolder", Description = "Specify where you'd like the results saved", DataType=typeof(string), PropertyName = "OutputFolder"},
-            new CmdLineArg() { Flag = "preserveJam", Description = "Optional flag to preserve jam values", DataType=typeof(string), PropertyName="PreserveJam"},
+            new CmdLineArg() { Flag = "preserveJam", Description = "Optional flag to preserve non-numeric margin of error values", DataType=typeof(string), PropertyName="PreserveJam"},
             
             new CmdLineArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
             new CmdLineArg() { Flag = "listSummaryLevels", Description = "Displays a list of available census summary levels", DataType=typeof(string), PropertyName="DisplaySummaryLevels"},
-            new CmdLineArg() { Flag = "stripGEOIDcolumn", Description = "Adds an extra column to the shapefile output named GEOID_STRP that contains the same data as the GEOID column but without the \"15000US\" prefix", DataType=typeof(string), PropertyName = "AddStrippedGEOIDcolumn" }
+            new CmdLineArg() { Flag = "stripGEOIDColumn", Description = "Adds an extra column to the shapefile output named GEOID_STRP that contains the same data as the GEOID column but without the \"15000US\" prefix", DataType=typeof(string), PropertyName = "AddStrippedGEOIDcolumn" }
             //This command is now kind of useless now that we discovered how mangled these variable names actually are
             //new CmdLineArg() { Flag = "exportVariables", Description = "Exports a CSV of all variables to allVariables.csv", DataType=typeof(string), PropertyName="ExportVariables"}
         };
 
-
+        public string ArgumentLine;
 
         public AcsState State { get; set; }
 
@@ -84,6 +84,17 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             this.State = AcsState.None;
         }
 
+        public int IndexOf(string str, int idx, params char[] delims)
+        {
+            foreach (char d in delims)
+            {
+                int next = str.IndexOf(d, idx);
+                if (next >= 0)
+                    return next;
+            }
+            return -1;
+        }
+
 
         public bool Load(string[] args)
         {
@@ -91,12 +102,14 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             for (int i = 0; i < args.Length; i++)
             {
                 sb.Append(args[i]).Append(' ');
-            }
+            }            
             string line = sb.ToString();
-            char delim = '-';
+            this.ArgumentLine = line;
+            //char delim = '-';
+            char[] delims = new char[] { (char)45, (char)8211 }; //'-', '–';
+            int idx = IndexOf(line, 0, delims);     //int idx = line.IndexOf(delim);
 
-
-            if (line.IndexOf(delim) == -1)
+            if (idx == -1)
             {
                 //if we have arguments, but they didn't include flags, it's probably a file,
                 //look for the file.
@@ -119,9 +132,11 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 }
             }
 
+            
+
 
             var thisType = typeof(ImportJob);
-            int idx = line.IndexOf(delim);
+            //int idx = IndexOf(line, 0, delims);     //int idx = line.IndexOf(delim);
             while (idx >= 0)
             {
                 int nextSpace = line.IndexOf(' ', idx + 1);
@@ -130,7 +145,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 string contents = string.Empty;
 
                 idx += 1 + flag.Length;
-                int end = line.IndexOf(delim, idx);
+                int end = IndexOf(line, idx, delims);   //int end = line.IndexOf(delim, idx);
                 if (end == -1)
                 {
                     end = line.Length;
@@ -145,7 +160,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
                     idx = end;
                 }
-                idx = line.IndexOf(delim, idx);
+                idx = IndexOf(line, idx, delims);       //idx = line.IndexOf(delim, idx);
 
 
                 for (int p = 0; p < Arguments.Length; p++)
@@ -177,7 +192,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 }
                 if (!string.IsNullOrEmpty(DisplayStateCodes))
                 {
-                    Utilities.DisplayEnum("State Codes:", typeof(AcsState));
+                    Utilities.DisplayEnumKeysOnly("State Codes:", typeof(AcsState));
                     return true;
                 }
 
@@ -186,8 +201,22 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     _log.Error("Invalid State selected, please select a state from the list and try again.");
                     return false;
                 }
+                else if (this.State == AcsState.UnitedStates)
+                {
+                    //if it can't be parsed, it'll get assigned to value '0', which in this case is 'UnitedStates'
 
-                if (string.IsNullOrEmpty(this.JobName))
+                    var isOkay = "-s UnitedStates".ToLower();
+                    if (!this.ArgumentLine.Contains(isOkay))
+                    {
+                        _log.Fatal("I couldn't understand which state you wanted, please check the spelling and try again.  Exiting...");
+                        return false;
+                    }
+                }
+
+
+
+
+                if ((string.IsNullOrEmpty(this.JobName)) || (this.JobName == true.ToString()))
                 {
                     this.JobName = string.Format("{0}_{1}", this.State, DateTime.Now.ToShortDateString().Replace('/', '_'));
                     _log.DebugFormat("Jobname was empty, using {0}", this.JobName);

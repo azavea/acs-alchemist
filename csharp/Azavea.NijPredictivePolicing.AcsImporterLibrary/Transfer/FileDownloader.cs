@@ -53,18 +53,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             {
                 try
                 {
-                    //This is to avoid the server blocking too many connection requests
-                    if ((DateTime.Now - _lastQuery).Milliseconds < WaitTimeMs)
-                    {
-                        int nap = (int)Math.Pow(2, retries) * WaitTimeMs - (DateTime.Now - _lastQuery).Milliseconds;
-                        if (nap > 0)
-                        {
-                            _log.DebugFormat("Sleeping for {0} ms before attempting to download next file", nap);
-                            System.Threading.Thread.Sleep(nap);
-                        }
-                    }
-                    _lastQuery = DateTime.Now;
 
+                    _lastQuery = DateTime.Now;
+                    System.Threading.Thread.Sleep(250); //just a little pre-nap so we don't hammer the server
 
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(desiredURL);
                     request.KeepAlive = false;  //We're only doing this once
@@ -105,9 +96,26 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                     return true;
                 }
+                catch (UnauthorizedAccessException cantWriteEx)
+                {
+                    _log.Error("The importer couldn't save the file, please run this application as administrator, or set the output directory.");
+                    _log.Fatal("The importer cannot continue.  Exiting...");
+                    Environment.Exit(-1);
+                }
                 catch (Exception ex)
                 {
                     _log.Error("Error downloading file, retrying", ex);
+
+                    //This is to avoid the server blocking too many connection requests
+                    if ((DateTime.Now - _lastQuery).Milliseconds < WaitTimeMs)
+                    {
+                        int nap = (int)Math.Pow(2, retries) * WaitTimeMs - (DateTime.Now - _lastQuery).Milliseconds;
+                        if (nap > 0)
+                        {
+                            _log.DebugFormat("Sleeping for {0}ms before starting download", nap);
+                            System.Threading.Thread.Sleep(nap);
+                        }
+                    }
                 }
 
                 retries++;
