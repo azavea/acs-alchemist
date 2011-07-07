@@ -42,7 +42,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 if (elapsed.TotalDays < 7)
                 {
                     _log.DebugFormat("File {0} is less than 7 days old, skipping", Path.GetFileName(filePath));
-                    File.SetCreationTime(filePath, DateTime.Now);
+                    System.Threading.Thread.Sleep(100); //give the disk a chance to catch up
+                    FileUtilities.TryChangeCreationTime(filePath, DateTime.Now);
                     return true;
                 }
             }
@@ -77,7 +78,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                             {
                                 _log.DebugFormat("File {0} already exists, and date stamps match, skipping",
                                     Path.GetFileName(filePath));
-                                File.SetCreationTime(filePath, DateTime.Now);
+
+                                FileUtilities.TryChangeCreationTime(filePath, DateTime.Now);
                                 return true;
                             }
                         }
@@ -90,7 +92,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         response.Close();
                         request.Abort();
 
-                        File.SetLastWriteTime(filePath, response.LastModified);
+                        FileUtilities.TryChangeLastWriteTime(filePath, response.LastModified);
                         _log.DebugFormat("Downloaded {0} successfully", Path.GetFileName(filePath));
                     }
 

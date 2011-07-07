@@ -32,6 +32,46 @@ namespace Azavea.NijPredictivePolicing.Common
         }
 
         /// <summary>
+        /// Try changing the file's creation time without exceptions.  Returns true on success, false on failure.
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public static bool TryChangeCreationTime(string filename, DateTime newTime)
+        {
+            try
+            {
+                if (File.Exists(filename))
+                {
+                    File.SetCreationTime(filename, newTime);
+                }
+                    
+                return true;
+            }
+            catch { }
+            return false;
+        }
+
+        /// <summary>
+        /// Try changing the file's last write time without exceptions.  Returns true on success, false on failure.
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public static bool TryChangeLastWriteTime(string filename, DateTime newTime)
+        {
+            try
+            {
+                if (File.Exists(filename))
+                {
+                    File.SetLastWriteTime(filename, newTime);
+                }
+
+                return true;
+            }
+            catch { }
+            return false;
+        }
+
+        /// <summary>
         /// Given a basepath and a list of names of subdirectories, creates the subdirectories if necessary.  Throws exceptions on error.
         /// </summary>
         /// <param name="basepath">A path to a directory that already exists</param>
@@ -133,6 +173,12 @@ namespace Azavea.NijPredictivePolicing.Common
         //    return false;
         //}
 
+        /// <summary>
+        /// Uses Ionic.Zip library to expand a file (without overwriting) to a given location
+        /// </summary>
+        /// <param name="basePath"></param>
+        /// <param name="zipFileName"></param>
+        /// <returns></returns>
         public static bool UnzipFileTo(string basePath, string zipFileName)
         {
             try
@@ -154,6 +200,12 @@ namespace Azavea.NijPredictivePolicing.Common
             return false;
         }
 
+        /// <summary>
+        /// Uses Ionic.Zip library to search a compressed file for a given pattern
+        /// </summary>
+        /// <param name="zipFileName"></param>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
         public static List<string> FindFileNameInZipLike(string zipFileName, string pattern)
         {
             var zipFile = new ZipFile(zipFileName);

@@ -103,7 +103,6 @@
     <Compile Include="Common\DB\SpatialiteTests.cs" />
     <Compile Include="Common\DB\TableCreationTests.cs" />
     <Compile Include="Common\Data\ExcelDataReaderTests.cs" />
-    <Compile Include="Helpers\Utilities.cs" />
     <Compile Include="Helpers\LogHelpers.cs" />
     <Compile Include="IntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
