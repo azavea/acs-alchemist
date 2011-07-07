@@ -105,13 +105,14 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         public int IndexOf(string str, int idx, params char[] delims)
         {
+            List<int> indices = new List<int>(delims.Length);
             foreach (char d in delims)
             {
                 int next = str.IndexOf(d, idx);
                 if (next >= 0)
-                    return next;
+                    indices.Add(next);
             }
-            return -1;
+            return (indices.Count > 0) ? indices.Min() : -1;
         }
 
 

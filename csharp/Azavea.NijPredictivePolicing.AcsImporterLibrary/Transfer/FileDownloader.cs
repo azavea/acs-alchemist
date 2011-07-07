@@ -62,7 +62,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 {
                     _log.DebugFormat("File {0} is less than 7 days old, skipping", Path.GetFileName(filePath));
                     System.Threading.Thread.Sleep(100); //give the disk a chance to catch up
-                    FileUtilities.TryChangeCreationTime(filePath, DateTime.Now);
                     return true;
                 }
             }

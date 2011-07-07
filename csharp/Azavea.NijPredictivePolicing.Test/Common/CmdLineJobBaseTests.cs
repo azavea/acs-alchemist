@@ -113,8 +113,8 @@ namespace Azavea.NijPredictivePolicing.Test.Common
             CmdLineJobBase cmds = new CmdLineJobBase();
             Assert.IsTrue(cmds.Load(args, Arguments, dest), "Load failed!");
 
-            Assert.AreEqual("param", dest.another, "parameter after filename with hypens was klobbered");
-            Assert.AreEqual("this-is-a-terrible-filename.txt", dest.somefile, "failed on filename with hyphens");            
+            Assert.AreEqual("param", dest.another, "parameter after filename with hypens was clobbered");
+            Assert.AreEqual("this-is-a-terrible-filename.txt", dest.somefile, "failed on filename with hyphens");
         }
 
 
@@ -132,7 +132,7 @@ namespace Azavea.NijPredictivePolicing.Test.Common
             CmdLineJobBase cmds = new CmdLineJobBase();
             Assert.IsTrue(cmds.Load(args, Arguments, dest), "Load failed!");
 
-            Assert.AreEqual("param", dest.another, "parameter after filename with hypens was klobbered");
+            Assert.AreEqual("param", dest.another, "parameter after filename with hypens was clobbered");
             Assert.AreEqual("C:\\terrible path\\with spaces\\in it\\terrible_filename.txt", dest.somefile, "failed on filename with quotes");
         }
 
@@ -151,29 +151,33 @@ namespace Azavea.NijPredictivePolicing.Test.Common
         }
 
         /// <summary>
-        /// there the last hyphen is unicode 8211, still a hyphen, just evil.
+        /// Ensure unicode hyphen (8211) support
         /// </summary>
         [Test]
         public void TestStandardLine()
         {
-            string[] args = ("-s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 "+((char)8211)+"exportToShape").Split(' ');
-            ImportJob job = new ImportJob();
-            if (!job.Load(args))
-            {
-                Assert.Fail("Couldn't parse standard line");
-            }
+            var argsList = new string[][]{
+                ("-s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 " + (char)8211 + "exportToShape").Split(' '),
+                ("-s Wyoming -e 150 " + (char)8211 + "v myVariablesFile.txt -jobName Test01 -exportToShape").Split(' '),
+                ((char)8211 + "s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 -exportToShape").Split(' ')
+            };
 
-            Assert.AreEqual(AcsState.Wyoming, job.State, "State is wrong");
-            Assert.AreEqual("myVariablesFile.txt", job.IncludedVariableFile, "variables file is wrong");
-            Assert.AreEqual("Test01", job.JobName, "Job name is wrong");
-            Assert.AreEqual(true.ToString(), job.ExportToShapefile, true.ToString(), "flag param is wrong");
+            for (int i = 0; i < argsList.Length; i++)
+            {
+                var args = argsList[i];
+                ImportJob job = new ImportJob();
+                if (!job.Load(args))
+                {
+                    Assert.Fail("Couldn't parse standard line for argsList[{0}]", i);
+                }
+
+                Assert.AreEqual(AcsState.Wyoming, job.State, "State is wrong for argsList[{0}]", i);
+                Assert.AreEqual("myVariablesFile.txt", job.IncludedVariableFile, "variables file is wrong for argsList[{0}]", i);
+                Assert.AreEqual("Test01", job.JobName, "Job name is wrong for argsList[{0}]", i);
+                Assert.AreEqual(true.ToString(), job.ExportToShapefile, true.ToString(), "flag param is wrong for argsList[{0}]", i);
+            }
         }
 
-        //CmdLineJob job = new CmdLineJob();
-         //   if ((args != null) && (args.Length > 0))
-         //   {
-         //       _log.Debug("Loading arguments...");
-         //       job.Load(args, CmdLineJob.Arguments, job);
 
     }
 }
