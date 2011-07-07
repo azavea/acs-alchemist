@@ -1,4 +1,23 @@
-﻿using System;
+﻿/*
+  Copyright (c) 2011 Azavea, Inc.
+ 
+  This file is part of _SOLUTIONNAME_.
+
+  _SOLUTIONNAME_ is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  _SOLUTIONNAME_ is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public License
+  along with _SOLUTIONNAME_.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,10 +58,20 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             _log.Debug("  `--    --'    --'    '`''--' ^-----'  `''\"`-    \"-     '`''\"'  '`'''-'");
             _log.Debug("");
             _log.Debug("+--------------------------------------------+");
-            _log.Debug("|   Welcome to the Acs Data Importer         |");
+            _log.Debug("|   Welcome to _SOLUTIONNAME_                |");
             _log.Debug("+--------------------------------------------+");
             _log.Debug("");
             _log.Debug("");
+        }
+
+        protected static void ShowCopyrightAndLicense()
+        {
+            _log.Info("+-----------------------------------------------------+");
+            _log.Info(" _SOLUTIONNAME_  Copyright (C) 2011 Azavea, Inc.");
+            _log.Info(" This program comes with ABSOLUTELY NO WARRANTY;");
+            _log.Info(" This is free software, and you are welcome to redistribute it");
+            _log.Info(" under the terms of the GNU Lesser General Public License");
+            _log.Info("+-----------------------------------------------------+");
         }
 
         protected static void LoadConfigFile()
@@ -75,6 +104,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             Init();
             LoadConfigFile();
             ShowWelcomeScreen();
+            ShowCopyrightAndLicense();
 
 
             ImportJob job = new ImportJob();
