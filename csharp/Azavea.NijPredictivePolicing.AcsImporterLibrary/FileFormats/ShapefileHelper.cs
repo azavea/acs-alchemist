@@ -200,11 +200,23 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         /// <returns></returns>
         public static bool MakeOutputProjFile(string sourceProjectionFilename, string destShapefilename)
         {
-            string prjFileName = Path.Combine(
-                Path.GetDirectoryName(destShapefilename), 
-                Path.GetFileNameWithoutExtension(destShapefilename)) + ".prj";
+            try
+            {
+                string prjFileName = Path.Combine(
+                    Path.GetDirectoryName(destShapefilename),
+                    Path.GetFileNameWithoutExtension(destShapefilename)) + ".prj";
 
-            File.Copy(sourceProjectionFilename, prjFileName, true);        //File.WriteAllText(prjFileName, File.ReadAllText(wktProjFilename));
+                if (File.Exists(prjFileName))
+                {
+                    _log.DebugFormat("The file already exists: {0}", prjFileName);
+                }
+
+                File.Copy(sourceProjectionFilename, prjFileName, true);        //File.WriteAllText(prjFileName, File.ReadAllText(wktProjFilename));
+            }
+            catch (Exception ex)
+            {
+                _log.Error("There was an error trying to write a .prj file for your export.");
+            }
             return true;
         }
 
