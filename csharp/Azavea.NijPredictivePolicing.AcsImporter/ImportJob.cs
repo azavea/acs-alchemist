@@ -156,7 +156,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
 
             var thisType = typeof(ImportJob);
-            //int idx = IndexOf(line, 0, delims);     //int idx = line.IndexOf(delim);
+            idx = IndexOf(line, 0, delims);     //int idx = line.IndexOf(delim);
             while (idx >= 0)
             {
                 int nextSpace = line.IndexOf(' ', idx + 1);

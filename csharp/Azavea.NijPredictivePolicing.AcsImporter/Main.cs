@@ -101,6 +101,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         public static int Main(string[] args)
         {
+            //Console.ReadKey();
+
             Init();
             LoadConfigFile();
             ShowWelcomeScreen();
