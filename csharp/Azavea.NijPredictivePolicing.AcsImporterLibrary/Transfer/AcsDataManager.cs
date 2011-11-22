@@ -990,27 +990,29 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             var geomKeys = new Dictionary<string, DataRow>();
             foreach (DataRow row in wholeGeomTable.Rows)
             {
-                string key = string.Format("{0}_{1}_{2}",
-                    Utilities.GetAs<int>(row["COUNTY"], -1),
-                    Utilities.GetAs<int>(row["TRACT"], -1),
-                    Utilities.GetAs<int>(row["BLKGROUP"], -1)
-                );
+                string county = Utilities.GetAs<string>(row["COUNTY"], "-1");
+                string tract = Utilities.GetAs<string>(row["TRACT"], "-1");
+                string blkgroup = Utilities.GetAs<string>(row["BLKGROUP"], "-1");
+                if (tract.Trim().Length != 6)
+                    tract += "00";
+
+                string key = string.Format("{0}_{1}_{2}", county, tract, blkgroup);
                 geomKeys[key] = row;
             }
 
             var dict = new Dictionary<string, DataRow>();
+            GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
+                    ShapefileHelper.GetGeomFactory());
+            GisSharpBlog.NetTopologySuite.IO.WKBWriter binWriter = new WKBWriter();
             foreach (DataRow row in wholeShapeTable.Rows)
             {
-                string tract = Utilities.GetAs<string>(row["TRACT"], string.Empty);
+                string county = Utilities.GetAs<string>(row["COUNTY"], "-1");
+                string tract = Utilities.GetAs<string>(row["TRACT"], "-1");
+                string blkgroup = Utilities.GetAs<string>(row["BLKGROUP"], "-1");
                 if (tract.Trim().Length != 6)
                     tract += "00";
 
-                string key = string.Format("{0}_{1}_{2}",
-                   Utilities.GetAs<int>(row["COUNTY"], -1),
-                   Utilities.GetAs<int>(tract, -1),
-                   Utilities.GetAs<int>(row["BLKGROUP"], -1)
-                );
-
+                string key = string.Format("{0}_{1}_{2}", county, tract, blkgroup);
                 if (geomKeys.ContainsKey(key))
                 {
                     string logrecno = geomKeys[key]["LOGRECNO"] as string;
@@ -1018,15 +1020,41 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                     if (dict.ContainsKey(logrecno))
                     {
+                        /* In theory, there should be a one-to-one relationship between logrecno and Geometry.
+                         * In practice, there are a small number of geometries that are discontiguous or self-
+                         * intersecting.  Because the geometry shapefile only uses single polygons and not
+                         * multipolygons, they solve this problem by having duplicate rows in the geometry 
+                         * shapefile with the same county, tract, and blkgroup numbers, one for each part of
+                         * the multipolygon.  This is undocumented AFAIK, but can be seen in several places (see
+                         * logrecno 0014948 for PA for example).  To account for this, we union geometries 
+                         * together whenever we encounter duplicates and inform the user, so we don't end up
+                         * with missing geometries in the output.
+                         */
                         //http://www.census.gov/geo/www/cob/tr_metadata.html
-                        _log.DebugFormat("duplicate logical record number? {0}, with spatial key {1}, if tract is between 9400, and 9499, it is reserved", logrecno, key);
+                        _log.DebugFormat("Duplicate records encountered for logical record number {0} (County:{1}, Tract:{2}, Block Group:{3}).", logrecno, county, tract, blkgroup);
+                        _log.DebugFormat("Attempting to merge geometries for duplicates together.  Please note if tract is between 9400, and 9499, it is reserved.");
+                        try
+                        {
+                            byte[] geomBytes = (byte[])row["Geometry"];
+                            IGeometry geomToAdd = binReader.Read(geomBytes);
+                            geomBytes = (byte[])dict[logrecno]["Geometry"];
+                            IGeometry currentGeom = binReader.Read(geomBytes);
+                            byte[] newGeomBytes = binWriter.Write(currentGeom.Union(geomToAdd));
+                            row["Geometry"] = newGeomBytes;
+                            _log.Debug("Geometry merge succeeded!  Please double check all features in the output that match the above logrecno for consistency.");
+                        }
+                        catch (Exception)
+                        {
+                            _log.Debug("Geometry merge failed; only one geometry will be used");
+                        }
                     }
 
                     dict[logrecno] = row;
                 }
                 else
                 {
-                    _log.Debug("Couldn't find... this one");
+                    _log.DebugFormat("Couldn't find a geometry matching County:{0}, Tract:{1}, Block Group:{2}", 
+                        county, tract, blkgroup);
                 }
             }
 
