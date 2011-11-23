@@ -1029,23 +1029,26 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                          * logrecno 0014948 for PA for example).  To account for this, we union geometries 
                          * together whenever we encounter duplicates and inform the user, so we don't end up
                          * with missing geometries in the output.
+                         * 
+                         * As this link indicates, tracts 9400 - 9499 are especially prone to this phenomenon:
+                         * http://www.census.gov/geo/www/cob/tr_metadata.html
                          */
-                        //http://www.census.gov/geo/www/cob/tr_metadata.html
+                        
                         _log.DebugFormat("Duplicate records encountered for logical record number {0} (County:{1}, Tract:{2}, Block Group:{3}).", logrecno, county, tract, blkgroup);
-                        _log.DebugFormat("Attempting to merge geometries for duplicates together.  Please note if tract is between 9400, and 9499, it is reserved.");
+                        _log.DebugFormat("Attempting to merge geometries for duplicates together.");
                         try
                         {
                             byte[] geomBytes = (byte[])row["Geometry"];
                             IGeometry geomToAdd = binReader.Read(geomBytes);
                             geomBytes = (byte[])dict[logrecno]["Geometry"];
                             IGeometry currentGeom = binReader.Read(geomBytes);
-                            byte[] newGeomBytes = binWriter.Write(currentGeom.Union(geomToAdd));
-                            row["Geometry"] = newGeomBytes;
+                            geomBytes = binWriter.Write(currentGeom.Union(geomToAdd));
+                            row["Geometry"] = geomBytes;    //saved to dict at end of current if clause
                             _log.Debug("Geometry merge succeeded!  Please double check all features in the output that match the above logrecno for consistency.");
                         }
                         catch (Exception)
                         {
-                            _log.Debug("Geometry merge failed; only one geometry will be used");
+                            _log.Error("Geometry merge failed; only one geometry will be used!  Output may be missing geometries!");
                         }
                     }
 
