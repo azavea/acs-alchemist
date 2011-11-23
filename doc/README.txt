@@ -64,8 +64,9 @@ C:\...> AcsDataImporter.exe -s Wyoming
 Summary Levels
 -------------------------------------
 
-  Variable summaries are grouped into a number of levels.  The importer
-will require a summary level specified by code, These can be listed by typing:
+  Variable summaries are grouped into a number of levels of areal 
+aggregation - tracts, block groups, etc. The importer will require a summary 
+level specified by code.  These can be listed by typing: 
 
 C:\...> AcsDataImporter.exe -listSummaryLevels
 
@@ -76,12 +77,22 @@ Variable Files
   Each data point for the ACS is represented by a unique variable ID.
 These are available here: 
 http://www2.census.gov/acs2009_5yr/summaryfile/ACS2009_5-Year_TableShells.xls
-From this file, select up to 100 Unique ID's per export job you'd like,
-and save these to your variable file in the following format.  For example:
+From this file, select up to 100 Unique ID's per export job you'd like, and save 
+these to a variable file in the following format. This file is used to determine 
+which variables should be included in your output. Each line corresponds to a 
+variable and consists of two parts separated by a comma. The first is an ID from 
+the "Table ID" column in the above file, the second is an optional title for the 
+column in the output shapefile (if no title is specified, the ID is used 
+instead). Note that titles are truncated to 10 characters due to inherent 
+limitations of the shapefile format; the program will tell you if this results 
+in duplicate column names. Example content for a variables file would be: 
 
 B01001001,TOTALPOP
 B01001002,TOTALMALE
 B01001026,TOTALFEMALE
+
+Assuming this is saved in myVariables.txt in your working directory, you could 
+then use it with the following command: 
 
 C:\...> AcsDataImporter.exe -s Wyoming -e 150 -v myVariablesFile.txt
 
@@ -104,7 +115,7 @@ This command will make sure all necessary files are downloaded for Wyoming,
 and import the selected variables into an internal database named "Test01".
 The variable values were at the block group summary level.  From here you 
 can export your results into a shapefile using the summary geography, or
-using a grid 'fishnet.'
+using a grid 'fishnet'.
 
 Exporting to a Shapefile
 -------------------------------------
@@ -132,6 +143,39 @@ and the importer will reproject the data into your projection when exporting.
 
 C:\...> AcsDataImporter.exe -s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 -exportToShape -outputProjection myproj.prj
 
+Job Files
+-------------------------------------
+Since this program has a lot of command line flags that are rather tedious to 
+type, there's another way to specify them other than the command line. You can 
+create a job file. A job file simply contains all the arguments you would 
+normally specify on the command line in a text file. The syntax is simple:
+ - Blank lines, lines consisting solely of whitespace, and lines that start 
+   with #, are ignored
+ - All other lines should be a command line flag starting with -, followed by an 
+   argument (if required for said flag)
+In order to use a job file, simply specify its path as the only argument to the 
+importer. Note that file paths specified in the job file should be relative to 
+the directory the importer will be run in, not to the location of the job file. 
+An example job file named "myJob.txt" for the previous command would look 
+something like this: 
+
+#myJob.txt - gets some data about wyoming and puts it in a shapefile
+#specify Wyoming as the state
+-s Wyoming
+#only extract blockgroups
+-e 150
+#extract the variables in myVariablesFile.txt
+-v myVariablesFile.txt
+#use "Test01" as a job name
+-jobName Test01
+#export results to a shapefile
+-exportToShape
+#convert the output to projection specified in myproj.prj rather than using WGS84
+-outputProjection myproj.prj
+
+And could be run using this command:
+
+C:\...> AcsDataImporter.exe myJob.txt
 
 Frequently Asked Questions
 -------------------------------------
