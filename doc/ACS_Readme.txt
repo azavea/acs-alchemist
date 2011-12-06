@@ -40,9 +40,8 @@ Things you absolutely need:
 	
 Weaknesses:
 	- Can't run more than one at once (unless they use different working directories), and it's not multithreaded
-	- Pretty much no config files beyond command line inputs, everything is hardcoded
 	
-
+	
 CrimeDataMerger:
 	- Pretty simple, give it a shapefile to extract "cells" from
 	
