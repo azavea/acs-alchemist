@@ -317,6 +317,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                 case BoundaryLevels.census_tracts:
                     url = Settings.ShapeFileTractURL + Settings.ShapeFileTractFilename;
                     break;
+
+                /*
                 case BoundaryLevels.county_subdivisions:
                     url = Settings.ShapeFileCountySubdivisionsURL + Settings.ShapeFileCountySubdivisionsFilename;
                     break;
@@ -336,6 +338,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                 case BoundaryLevels.states:
                 case BoundaryLevels.census_regions:
                 case BoundaryLevels.census_divisions:
+                 */
                 default:
                     break;
             }

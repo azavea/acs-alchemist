@@ -257,10 +257,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             BoundaryLevels[] shapeFileLevels = new BoundaryLevels[] {
                 BoundaryLevels.census_blockgroups,
                 BoundaryLevels.census_tracts,
+                /*
                 BoundaryLevels.county_subdivisions,
                 BoundaryLevels.zipthree,
                 BoundaryLevels.zipfive,
                 BoundaryLevels.counties
+                 */
             };
 
             foreach (BoundaryLevels level in shapeFileLevels)

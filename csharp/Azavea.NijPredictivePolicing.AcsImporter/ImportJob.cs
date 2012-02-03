@@ -49,7 +49,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new CmdLineArg() { Flag = "j", Display=false, DataType=typeof(string), PropertyName="JobName"},
             new CmdLineArg() { Flag = "jobName", Description = "Specify a name for this job / shapefile", DataType=typeof(string), PropertyName="JobName"},
             new CmdLineArg() { Flag = "r", Display=false,  DataType=typeof(string), PropertyName="ReplaceTable"},
-            new CmdLineArg() { Flag = "replaceJob", Description = "Replace an existing job / shapefile", DataType=typeof(string), PropertyName="ReplaceTable"},
+            new CmdLineArg() { Flag = "replaceJob", Description = "Replace the database for an existing job / shapefile", DataType=typeof(string), PropertyName="ReplaceTable"},
             
             new CmdLineArg() { Flag = "outputProjection", Description = "Provide the .prj file of a desired projection to operate in", DataType=typeof(string), PropertyName="OutputProjection"},
 
