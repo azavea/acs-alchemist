@@ -189,7 +189,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     if (arg.Flag == flag)
                     {
                         var prop = thisType.GetProperty(arg.PropertyName);
-                        prop.SetValue(this, Utilities.GetAsType(prop.PropertyType, contents, null), null);
+                        object defval = (prop.PropertyType == typeof(AcsState)) ? (object)AcsState.None : null;
+                        prop.SetValue(this, Utilities.GetAsType(prop.PropertyType, contents, defval), null);
                         break;
                     }
                 }
@@ -221,18 +222,6 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     _log.Error("Invalid State selected, please select a state from the list and try again.");
                     return false;
                 }
-                else if (this.State == AcsState.UnitedStates)
-                {
-                    //if it can't be parsed, it'll get assigned to value '0', which in this case is 'UnitedStates'
-
-                    var isOkay = "-s UnitedStates".ToLower();
-                    if (!this.ArgumentLine.Contains(isOkay))
-                    {
-                        _log.Fatal("I couldn't understand which state you wanted, please check the spelling and try again.  Exiting...");
-                        return false;
-                    }
-                }
-
 
 
 
