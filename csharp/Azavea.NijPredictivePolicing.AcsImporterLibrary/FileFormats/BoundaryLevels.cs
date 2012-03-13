@@ -30,6 +30,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
     /// </summary>
     public enum BoundaryLevels
     {
+        /*
         [DescriptionAttribute("Census Regions")]
         census_regions = 20,
 
@@ -44,6 +45,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
         [DescriptionAttribute("County Subdivisions by State 2000 ")]
         county_subdivisions = 60,
+         */
 
         [DescriptionAttribute("Census Tracts by State 2000 ")]
         census_tracts = 140,
@@ -51,6 +53,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         [DescriptionAttribute("Census Block Groups by State 2000 ")]
         census_blockgroups = 150,
 
+        /*
         [DescriptionAttribute("Voting Districts by State 2000 ")]
         voting = 700,
 
@@ -59,6 +62,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
         [DescriptionAttribute("5-Digit ZIP Code Tabulation Areas (ZCTAs) 2000 by State")]
         zipfive = -2
+         */
     }
 
 
@@ -70,10 +74,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
     /// </summary>
     public class CensusSummaryLevels
     {
-        public const string census_regions = "020";
-        public const string census_divisions = "030";
-        public const string states = "040";
-        public const string counties = "050";
+        //public const string census_regions = "020";
+        //public const string census_divisions = "030";
+        //public const string states = "040";
+        //public const string counties = "050";
         public const string county_subdivisions = "060";        
         public const string census_tracts = "140";
         public const string census_blockgroups = "150";
@@ -89,14 +93,16 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         {
             switch (level)
             {
+                /*
                 case BoundaryLevels.states: return states;
                 case BoundaryLevels.counties: return counties;
+                 */
                 case BoundaryLevels.census_tracts: return census_tracts;
                 case BoundaryLevels.census_blockgroups: return census_blockgroups;
-                case BoundaryLevels.census_regions: return census_regions;
-                case BoundaryLevels.county_subdivisions: return county_subdivisions;
-                case BoundaryLevels.census_divisions: return census_divisions;
-                case BoundaryLevels.voting: return voting;
+                //case BoundaryLevels.census_regions: return census_regions;
+                //case BoundaryLevels.county_subdivisions: return county_subdivisions;
+                //case BoundaryLevels.census_divisions: return census_divisions;
+                //case BoundaryLevels.voting: return voting;
                 //case BoundaryLevels.zipthree: return zipthree;
                 //case BoundaryLevels.zipfive: return zipfive;
 

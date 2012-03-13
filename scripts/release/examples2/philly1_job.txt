@@ -1,0 +1,34 @@
+#
+#This is an example arguments file for the AcsDataImporter
+#
+
+-outputFolder output
+-includeEmptyGridCells
+-preserveJam
+
+#The name for this job
+-j philly01
+
+#Specify our desired State
+-s Pennsylvania
+
+#The desired variables
+-v examples2\philly1_variables.txt
+
+#Our filtering geometry
+-f examples2\philly_boundaries\philly_2272_boundary.shp
+
+#Our summary level - by block groups
+-e 140 
+
+#Specifies a file containing WKT of the desired output projection
+-outputProjection examples2\2272.prj
+
+#produce a shapefile using the census summary level shapes
+-exportToShape
+
+#OR produce a grid with cellsizes 1000 ft on a side (in the units we're projecting to)
+#-exportToGrid 1000
+
+#An optional grid to align our grid cells against
+#-gridEnvelope examples2\philly_2272_env.txt

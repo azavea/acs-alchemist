@@ -101,6 +101,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         public static int Main(string[] args)
         {
+            //Console.WriteLine("PAUSING SO YOU CAN ATTACH THE DEBUGGER - PRESS ANY KEY - WHEN READY");
             //Console.ReadKey();
 
             Init();

@@ -61,6 +61,10 @@ namespace Azavea.NijPredictivePolicing.Common
                     }
                     line = sb.ToString();
                 }
+                else
+                {
+                    _log.ErrorFormat("Provided config file didn't exist {0}", args[0]);
+                }
             }
 
             HashSet<string> knownFlags = new HashSet<string>();
