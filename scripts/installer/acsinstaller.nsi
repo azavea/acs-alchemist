@@ -25,6 +25,8 @@ Name "ACS Importer"
 !include Sections.nsh
 !include MUI2.nsh
 #!include ShellLink.nsh
+!include nsDialogs.nsh
+!include LogicLib.nsh
 
 # Variables
 Var StartMenuGroup
@@ -33,6 +35,9 @@ Var StartMenuGroup
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_STARTMENU Application $StartMenuGroup
+
+Page custom onPathPageCreate onPathPageLeave "Add directory to system path?"
+
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
@@ -59,6 +64,14 @@ InstallDirRegKey HKLM "${REGKEY}" Path
 ShowUninstDetails show
 
 !define SHORTCUTFILE "$SMPROGRAMS\$StartMenuGroup\ACS Importer.lnk"
+
+#
+# Added variables
+#
+
+Var Dialog
+Var chkAddToPath
+Var Checkbox_State
 
 # Installer sections
 Section -Main SEC0000
@@ -172,5 +185,47 @@ Function un.onInit
     ReadRegStr $INSTDIR HKLM "${REGKEY}" Path
     !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuGroup
     !insertmacro SELECT_UNSECTION Main ${UNSEC0000}
+FunctionEnd
+
+
+
+
+Function onPathPageLeave
+
+${NSD_GetState} $chkAddToPath $Checkbox_State
+${If} $Checkbox_State == ${BST_CHECKED}
+    #APPEND TO PATH!
+    
+    #setx PATH "%path%;C:\FOO"    
+    NsExec::ExecToLog 'setx PATH "%path%;$INSTDIR;"'
+    
+    #reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_SZ /d %path%;c:\FOO
+    NsExec::ExecToLog 'reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_SZ /d "%path%;$INSTDIR;"'
+
+    DetailPrint "Added install dir to path"
+
+${EndIf}
+
+
+FunctionEnd
+
+
+
+Function onPathPageCreate
+ nsDialogs::Create 1018
+ Pop $Dialog
+
+ ${If} $Dialog == error
+  Abort
+ ${EndIf}
+
+ #create our form...
+
+ ${NSD_CreateCheckbox} 0 0 75% 24u "Add the install directory to your system path?"
+ Pop $chkAddToPath
+ 
+ ${NSD_SetFocus} $chkAddToPath
+
+ nsDialogs::Show
 FunctionEnd
 
