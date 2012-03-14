@@ -305,6 +305,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     _log.Debug("Exporting to gridded shapefile... Done!");
                 }
 
+                _log.Info("Done!");
 
                 return true;
             }

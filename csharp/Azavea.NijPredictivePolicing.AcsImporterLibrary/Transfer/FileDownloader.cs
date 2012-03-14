@@ -111,7 +111,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         request.Abort();
 
                         FileUtilities.TryChangeLastWriteTime(filePath, response.LastModified);
-                        _log.DebugFormat("Downloaded {0} successfully", Path.GetFileName(filePath));
+                        _log.DebugFormat("Downloaded of {0} was successful", Path.GetFileName(filePath));
+
+                        if (Settings.ShowFilePaths)
+                        {
+                            _log.InfoFormat("Downloaded File {0} saved to {1}", filePath);
+                        }
                     }
 
                     return true;

@@ -1309,6 +1309,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 writer.Write(exportFeatures);
 
                 _log.Debug("Shapefile exported successfully");
+
+                if (Settings.ShowFilePaths)
+                {
+                    _log.InfoFormat("Shapefile saved as \"{0}.shp\"", newShapefilename);
+                }
+
                 return true;
             }
             catch (FileNotFoundException notFound)

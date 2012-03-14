@@ -132,6 +132,8 @@ namespace Azavea.NijPredictivePolicing.Common
             set { _AppDataPath = value; }
         }
 
+        public static bool ShowFilePaths = true;
+
 
         private static T Get<T>(string key, T ifEmpty)
         {

@@ -210,6 +210,11 @@ namespace Azavea.NijPredictivePolicing.Common
 
                 _log.Debug("Unzipping... Done!");
 
+                if (Settings.ShowFilePaths)
+                {
+                    _log.InfoFormat("Unzipped \"{0}\" to \"{1}\"", Path.GetFileName(zipFileName), basePath);
+                }
+
                 return true;
             }
             catch (Exception ex)

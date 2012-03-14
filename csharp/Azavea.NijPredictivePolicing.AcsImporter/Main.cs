@@ -39,6 +39,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         {
             ConsoleAppender con = new ConsoleAppender();
             con.Layout = new PatternLayout("%message%newline");
+            //con.Threshold = log4net.Core.Level.Info;
+
             log4net.Config.BasicConfigurator.Configure(con);
             _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         }
