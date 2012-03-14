@@ -117,8 +117,8 @@ Section -Main SEC0000
     SetOutPath $SMPROGRAMS\$StartMenuGroup	
 	CreateShortcut "$SMPROGRAMS\$StartMenuGroup\View Files.lnk" "$INSTDIR"	
     CreateShortcut "${SHORTCUTFILE}" "cmd" "/k cd $INSTDIR"
-	ShellLink::SetRunAsAdministrator "${SHORTCUTFILE}"
-	Pop $0
+	#ShellLink::SetRunAsAdministrator "${SHORTCUTFILE}"
+	#Pop $0
 	ShellLink::SetShortCutWorkingDirectory "${SHORTCUTFILE}" $INSTDIR
 	Pop $0
 	
@@ -171,8 +171,17 @@ Section -un.post UNSEC0001
     DeleteRegValue HKLM "${REGKEY}" Path
     DeleteRegKey /IfEmpty HKLM "${REGKEY}\Components"
     DeleteRegKey /IfEmpty HKLM "${REGKEY}"
+    
+    delete "$SMPROGRAMS\$StartMenuGroup\View Files.lnk"
+    delete "${SHORTCUTFILE}"
+    
     RmDir /REBOOTOK $SMPROGRAMS\$StartMenuGroup
     RmDir /REBOOTOK $INSTDIR
+    Push $R0
+    StrCpy $R0 $StartMenuGroup 1
+    StrCmp $R0 ">" no_smgroup
+no_smgroup:
+    Pop $R0
 SectionEnd
 
 # Installer functions
