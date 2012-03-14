@@ -35,7 +35,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public static readonly string TempPath = FileUtilities.SafePathEnsure(Settings.AppTempPath);
+        //public static readonly string TempPath = FileUtilities.SafePathEnsure(Settings.AppTempPath);
 
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         /// <returns></returns>
         public static string GetStateBlockGroupDataFilePath(AcsState state)
         {
-            string basePath = FileUtilities.PathEnsure(FileLocator.TempPath, Settings.CurrentAcsDirectory);
+            string basePath = FileUtilities.PathEnsure(Settings.AppDataDirectory, Settings.CurrentAcsDirectory);
             return Path.Combine(basePath, state.ToString() + Settings.BlockGroupsFileTypeExtension);
         }
 
@@ -94,7 +94,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         /// <returns></returns>
         public static string GetStateWorkingDir(AcsState state)
         {
-            return FileUtilities.PathEnsure(FileLocator.TempPath, "Working", state.ToString());
+            return FileUtilities.PathEnsure(Settings.AppDataDirectory, "Working", state.ToString());
         }
 
         /// <summary>

@@ -33,7 +33,7 @@ namespace Azavea.NijPredictivePolicing.Common
     public static class Settings
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private static string _tempPath;
+        
 
         /// <summary>
         /// Path to the ACS prj file for the ACS shapefiles
@@ -71,7 +71,15 @@ namespace Azavea.NijPredictivePolicing.Common
 
             //These MUST be in the constructor, because static class fields are initialized before the constructor
             //is run, which would mean ApplicationPath would be empty
-            _tempPath = FileUtilities.SafePathEnsure(Settings.ApplicationPath, "Data");
+            //_tempPath = FileUtilities.SafePathEnsure(Settings.ApplicationPath, "Data");
+
+
+            //_tempPath = FileUtilities.SafePathEnsure(
+            //    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            //    "Data");
+            //_log.InfoFormat("Settings Initialized, default data path is {0}", _tempPath);
+
+
             AcsPrjFilePath = Path.Combine(Settings.ApplicationPath, "WGS84NAD83.prj"); 
         }
 
@@ -94,23 +102,36 @@ namespace Azavea.NijPredictivePolicing.Common
         /// </summary>
         public static readonly string ApplicationPath;
 
-        
+        /// <summary>
+        /// 
+        /// </summary>
+        private static string _AppDataPath;
 
 
         /// <summary>
         /// Gets (and creates) the path to the Applications Temporary Folder
+        /// Local path to store working files
         /// </summary>
-        public static string AppTempPath
+        public static string AppDataDirectory
         {
             get
             {
-                if (string.IsNullOrEmpty(_tempPath))
+                if (string.IsNullOrEmpty(_AppDataPath))
                 {
-                    _tempPath = FileUtilities.PathEnsure(Path.GetTempPath(), ApplicationName);
+                    _AppDataPath = FileUtilities.SafePathEnsure(
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                        Settings.ApplicationName,
+                        "Data");
+                    _log.InfoFormat("AppDataPath Initialized, default data path is {0}", _AppDataPath);
+
+                    //deprecated
+                    //_AppDataPath = FileUtilities.PathEnsure(Path.GetTempPath(), ApplicationName);
                 }
-                return _tempPath;
+                return _AppDataPath;
             }
+            set { _AppDataPath = value; }
         }
+
 
         private static T Get<T>(string key, T ifEmpty)
         {
@@ -292,6 +313,9 @@ namespace Azavea.NijPredictivePolicing.Common
         public static void RestoreDefaults()
         {
             var c = Settings.ConfigFile;
+
+            c.Set("AppDataDirectory", string.Empty);
+
             c.Set("CensusFtpRoot", "http://www2.census.gov");
             c.Set("CurrentAcsDirectory", "acs2005_2009_5yr");
             c.Set("CurrentAcsAllStateTablesDirectory", "2005-2009_ACSSF_By_State_All_Tables");

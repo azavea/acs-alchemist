@@ -172,7 +172,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         }
         public string GetLocalColumnMappingsDirectory()
         {
-            return FileUtilities.PathCombine(FileLocator.TempPath, Settings.ColumnMappingsFileName);
+            return FileUtilities.PathCombine(Settings.AppDataDirectory, Settings.ColumnMappingsFileName);
         }
         
 
@@ -197,7 +197,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             _log.DebugFormat("Downloading column mappings file ({0})", Settings.ColumnMappingsFileName);
 
             string desiredUrl = Settings.CurrentColumnMappingsFileUrl;
-            string destFilepath = FileUtilities.PathCombine(FileLocator.TempPath,
+            string destFilepath = FileUtilities.PathCombine(Settings.AppDataDirectory,
                 Settings.ColumnMappingsFileName + Settings.ColumnMappingsFileExtension);
 
 
