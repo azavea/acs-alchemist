@@ -37,12 +37,23 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         private static ILog _log = null;
         protected static void Init()
         {
-            ConsoleAppender con = new ConsoleAppender();
-            con.Layout = new PatternLayout("%message%newline");
-            //con.Threshold = log4net.Core.Level.Info;
+            try
+            {
+                //attempt to load logging configuration
+                System.IO.FileInfo configFile = new System.IO.FileInfo(Path.Combine(Settings.ApplicationPath, "Logging.config"));
+                log4net.Config.XmlConfigurator.ConfigureAndWatch(configFile);
+                _log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+                _log.Info("Hunchlab Logging initialized");
+            }
+            catch
+            {
 
-            log4net.Config.BasicConfigurator.Configure(con);
-            _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+                ConsoleAppender con = new ConsoleAppender();
+                con.Layout = new PatternLayout("%message%newline");
+                //con.Threshold = log4net.Core.Level.Info;
+                log4net.Config.BasicConfigurator.Configure(con);
+                _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+            }
         }
 
 

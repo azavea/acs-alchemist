@@ -255,15 +255,16 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     _log.Warn(Constants.Warning_MissingProjection);
                 }
 
+                _log.Debug("\r\n/*************************************/");
+                _log.Info("   Loading Prerequisites...");
+                _log.Debug("/*************************************/");
 
-
-                _log.Debug("\r\nLoading Prerequisites...");
                 if (!manager.CheckColumnMappingsFile()
                     || !manager.CheckBlockGroupFile()
                     || !manager.CheckDatabase()
                     || !manager.CheckShapefiles())
                 {
-                    _log.Debug("Loading Prerequisites... Failed!");
+                    _log.Info("Loading Prerequisites... Failed!");
                     _log.Error("Import cannot continue, one or more prerequisites failed!");
                     return false;
                 }
@@ -273,18 +274,24 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
                 if (!string.IsNullOrEmpty(IncludedVariableFile) && !string.IsNullOrEmpty(this.JobName))
                 {
-                    _log.Info("Importing requested variables...");
+                    _log.Info("\r\n/*************************************/");
+                    _log.Info("   Importing requested variables...    ");
+                    _log.Info("/*************************************/");
+
                     if (!manager.CheckBuildVariableTable(this.JobName))
                     {
                         _log.Error("Importing requested variables... Failed! A problem was detected, exiting.");
                         return false;
                     }
-                    _log.Debug("mporting requested variables... Done!");
+                    _log.Debug("Importing requested variables... Done!");
                 }
 
                 if (!string.IsNullOrEmpty(ExportToShapefile))
                 {
-                    _log.Info("Exporting to shapefile...");
+                    _log.Debug("\r\n/*************************************/");
+                    _log.Info("   Exporting to shapefile... ");
+                    _log.Debug("/*************************************/");
+
                     if (!manager.ExportShapefile(this.JobName))
                     {
                         _log.Error("There was an error while exporting the shapefile");
@@ -295,7 +302,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
                 if (!string.IsNullOrEmpty(ExportToGrid))
                 {
-                    _log.Info("Exporting to gridded shapefile...");
+                    _log.Debug("\r\n/*************************************/");
+                    _log.Info("   Exporting to gridded shapefile...");
+                    _log.Debug("/*************************************/");
+
                     manager.GridEnvelopeFilename = GridEnvelope;
                     manager.SetGridParam(ExportToGrid);
 
