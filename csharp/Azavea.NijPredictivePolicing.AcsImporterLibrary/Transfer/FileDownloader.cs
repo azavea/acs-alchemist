@@ -115,7 +115,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                         if (Settings.ShowFilePaths)
                         {
-                            _log.InfoFormat("Downloaded File {0} saved to {1}", filePath);
+                            _log.InfoFormat("Downloaded File {0} saved to {1}", Path.GetFileName(filePath), filePath);
                         }
                     }
 
