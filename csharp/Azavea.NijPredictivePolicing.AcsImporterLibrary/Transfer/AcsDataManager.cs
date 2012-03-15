@@ -1037,6 +1037,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                          */
                         
                         _log.DebugFormat("Duplicate records encountered for logical record number {0} (County:{1}, Tract:{2}, Block Group:{3}).", logrecno, county, tract, blkgroup);
+                        if (row["GEOID"] != dict[logrecno]["GEOID"])
+                        {
+                            _log.DebugFormat("GEOID {0} collided with GEOID {1}", row["GEOID"], dict[logrecno]["GEOID"]);
+                        }
                         _log.DebugFormat("Attempting to merge geometries for duplicates together.");
                         try
                         {
