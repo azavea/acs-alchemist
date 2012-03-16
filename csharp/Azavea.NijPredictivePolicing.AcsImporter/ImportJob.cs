@@ -51,10 +51,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new CmdLineArg() { Flag = "r", Display=false,  DataType=typeof(string), PropertyName="ReplaceTable"},
             new CmdLineArg() { Flag = "replaceJob", Description = "Replace the database for an existing job / shapefile", DataType=typeof(string), PropertyName="ReplaceTable"},
             
-            new CmdLineArg() { Flag = "outputProjection", Description = "Provide the .prj file of a desired projection to operate in", DataType=typeof(string), PropertyName="OutputProjection"},
+            new CmdLineArg() { Flag = "outputProjection", Description = "Provide the .prj file of a desired projection use", DataType=typeof(string), PropertyName="OutputProjection"},
 
             new CmdLineArg() { Flag = "exportToShape", Description = "Export results to shapefile", DataType=typeof(string), PropertyName="ExportToShapefile"},
-            new CmdLineArg() { Flag = "exportToGrid", Description = "Export results to fishnetted shapefile where value = # feet", DataType=typeof(string), PropertyName="ExportToGrid"},
+            new CmdLineArg() { Flag = "exportToGrid", Description = "Export to shapefile of vector cells of given feet", DataType=typeof(string), PropertyName="ExportToGrid"},
 
             new CmdLineArg() { Flag = "gridEnvelope", Description = "Align the grid cells to an envelope in a file", DataType=typeof(string), PropertyName="GridEnvelope"},            
             new CmdLineArg() { Flag = "includeEmptyGridCells", Display=false,   DataType=typeof(string), PropertyName="IncludeEmptyGridCells"},
@@ -65,7 +65,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             
             new CmdLineArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
             new CmdLineArg() { Flag = "listSummaryLevels", Description = "Displays a list of available census summary levels", DataType=typeof(string), PropertyName="DisplaySummaryLevels"},
-            new CmdLineArg() { Flag = "stripGEOIDColumn", Description = "Adds an extra column to the shapefile output named GEOID_STRP that contains the same data as the GEOID column but without the \"15000US\" prefix", DataType=typeof(string), PropertyName = "AddStrippedGEOIDcolumn" }
+            new CmdLineArg() { Flag = "stripGEOIDColumn", Description = "Adds an extra column to the shapefile output named \"GEOID_STRP\" that contains the same data as the \"GEOID\" column but without the \"15000US\" prefix", DataType=typeof(string), PropertyName = "AddStrippedGEOIDcolumn" }
             //This command is now kind of useless now that we discovered how mangled these variable names actually are
             //new CmdLineArg() { Flag = "exportVariables", Description = "Exports a CSV of all variables to allVariables.csv", DataType=typeof(string), PropertyName="ExportVariables"}
         };
