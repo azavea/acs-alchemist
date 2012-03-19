@@ -86,6 +86,8 @@ Section -Main SEC0000
 	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\Install.doc
 	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\Manual.doc
 	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\ACS_Importer_Flowchart.jpg
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\ACS2009_5-Year_TableShells.xls
+	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\ACS2010_5-Year_TableShells.xls
 	
 	#Licenses#
 	SetOutPath $INSTDIR\Licenses
@@ -237,4 +239,3 @@ Function onPathPageCreate
 
  nsDialogs::Show
 FunctionEnd
-
