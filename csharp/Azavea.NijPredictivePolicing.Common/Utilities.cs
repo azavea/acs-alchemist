@@ -224,7 +224,25 @@ namespace Azavea.NijPredictivePolicing.Common
             _log.Debug(label);
             foreach (var value in levels)
             {
-                _log.DebugFormat("{0}:{1}", value.ToString(), (int)value);
+                _log.InfoFormat("{0}:{1}", value.ToString(), (int)value);
+            }
+        }
+
+        /// <summary>
+        /// Same as above, but accepts a formatStr
+        /// {0} is the 'string label'
+        /// {1} is the 'int value'
+        /// </summary>
+        /// <param name="label"></param>
+        /// <param name="enumType"></param>
+        /// <param name="formatStr"></param>
+        public static void DisplayEnum(string label, Type enumType, string formatStr)
+        {
+            var levels = Enum.GetValues(enumType);
+            _log.Debug(label);
+            foreach (var value in levels)
+            {
+                _log.InfoFormat(formatStr, value.ToString(), (int)value);
             }
         }
 

@@ -208,7 +208,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             {
                 if (!string.IsNullOrEmpty(DisplaySummaryLevels))
                 {
-                    Utilities.DisplayEnum("Summary Levels:", typeof(BoundaryLevels));
+                    Utilities.DisplayEnum("Summary Levels:", typeof(BoundaryLevels), "{1} - {0}");
                     return true;
                 }
                 if (!string.IsNullOrEmpty(DisplayStateCodes))
