@@ -82,10 +82,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         WestVirginia = 54,
         Wisconsin = 55,
         Wyoming = 56,
-        UnitedStates = 00,        //Not really a state, but ACS includes it as an option
+        //UnitedStates = 00,        //Not really a state, but ACS includes it as an option
 
         PuertoRico = 72,
-        None = -1
+        //None = -1
     }
 
     /// <summary>
