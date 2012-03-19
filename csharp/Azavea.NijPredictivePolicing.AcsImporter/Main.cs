@@ -58,17 +58,6 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         protected static void ShowWelcomeScreen()
         {
-            _log.Debug("");
-            _log.Debug("         ,..");
-            _log.Debug("       .'   |");
-            _log.Debug("        |_,,'");
-            _log.Debug("     ,--|   ,--.");
-            _log.Debug("    '   |' |   ''      _____.  _____.: _____`_  /.   :.    __.   _____.");
-            _log.Debug("     -- '   --.|            p|      /       ||      .\' //'  |.       p|");
-            _log.Debug(" ,-^-.  ,-^'.  |'`'.   _,..,||    ,'    `... |   ,| '/  |,...-/  _,..,||");
-            _log.Debug(" [   ,==.   | |.   |  /|   ,'|  ,'     '    /|   `O//    '      /|   .'|");
-            _log.Debug("  `--    --'    --'    '`''--' ^-----'  `''\"`-    \"-     '`''\"'  '`'''-'");
-            _log.Debug("");
             _log.Debug("+--------------------------------------------+");
             _log.Debug("|   Welcome to _SOLUTIONNAME_                |");
             _log.Debug("+--------------------------------------------+");
