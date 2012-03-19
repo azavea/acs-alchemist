@@ -111,6 +111,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public bool IncludeEmptyGridCells = false;
         public string OutputFolder;
+        
         public bool PreserveJam;
 
         /// <summary>
@@ -137,6 +138,19 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         public AcsDataManager(AcsState aState)
         {
             this.State = aState;
+            Init();
+        }
+
+        public AcsDataManager(AcsState aState, string workingFolder)
+        {
+            this.State = aState;
+
+            if (!string.IsNullOrEmpty(workingFolder))
+            {
+                //override where we're storing temporary files
+                Settings.AppDataDirectory = FileUtilities.SafePathEnsure(workingFolder);
+            }
+
             Init();
         }
 

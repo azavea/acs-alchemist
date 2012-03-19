@@ -61,6 +61,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new CmdLineArg() { Flag = "includeEmptyGeometries", Description = "Keeps empty grid cells during export", DataType=typeof(string), PropertyName="IncludeEmptyGridCells"},
 
             new CmdLineArg() { Flag = "outputFolder", Description = "Specify where you'd like the results saved", DataType=typeof(string), PropertyName = "OutputFolder"},
+            new CmdLineArg() { Flag = "workingFolder", Description = "Specify where you'd like temporary files saved", DataType=typeof(string), PropertyName = "WorkingFolder"},
             new CmdLineArg() { Flag = "preserveJam", Description = "Optional flag to preserve non-numeric margin of error values", DataType=typeof(string), PropertyName="PreserveJam"},
             
             new CmdLineArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
@@ -90,6 +91,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public string OutputProjection { get; set; }
         public string IncludeEmptyGridCells { get; set; }
         public string OutputFolder { get; set; }
+        public string WorkingFolder { get; set; }
         public string PreserveJam { get; set; }
         public string AddStrippedGEOIDcolumn { get; set; }
         
@@ -234,7 +236,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     _log.DebugFormat("Jobname was empty, using {0}", this.JobName);
                 }
 
-                var manager = new AcsDataManager(this.State);
+                var manager = new AcsDataManager(this.State, this.WorkingFolder);
                 //TODO: check for bad combinations of inputs
                 manager.SummaryLevel = this.SummaryLevel;
                 manager.ExportFilterFilename = this.ExportFilterShapefile;
@@ -244,6 +246,11 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
                 manager.AddStrippedGEOIDcolumn = (!string.IsNullOrEmpty(this.AddStrippedGEOIDcolumn));
                 manager.OutputFolder = this.OutputFolder;
+
+                //if (!string.IsNullOrEmpty(this.WorkingFolder))
+                //{
+                //    manager.WorkingPath = FileUtilities.SafePathEnsure(this.WorkingFolder);
+                //}
                 manager.IncludeEmptyGridCells = (!string.IsNullOrEmpty(this.IncludeEmptyGridCells));
                 //manager.SRID = Utilities.GetAs<int>(this.ExportFilterSRID, -1);
 
