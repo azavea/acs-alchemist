@@ -32,6 +32,7 @@ using Azavea.NijPredictivePolicing.Test.Helpers;
 using log4net;
 using System.Data.Common;
 using System.IO;
+using Azavea.NijPredictivePolicing.Common;
 
 namespace Azavea.NijPredictivePolicing.Test.Common.DB
 {
@@ -79,7 +80,7 @@ namespace Azavea.NijPredictivePolicing.Test.Common.DB
 
 
                 ////load Spatialite!
-                string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, "libspatialite-2.dll");
+                string spatialitePath = System.IO.Path.Combine(Environment.CurrentDirectory, Settings.SpatialiteDLL);
                 nonQueryDB(conn, "SELECT load_extension('" + spatialitePath + "');");
 
                 nonQueryDB(conn, "SELECT InitSpatialMetaData()");

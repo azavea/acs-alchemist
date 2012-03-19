@@ -211,11 +211,23 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
                     _log.DebugFormat("The file already exists: {0}", prjFileName);
                 }
 
-                File.Copy(sourceProjectionFilename, prjFileName, true);        //File.WriteAllText(prjFileName, File.ReadAllText(wktProjFilename));
+                if (File.Exists(sourceProjectionFilename))
+                {
+                    File.Copy(sourceProjectionFilename, prjFileName, true);        //File.WriteAllText(prjFileName, File.ReadAllText(wktProjFilename));
+                }
+                else
+                {
+                    var wkt = Utilities.GetCoordinateSystemWKTByID(sourceProjectionFilename);
+                    if (!string.IsNullOrEmpty(wkt))
+                    {
+                        File.WriteAllText(prjFileName, wkt);
+                    }
+                }
+                
             }
             catch (Exception ex)
             {
-                _log.Error("There was an error trying to write a .prj file for your export.");
+                _log.Error("There was an error trying to write a .prj file for your export.", ex);
             }
             return true;
         }

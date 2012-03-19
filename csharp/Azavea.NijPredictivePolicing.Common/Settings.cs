@@ -103,6 +103,13 @@ namespace Azavea.NijPredictivePolicing.Common
         public static readonly string ApplicationPath;
 
         /// <summary>
+        /// This doesn't work yet, virtualshape extension crashes / fails
+        /// </summary>
+        //public static string SpatialiteDLL = "libspatialite-4.dll";
+
+        public static string SpatialiteDLL = "libspatialite-2.dll";
+
+        /// <summary>
         /// 
         /// </summary>
         private static string _AppDataPath;

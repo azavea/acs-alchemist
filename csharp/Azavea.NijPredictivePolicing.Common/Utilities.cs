@@ -31,6 +31,8 @@ using GeoAPI.CoordinateSystems.Transformations;
 using GisSharpBlog.NetTopologySuite.Features;
 using ProjNet.CoordinateSystems;
 using ProjNet.CoordinateSystems.Transformations;
+using Azavea.NijPredictivePolicing.Common.DB;
+using System.Data;
 
 namespace Azavea.NijPredictivePolicing.Common
 {
@@ -219,7 +221,7 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <param name="label"></param>
         /// <param name="enumType"></param>
         public static void DisplayEnum(string label, Type enumType)
-        {
+        {            
             var levels = Enum.GetValues(enumType);
             _log.Debug(label);
             foreach (var value in levels)
@@ -325,8 +327,96 @@ namespace Azavea.NijPredictivePolicing.Common
         public static ICoordinateSystem GetCoordinateSystemByWKTFile(string filename)
         {
             CoordinateSystemFactory csf = new CoordinateSystemFactory();
-            return csf.CreateFromWkt(File.ReadAllText(filename));
+
+            if (File.Exists(filename))
+            {
+                return csf.CreateFromWkt(File.ReadAllText(filename));
+            }
+            else
+            {
+                string wkt = GetCoordinateSystemWKTByID(filename);
+                if (!string.IsNullOrEmpty(wkt))
+                {
+                    return csf.CreateFromWkt(wkt);
+                }
+            }
+
+            return null;
         }
+
+        public static string GetCoordinateSystemWKTByID(string filename)
+        {
+            int outputSrid = Utilities.GetAs<int>(filename, -1);
+            if (outputSrid < 0)
+            {
+                _log.ErrorFormat("Unable to lookup SRID by id {0} ", filename);
+                return null;
+            }
+
+            _log.Info("Retrieving WKT for " + outputSrid);
+
+            /*
+             * This is not efficient, but it is very convenient
+             */
+            //BRUTE FORCE find the srid in our srids file
+            if (!File.Exists("SRID.csv"))
+            {
+                _log.Error("Unable to lookup srid by number, no SRID.csv file");
+            }
+            StreamReader reader = new StreamReader("SRID.csv");
+            string line = string.Empty;
+            string key = outputSrid + ";";
+            while ((line = reader.ReadLine()) != null)
+            {
+                if (!line.StartsWith(key))
+                {
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (!string.IsNullOrEmpty(line))
+            {
+                return line.Split(';')[1];
+            }
+            else
+            {
+                return string.Empty;
+            }
+
+
+
+            /**
+             * This should work in theory, but either need: 
+             * * The newest version of spatialite with the 'srs_wkt' column
+             * * An easy way to convert proj4 projection descriptions into WKT
+             * 
+             * The newest Spatialite doesn't appear to be a drop in replacement, so that might need to wait
+             */
+
+            //SqliteDataClient temp = new SqliteDataClient("_srids.tmp");
+            //temp.LoadAllSpatialReferences();
+
+            //string projWKT = "";
+            //string sql = "SELECT srs_wkt FROM spatial_ref_sys WHERE srid = " + outputSrid;    //not really worried about injection here
+            //using (var cmd = temp.GetCommand(sql))
+            //{
+            //    projWKT = cmd.ExecuteScalar() as string;
+            //}
+            //if (!string.IsNullOrEmpty(projWKT))
+            //{
+            //    return csf.CreateFromWkt(projWKT);
+            //}
+            //else
+            //{
+            //    _log.Error("ERROR: Unable to retrieve specified SRID from spatial reference");
+            //}
+
+
+        }
+
 
         /// <summary>
         /// Helper function for building a transformation between two coordinate systems (useful when reprojecting)

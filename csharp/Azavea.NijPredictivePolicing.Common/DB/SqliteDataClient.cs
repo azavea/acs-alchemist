@@ -79,6 +79,28 @@ namespace Azavea.NijPredictivePolicing.Common.DB
             }
         }
 
+        public void LoadAllSpatialReferences()
+        {
+            using (var conn = GetConnection())
+            {
+                string sql = "SELECT count(1) FROM spatial_ref_sys ";    //not really worried about injection here
+                using (var cmd = this.GetCommand(sql, conn))
+                {
+                    int count = Utilities.GetAs<int>(cmd.ExecuteScalar(), -1);
+                    if (count > 10)
+                    {
+                        return;
+                    }
+                }
+
+                this.GetCommand("DELETE FROM spatial_ref_sys ", conn).ExecuteNonQuery();
+                
+
+                string spatialRefSQL = File.ReadAllText("init_spatialite.sql");
+                this.GetCommand(spatialRefSQL, conn).ExecuteNonQuery();
+            }
+        }
+
 
         /// <summary>
         /// Close your connections when you're done with them, so they can go back into the pool.
@@ -90,7 +112,7 @@ namespace Azavea.NijPredictivePolicing.Common.DB
             conn.Open();
             _connsOpened++;
 
-            string spatialitePath = System.IO.Path.Combine(Settings.ApplicationPath, "libspatialite-2.dll");
+            string spatialitePath = System.IO.Path.Combine(Settings.ApplicationPath, Settings.SpatialiteDLL);
             this.GetCommand("SELECT load_extension('" + spatialitePath + "');", conn).ExecuteNonQuery();
 
             return conn;
@@ -102,7 +124,7 @@ namespace Azavea.NijPredictivePolicing.Common.DB
             conn.Open();
             _connsOpened++;
 
-            string spatialitePath = System.IO.Path.Combine(Settings.ApplicationPath, "libspatialite-2.dll");
+            string spatialitePath = System.IO.Path.Combine(Settings.ApplicationPath, Settings.SpatialiteDLL);
             this.GetCommand("SELECT load_extension('" + spatialitePath + "');", conn).ExecuteNonQuery();
 
             return conn;

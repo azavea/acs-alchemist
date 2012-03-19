@@ -359,7 +359,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
             if (!this.InitDatabase())
             {
-                _log.Error("Building local {0} database... Failed!  There was a problem detected.");
+                _log.ErrorFormat("Building local {0} database... Failed!  There was a problem detected.", this.State);
                 return false;
             }
 
@@ -1120,7 +1120,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 ICoordinateSystem destCRS = null;
                 if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
                 {
-                    destCRS = Utilities.GetCoordinateSystemByWKTFile(this.OutputProjectionFilename);
+                    destCRS = Utilities.GetCoordinateSystemByWKTFile(this.OutputProjectionFilename);                    
                     reprojector = Utilities.BuildTransformationObject(GeographicCoordinateSystem.WGS84, destCRS);
 
                     //Reproject everything in this file to the requested projection...                    
