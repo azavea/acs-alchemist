@@ -85,7 +85,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         //UnitedStates = 00,        //Not really a state, but ACS includes it as an option
 
         PuertoRico = 72,
-        //None = -1
+        None = -1
     }
 
     /// <summary>

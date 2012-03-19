@@ -259,7 +259,27 @@ namespace Azavea.NijPredictivePolicing.Common
             _log.Debug(label);
             foreach (var value in levels)
             {
-                _log.Debug(value.ToString());
+                _log.Info(value.ToString());
+            }
+        }
+
+
+        /// <summary>
+        /// Enumerates over an Enumerated type, and outputs the contents to the logger
+        /// </summary>
+        /// <param name="label"></param>
+        /// <param name="enumType"></param>
+        public static void DisplayEnumKeysOnly(string label, Type enumType, HashSet<string> excluded)
+        {
+            var levels = Enum.GetValues(enumType);
+            _log.Debug(label);
+            foreach (var value in levels)
+            {
+                string val = value.ToString();
+                if (excluded.Contains(val))
+                    continue;
+
+                _log.Info(value.ToString());
             }
         }
 

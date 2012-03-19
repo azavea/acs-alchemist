@@ -213,7 +213,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 }
                 if (!string.IsNullOrEmpty(DisplayStateCodes))
                 {
-                    Utilities.DisplayEnumKeysOnly("State Codes:", typeof(AcsState));
+                    Utilities.DisplayEnumKeysOnly("State Codes:", typeof(AcsState),
+                        //Do not display internal control value
+                        new HashSet<string>(new string[] { "None" })
+                        );
                     return true;
                 }
 
