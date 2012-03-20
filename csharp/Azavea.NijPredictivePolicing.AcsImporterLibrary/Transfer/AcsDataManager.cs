@@ -188,7 +188,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public string GetLocalBlockGroupZipFileName()
         {
-            return FileUtilities.PathCombine(this.WorkingPath, FileLocator.GetStateBlockGroupFileName(this.State));
+            string remoteFilename = FileLocator.GetStateBlockGroupFileName(this.State);
+            string localFilename = Settings.RequestedYear + "_" + remoteFilename;
+            return FileUtilities.PathCombine(this.WorkingPath, localFilename);
         }
         public string GetLocalGeographyFileName()
         {

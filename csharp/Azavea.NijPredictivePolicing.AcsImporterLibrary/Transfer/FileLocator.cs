@@ -57,8 +57,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
         /// <returns></returns>
         public static string GetStateBlockGroupFileName(AcsState state)
         {
-            return States.StateToCensusName(state) + Settings.BlockGroupsDataTableSuffix + 
-                Settings.BlockGroupsFileTypeExtension;
+            return States.StateToCensusName(state) + Settings.BlockGroupsDataTableSuffix 
+                + Settings.BlockGroupsFileTypeExtension;
         }
 
         /// <summary>
