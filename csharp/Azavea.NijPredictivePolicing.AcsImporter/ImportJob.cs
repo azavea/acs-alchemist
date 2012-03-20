@@ -134,7 +134,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             string line = sb.ToString();
             this.ArgumentLine = line;
             //char delim = '-';
-            char[] delims = new char[] { (char)45, (char)8211 }; //'-', '–';
+            char[] delims = new char[] { (char)45, (char)8211, (char)65533 }; //'-', '–', '?';
             int idx = IndexOf(line, 0, delims);     //int idx = line.IndexOf(delim);
 
             if (idx == -1)
@@ -249,7 +249,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
                 if ((string.IsNullOrEmpty(this.JobName)) || (this.JobName == true.ToString()))
                 {
-                    this.JobName = string.Format("{0}_{1}", this.State, DateTime.Now.ToShortDateString().Replace('/', '_'));
+                    this.JobName = string.Format("{0}_{1}_{2}", this.Year, this.State, DateTime.Now.ToShortDateString().Replace('/', '_'));
                     _log.DebugFormat("Jobname was empty, using {0}", this.JobName);
                 }
 
