@@ -366,7 +366,7 @@ namespace Azavea.NijPredictivePolicing.Common
         public static string FipsPlaceholder { get { return Settings.GetYear("FipsPlaceholder", "{FIPS-code}"); } }
 
         public static string ShapeFileBlockGroupURL { get { return Settings.GetYear("ShapeFileBlockGroupURL", string.Empty); } }
-        public static string ShapeFileBlockGroupFilename { get { return Settings.Get("ShapeFileBlockGroupFilename", string.Empty); } }
+        public static string ShapeFileBlockGroupFilename { get { return Settings.GetYear("ShapeFileBlockGroupFilename", string.Empty); } }
 
         public static string ShapeFileTractURL { get { return Settings.GetYear("ShapeFileTractURL", string.Empty); } }
         public static string ShapeFileTractFilename { get { return Settings.GetYear("ShapeFileTractFilename", string.Empty); } }
@@ -451,6 +451,7 @@ namespace Azavea.NijPredictivePolicing.Common
 
         public static void RestoreYear2010(Config c)
         {
+            //SEE: http://www2.census.gov/acs2010_5yr/summaryfile/UserTools/ACS_2006-2010_SF_Tech_Doc.pdf
             RestoreCensusDefaults(c);
             c.Set("CensusFtpRoot", "http://www2.census.gov");
             c.Set("CurrentAcsDirectory", "acs2010_5yr");
