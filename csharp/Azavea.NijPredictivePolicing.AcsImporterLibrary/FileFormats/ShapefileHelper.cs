@@ -120,7 +120,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
                 if (DataClient.HasTable(conn, client, tableName))
                 {
-                    client.GetCommand("DROP TABLE " + tableName).ExecuteNonQuery();
+                    client.GetCommand(string.Format("DROP TABLE \"{0}\"", tableName)).ExecuteNonQuery();
                 }
 
                 //trim off the '.shp' from the end

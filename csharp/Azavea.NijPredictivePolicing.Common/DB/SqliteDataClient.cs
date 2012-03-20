@@ -279,7 +279,7 @@ namespace Azavea.NijPredictivePolicing.Common.DB
         public static string GenerateTableSQLFromFields(string tablename, List<FixedWidthField> columns)
         {
             StringBuilder sql = new StringBuilder(512);
-            sql.AppendFormat("CREATE TABLE {0} ( ", tablename);
+            sql.AppendFormat("CREATE TABLE \"{0}\" ( ", tablename);
             sql.Append("ixid INTEGER NOT NULL PRIMARY KEY, ");
 
             for (int i = 0; i < columns.Count; i++)
@@ -320,7 +320,7 @@ namespace Azavea.NijPredictivePolicing.Common.DB
         public static string GenerateTableSQLFromTable(string tablename, DataTable dt, string primaryCol)
         {
             StringBuilder sql = new StringBuilder(512);
-            sql.AppendFormat("CREATE TABLE {0} ( ", tablename);
+            sql.AppendFormat("CREATE TABLE \"{0}\" ( ", tablename);
             
             var columns = dt.Columns;
             for (int i = 0; i < columns.Count; i++)

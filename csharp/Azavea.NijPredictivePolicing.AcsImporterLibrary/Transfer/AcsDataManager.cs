@@ -404,7 +404,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             if (geoReader.HasFile)
             {
                 _log.Debug("Importing Geographies File...");
-                string tableSelect = string.Format("select * from {0}", DbConstants.TABLE_Geographies);
+                string tableSelect = string.Format("select * from \"{0}\"", DbConstants.TABLE_Geographies);
                 var adapter = DataClient.GetMagicAdapter(conn, DbClient, tableSelect);
                 var table = DataClient.GetMagicTable(conn, DbClient, tableSelect);
 
@@ -449,7 +449,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             string createMappingsTableSql = DataClient.GenerateTableSQLFromFields(DbConstants.TABLE_ColumnMappings, SequenceFileReader.Columns);
             DbClient.GetCommand(createMappingsTableSql, conn).ExecuteNonQuery();
 
-            string tableSelect = string.Format("select * from {0}", DbConstants.TABLE_ColumnMappings);
+            string tableSelect = string.Format("select * from \"{0}\"", DbConstants.TABLE_ColumnMappings);
             var adapter = DataClient.GetMagicAdapter(conn, DbClient, tableSelect);
             var table = DataClient.GetMagicTable(conn, DbClient, tableSelect);
 
@@ -672,7 +672,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                                   columnMappings.COLNO, 
                                   columnMappings.SEQNO, 
                                   {0}.CUSTOM_COLUMN_NAME AS COLNAME 
-                        FROM      columnMappings, {0} 
+                        FROM      columnMappings, ""{0}""
                         WHERE     columnMappings.CENSUS_TABLE_ID = {0}.CENSUS_TABLE_ID;",
                         DbConstants.TABLE_DesiredColumns);
 
@@ -737,7 +737,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             }
 
             string tableName = Path.GetFileNameWithoutExtension(filename);
-            string sqlcmd = "SELECT AsBinary(Geometry) AS Geometry FROM " + tableName;
+            string sqlcmd = string.Format("SELECT AsBinary(Geometry) AS Geometry FROM \"{0}\" ", tableName);
             var wholeShapeTable = DataClient.GetMagicTable(DbClient.GetConnection(), DbClient, sqlcmd);
             List<IGeometry> results = new List<IGeometry>(wholeShapeTable.Rows.Count);
             ICoordinateTransformation reprojector = null;
@@ -767,7 +767,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             }
 
             //Cleanup so we don't store lots of crap in database
-            sqlcmd = "DROP TABLE " + tableName;
+            sqlcmd = string.Format("DROP TABLE \"{0}\" ", tableName);
             var droptable = DbClient.GetCommand(sqlcmd);
             droptable.ExecuteNonQuery();
 
@@ -798,7 +798,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     {
                         if (ReplaceTable)
                         {
-                            DbClient.GetCommand(string.Format("DROP TABLE IF EXISTS {0};", tableName), conn).ExecuteNonQuery();
+                            DbClient.GetCommand(string.Format("DROP TABLE IF EXISTS \"{0}\";", tableName), conn).ExecuteNonQuery();
                         }
                         else
                         {
@@ -941,7 +941,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     DbClient.GetCommand(createTableSQL, conn).ExecuteNonQuery();
 
                     _log.DebugFormat("Saving Table {0}...", tableName);
-                    var dba = DataClient.GetMagicAdapter(conn, DbClient, "select * from " + tableName);
+                    var dba = DataClient.GetMagicAdapter(conn, DbClient, string.Format("SELECT * FROM \"{0}\"", tableName));
                     dba.Update(newTable);
                     _log.Debug("Done!");
 
@@ -1132,7 +1132,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             using (var conn = DbClient.GetConnection())
             {
                 Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
-                var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName);
+                var variablesDT = DataClient.GetMagicTable(conn, DbClient, string.Format("select * from \"{0}\" ", tableName));
                 if ((variablesDT == null) || (variablesDT.Rows.Count == 0))
                 {
                     _log.Warn("Nothing to export, data table is empty");
@@ -1302,7 +1302,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 using (var conn = DbClient.GetConnection())
                 {
                     //Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
-                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName + " where 0 = 1 ");
+                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, string.Format("SELECT * FROM \"{0}\" where 0 = 1 ", tableName));
                     header = ShapefileHelper.SetupHeader(variablesDT);
                 }
 
@@ -1450,7 +1450,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 using (var conn = DbClient.GetConnection())
                 {
                     //Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
-                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, "select * from " + tableName + " where 0 = 1 ");
+                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, string.Format("SELECT * FROM \"{0}\" where 0 = 1 ", tableName));
                     header = ShapefileHelper.SetupHeader(variablesDT);
                 }
                 ShapefileHelper.AddColumn(header, "CELLID", typeof(string));
@@ -1626,7 +1626,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             {
                 //Don't need this hanging around...
                 DbClient.
-                    GetCommand(string.Format("DROP TABLE IF EXISTS {0};", DbConstants.TABLE_DesiredColumns)).
+                    GetCommand(string.Format("DROP TABLE IF EXISTS \"{0}\";", DbConstants.TABLE_DesiredColumns)).
                     ExecuteNonQuery();
             }
         }

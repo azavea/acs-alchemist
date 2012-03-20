@@ -42,9 +42,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         delegate string TableChecker(DataTable dt);
         
-        public const string DropTableSQL = "DROP TABLE IF EXISTS {0};";
+        public const string DropTableSQL = "DROP TABLE IF EXISTS \"{0}\";";
         public const string CreateTableSQL = 
-            @"DROP TABLE IF EXISTS {0}; CREATE TABLE {0} (
+            @"DROP TABLE IF EXISTS ""{0}""; CREATE TABLE ""{0}"" (
             CENSUS_TABLE_ID VARCHAR(32) NOT NULL PRIMARY KEY,
             CUSTOM_COLUMN_NAME VARCHAR(10));";
 
@@ -171,13 +171,13 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             tempTableName = tablename;
 
             client.GetCommand(string.Format(CreateTableSQL, tablename), conn).ExecuteNonQuery();
-            string selectAllSQL = string.Format("select * from {0}", tablename);
+            string selectAllSQL = string.Format("select * from \"{0}\"", tablename);
             return DataClient.GetMagicTable(conn, client, selectAllSQL);
         }
 
         protected bool SaveTable(DbConnection conn, IDataClient client, DataTable dt)
         {
-            string selectAllSQL = string.Format("select * from {0}", tempTableName);
+            string selectAllSQL = string.Format("select * from \"{0}\"", tempTableName);
 
             _log.Debug("Saving...");
             var adapter = DataClient.GetMagicAdapter(conn, client, selectAllSQL);
