@@ -33,12 +33,15 @@ namespace Azavea.NijPredictivePolicing.Common
     public static class Settings
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        
+
+
+        public static string RequestedYear = "2009";
+
 
         /// <summary>
         /// Path to the ACS prj file for the ACS shapefiles
         /// </summary>
-        public static readonly string AcsPrjFilePath; 
+        public static readonly string AcsPrjFilePath;
 
         static Settings()
         {
@@ -80,7 +83,8 @@ namespace Azavea.NijPredictivePolicing.Common
             //_log.InfoFormat("Settings Initialized, default data path is {0}", _tempPath);
 
 
-            AcsPrjFilePath = Path.Combine(Settings.ApplicationPath, "WGS84NAD83.prj"); 
+            AcsPrjFilePath = Path.Combine(Settings.ApplicationPath, "WGS84NAD83.prj");
+            RequestedYear = "2009";
         }
 
 
@@ -128,7 +132,8 @@ namespace Azavea.NijPredictivePolicing.Common
                     _AppDataPath = FileUtilities.SafePathEnsure(
                         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                         Settings.ApplicationName,
-                        "Data");
+                        "Data"
+                        );
                     _log.InfoFormat("AppDataPath Initialized, default data path is {0}", _AppDataPath);
 
                     //deprecated
@@ -141,16 +146,122 @@ namespace Azavea.NijPredictivePolicing.Common
 
         public static bool ShowFilePaths = true;
 
-
+        /// <summary>
+        /// Helper function that calls "Get" against the currently loaded app configuration file
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="ifEmpty"></param>
+        /// <returns></returns>
         private static T Get<T>(string key, T ifEmpty)
         {
             if (Settings.ConfigFile == null)
             {
                 Settings.ConfigFile = new Config("defaults.config");
-                Settings.RestoreDefaults();
+                Settings.RestoreDefaults();                
             }
+
             return Settings.ConfigFile.Get<T>(key, ifEmpty);
         }
+
+        /// <summary>
+        /// Wrapper that calls "Get" against the "Year" config specified by the "RequestedYear"
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="ifEmpty"></param>
+        /// <returns></returns>
+        private static T GetYear<T>(string key, T ifEmpty)
+        {
+            return Get(Settings.RequestedYear, key, ifEmpty);
+        }
+        
+        /// <summary>
+        /// Wrapper that calls "Get" against the "Year" config specified in the params
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="year"></param>
+        /// <param name="key"></param>
+        /// <param name="ifEmpty"></param>
+        /// <returns></returns>
+        private static T Get<T>(string year, string key, T ifEmpty)
+        {
+            var years = LoadYearConfigs();
+
+            if (!years.ContainsKey(year))
+            {
+                _log.ErrorFormat("The importer couldn't find/read the \"{0}.year\" config file, the importer cannot continue", year);
+                _log.FatalFormat("The importer couldn't find/read the \"{0}.year\" config file, the importer cannot continue", year);
+                Environment.Exit(-1);
+            }
+
+            return years[year].Get<T>(key, ifEmpty);
+        }
+
+
+        private static Dictionary<string, Config> _yearConfigs;
+
+
+        /// <summary>
+        /// Provides a mapping between a year or census query name like "2009" or "acs2010_1yr" etc, and a
+        /// config file which describes how to talk to that service
+        /// </summary>
+        /// <returns></returns>
+        public static Dictionary<string, Config> LoadYearConfigs()
+        {
+            if (_yearConfigs == null)
+            {
+                Dictionary<string, string> foundConfigs = new Dictionary<string, string>();
+
+                //try really hard to find these files, files found later on are assumed to be more authoritative, 
+                //this is because appPath is the default, and the next two would be user overrides
+                string[] paths = new string[] {
+                    Settings.ApplicationPath,                    
+                    Settings.AppDataDirectory,
+                    Environment.CurrentDirectory
+                };
+                foreach (string path in paths)
+                {
+                    string[] files = Directory.GetFiles(path, "*.year");
+                    if ((files != null) && (files.Length > 0))
+                    {
+                        foreach (string filename in files)
+                        {
+                            //2009, 2010, acs2010_3yr
+                            string key = Path.GetFileNameWithoutExtension(filename);
+                            foundConfigs[key] = filename;
+                        }
+                    }
+                }
+
+                //Settings.RestoreYear2009();
+                //Settings.RestoreDefaults();
+
+                _yearConfigs = new Dictionary<string, Config>();
+
+                if (!foundConfigs.ContainsKey("2009"))
+                {
+                    Config c = new Config(Path.Combine(Settings.ApplicationPath, "2009.year"));
+                    Settings.RestoreYear2009(c);
+                    _yearConfigs["2009"] = c;
+                }
+
+                if (!foundConfigs.ContainsKey("2010"))
+                {
+                    Config c = new Config(Path.Combine(Settings.ApplicationPath, "2010.year"));
+                    Settings.RestoreYear2010(c);
+                    _yearConfigs["2010"] = c;
+                }
+
+                foreach (string key in foundConfigs.Keys)
+                {
+                    _yearConfigs[key] = new Config(foundConfigs[key]);
+                }
+            }
+
+            return _yearConfigs;
+        }
+
 
 
         /*
@@ -162,34 +273,34 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <summary>
         /// URL for the US Census FTP site root
         /// </summary>
-        public static string CensusFtpRoot { get { return Settings.Get("CensusFtpRoot", string.Empty); } }
+        public static string CensusFtpRoot { get { return Settings.GetYear("CensusFtpRoot", string.Empty); } }
 
         /// <summary>
         /// Directory containing the current ACS multi-year predictive data, relative to CensusFtpRoot
         /// </summary>
-        public static string CurrentAcsDirectory { get { return Settings.Get("CurrentAcsDirectory", string.Empty); } }
+        public static string CurrentAcsDirectory { get { return Settings.GetYear("CurrentAcsDirectory", string.Empty); } }
 
         /// <summary>
         /// Directory containing the summary files, relative to CurrentAcsDirectory
         /// </summary>
-        public static string SummaryFileDirectory { get { return Settings.Get("SummaryFileDirectory", string.Empty); } }
+        public static string SummaryFileDirectory { get { return Settings.GetYear("SummaryFileDirectory", string.Empty); } }
 
         /// <summary>
         /// Directory containing the zip file with files mapping column names to sequence numbers, relative to SummaryFileDirectory
         /// </summary>
-        public static string ColumnMappingsFileDirectory { get { return Settings.Get("ColumnMappingsFileDirectory", string.Empty); } }
+        public static string ColumnMappingsFileDirectory { get { return Settings.GetYear("ColumnMappingsFileDirectory", string.Empty); } }
 
         /// <summary>
         /// The name of the zip file containing files mapping column names to sequence numbers
         /// </summary>
-        public static string ColumnMappingsFileName { get { return Settings.Get("ColumnMappingsFileName", string.Empty); } }
+        public static string ColumnMappingsFileName { get { return Settings.GetYear("ColumnMappingsFileName", string.Empty); } }
 
-        public static string ColumnMappingsFileExtension { get { return Settings.Get("ColumnMappingsFileExtension", ".zip"); } }
+        public static string ColumnMappingsFileExtension { get { return Settings.GetYear("ColumnMappingsFileExtension", ".zip"); } }
 
         /// <summary>
         /// Directory containing the raw data tables by state, relative to SummaryFileDirectory
         /// </summary>
-        public static string CurrentAcsAllStateTablesDirectory { get { return Settings.Get("CurrentAcsAllStateTablesDirectory", string.Empty); } }
+        public static string CurrentAcsAllStateTablesDirectory { get { return Settings.GetYear("CurrentAcsAllStateTablesDirectory", string.Empty); } }
 
 
         /// <summary>
@@ -199,7 +310,7 @@ namespace Azavea.NijPredictivePolicing.Common
         {            
             get
             {
-                var url = Settings.Get("CurrentColumnMappingsFileUrl", string.Empty);
+                var url = Settings.GetYear("CurrentColumnMappingsFileUrl", string.Empty);
                             return FillInTokenString(url);
             }
         }
@@ -211,7 +322,7 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             get
             {
-                var url = Settings.Get("CurrentAcsAllStateTablesUrl", string.Empty);
+                var url = Settings.GetYear("CurrentAcsAllStateTablesUrl", string.Empty);
                 return FillInTokenString(url);
             }
         }
@@ -223,12 +334,14 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <returns></returns>
         public static string FillInTokenString(string formatStr)
         {
-            var keys = Settings.ConfigFile.Keys;
+            var years = LoadYearConfigs();
+            var config = years[Settings.RequestedYear];
+            var keys = config.Keys;
             if (keys != null)
             {
                 foreach (var key in keys)
                 {
-                    formatStr = formatStr.Replace(string.Concat("{", key, "}"), Settings.ConfigFile[key] + string.Empty);
+                    formatStr = formatStr.Replace(string.Concat("{", key, "}"), config[key] + string.Empty);
                 }
             }
             return formatStr;
@@ -240,49 +353,49 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <summary>
         /// Currently the files in CurrentAcsAllStateTablesDirectory are named by the convention [state name] + BlockGroupsDataTableSuffix
         /// </summary>
-        public static string BlockGroupsDataTableSuffix { get { return Settings.Get("BlockGroupsDataTableSuffix", string.Empty); } }
+        public static string BlockGroupsDataTableSuffix { get { return Settings.GetYear("BlockGroupsDataTableSuffix", string.Empty); } }
 
         /// <summary>
         /// Currently the files in CurrentAcsAllStateTablesDirectory are named by the convention [state name] + BlockGroupsDataTableSuffix
         /// </summary>
-        public static string BlockGroupsFileTypeExtension { get { return Settings.Get("BlockGroupsFileTypeExtension", ".zip"); } }
+        public static string BlockGroupsFileTypeExtension { get { return Settings.GetYear("BlockGroupsFileTypeExtension", ".zip"); } }
 
         /// <summary>
         /// Used in the ShapeFile*Filename variables as a placeholder for the state fips code
         /// </summary>
-        public static string FipsPlaceholder { get { return Settings.Get("FipsPlaceholder", "{FIPS-code}"); } }
+        public static string FipsPlaceholder { get { return Settings.GetYear("FipsPlaceholder", "{FIPS-code}"); } }
 
-        public static string ShapeFileBlockGroupURL { get { return Settings.Get("ShapeFileBlockGroupURL", string.Empty); } }
+        public static string ShapeFileBlockGroupURL { get { return Settings.GetYear("ShapeFileBlockGroupURL", string.Empty); } }
         public static string ShapeFileBlockGroupFilename { get { return Settings.Get("ShapeFileBlockGroupFilename", string.Empty); } }
 
-        public static string ShapeFileTractURL { get { return Settings.Get("ShapeFileTractURL", string.Empty); } }
-        public static string ShapeFileTractFilename { get { return Settings.Get("ShapeFileTractFilename", string.Empty); } }
+        public static string ShapeFileTractURL { get { return Settings.GetYear("ShapeFileTractURL", string.Empty); } }
+        public static string ShapeFileTractFilename { get { return Settings.GetYear("ShapeFileTractFilename", string.Empty); } }
 
-        public static string ShapeFileCountySubdivisionsURL { get { return Settings.Get("ShapeFileCountySubdivisionsURL", string.Empty); } }
-        public static string ShapeFileCountySubdivisionsFilename { get { return Settings.Get("ShapeFileCountySubdivisionsFilename", string.Empty); } }
+        public static string ShapeFileCountySubdivisionsURL { get { return Settings.GetYear("ShapeFileCountySubdivisionsURL", string.Empty); } }
+        public static string ShapeFileCountySubdivisionsFilename { get { return Settings.GetYear("ShapeFileCountySubdivisionsFilename", string.Empty); } }
 
         //3 digit zips
-        public static string ShapeFileThreeDigitZipsURL { get { return Settings.Get("ShapeFileThreeDigitZipsURL", string.Empty); } }
-        public static string ShapeFileThreeDigitZipsFilename { get { return Settings.Get("ShapeFileThreeDigitZipsFilename", string.Empty); } }
+        public static string ShapeFileThreeDigitZipsURL { get { return Settings.GetYear("ShapeFileThreeDigitZipsURL", string.Empty); } }
+        public static string ShapeFileThreeDigitZipsFilename { get { return Settings.GetYear("ShapeFileThreeDigitZipsFilename", string.Empty); } }
 
         //5 digit zips
-        public static string ShapeFileFiveDigitZipsURL { get { return Settings.Get("ShapeFileFiveDigitZipsURL", string.Empty); } }
-        public static string ShapeFileFiveDigitZipsFilename { get { return Settings.Get("ShapeFileFiveDigitZipsFilename", string.Empty); } }
+        public static string ShapeFileFiveDigitZipsURL { get { return Settings.GetYear("ShapeFileFiveDigitZipsURL", string.Empty); } }
+        public static string ShapeFileFiveDigitZipsFilename { get { return Settings.GetYear("ShapeFileFiveDigitZipsFilename", string.Empty); } }
 
         //voting
-        public static string ShapeFileVotingURL { get { return Settings.Get("ShapeFileVotingURL", string.Empty); } }
-        public static string ShapeFileVotingFilename { get { return Settings.Get("ShapeFileVotingFilename", string.Empty); } }
+        public static string ShapeFileVotingURL { get { return Settings.GetYear("ShapeFileVotingURL", string.Empty); } }
+        public static string ShapeFileVotingFilename { get { return Settings.GetYear("ShapeFileVotingFilename", string.Empty); } }
 
         //counties
-        public static string ShapeFileCountiesURL { get { return Settings.Get("ShapeFileCountiesURL", string.Empty); } }
-        public static string ShapeFileCountiesFilename { get { return Settings.Get("ShapeFileCountiesFilename", string.Empty); } }
+        public static string ShapeFileCountiesURL { get { return Settings.GetYear("ShapeFileCountiesURL", string.Empty); } }
+        public static string ShapeFileCountiesFilename { get { return Settings.GetYear("ShapeFileCountiesFilename", string.Empty); } }
 
 
 
         /// <summary>
         /// Default projection to use if AcsPrjFilePath is missing or invalid
         /// </summary>
-        public static string DefaultPrj { get { return Settings.Get("DefaultPrj", string.Empty); } }
+        public static string DefaultPrj { get { return Settings.GetYear("DefaultPrj", string.Empty); } }
 
         /// <summary>
         /// Time to wait in milliseconds for a net connection request to timeout before giving up
@@ -312,24 +425,42 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             get
             {
-                return Settings.Get("ReservedColumnNames", "GEOID,GEOID_STRP");                
+                return Settings.GetYear("ReservedColumnNames", "GEOID,GEOID_STRP");                
             }
         }
-
-        
-
 
         public static void RestoreDefaults()
         {
             var c = Settings.ConfigFile;
-
             c.Set("AppDataDirectory", string.Empty);
+            c.Set("TimeOutMs", 10000);
+            c.Set("GeoidPrefix", "15000US");
+            c.Save();
+        }
 
+
+        public static void RestoreYear2009(Config c)
+        {
+            RestoreCensusDefaults(c);
             c.Set("CensusFtpRoot", "http://www2.census.gov");
             c.Set("CurrentAcsDirectory", "acs2005_2009_5yr");
             c.Set("CurrentAcsAllStateTablesDirectory", "2005-2009_ACSSF_By_State_All_Tables");
             c.Set("ColumnMappingsFileName", "2005-2009_SummaryFileXLS");
+            c.Save();
+        }
 
+        public static void RestoreYear2010(Config c)
+        {
+            RestoreCensusDefaults(c);
+            c.Set("CensusFtpRoot", "http://www2.census.gov");
+            c.Set("CurrentAcsDirectory", "acs2010_5yr");
+            c.Set("CurrentAcsAllStateTablesDirectory", "2006-2010_ACSSF_By_State_All_Tables");
+            c.Set("ColumnMappingsFileName", "2010_SummaryFileTemplates");
+            c.Save();
+        }
+
+        public static void RestoreCensusDefaults(Config c)
+        {
             c.Set("SummaryFileDirectory", "summaryfile");
             c.Set("ColumnMappingsFileDirectory", "UserTools");
             c.Set("ColumnMappingsFileExtension", ".zip");
@@ -341,8 +472,7 @@ namespace Azavea.NijPredictivePolicing.Common
 
             c.Set("FipsPlaceholder", "{FIPS-code}");
             c.Set("DefaultPrj", "GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]");
-            c.Set("TimeOutMs", 10000);
-            c.Set("GeoidPrefix", "15000US");
+
             c.Set("ReservedColumnNames", "GEOID,GEOID_STRP");
 
             c.Set("ShapeFileBlockGroupURL", "http://www.census.gov/geo/cob/bdy/bg/bg00shp/");
@@ -365,8 +495,6 @@ namespace Azavea.NijPredictivePolicing.Common
 
             c.Set("ShapeFileCountiesURL", "http://www.census.gov/geo/cob/bdy/co/co00shp/");
             c.Set("ShapeFileCountiesFilename", "co{FIPS-code}_d00_shp.zip");
-
-            c.Save();
         }
 
     }

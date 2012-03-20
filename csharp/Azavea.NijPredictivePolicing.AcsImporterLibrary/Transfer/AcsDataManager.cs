@@ -141,16 +141,26 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             Init();
         }
 
-        public AcsDataManager(AcsState aState, string workingFolder)
+        public AcsDataManager(AcsState aState, string workingFolder, string year)
         {
             this.State = aState;
+
+            if (!string.IsNullOrEmpty(year))
+            {
+                /**
+                 * IMPORTANT NOTE!  RequestedYear MUST BE SET before setting the Application Data Directory!
+                 */
+
+                Settings.RequestedYear = year;
+            }
 
             if (!string.IsNullOrEmpty(workingFolder))
             {
                 //override where we're storing temporary files
+                //Settings.AppDataDirectory = FileUtilities.SafePathEnsure(workingFolder, Settings.RequestedYear);
                 Settings.AppDataDirectory = FileUtilities.SafePathEnsure(workingFolder);
             }
-
+            
             Init();
         }
 

@@ -48,6 +48,11 @@ namespace Azavea.NijPredictivePolicing.Common
             Load(filename);
         }
 
+        public string GetFilename()
+        {
+            return _filename;
+        }
+
         public bool Load(string filename)
         {
             _filename = filename;

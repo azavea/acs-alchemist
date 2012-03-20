@@ -40,6 +40,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         public static CmdLineArg[] Arguments = new CmdLineArg[] {
             new CmdLineArg() { Flag = "s", Description = "State Code", DataType=typeof(AcsState), PropertyName="State"},
+            new CmdLineArg() { Flag = "y", Description = "Year", DataType=typeof(AcsState), PropertyName="Year"},
             new CmdLineArg() { Flag = "e", Description = "Filter Spatially by Census Summary Level", DataType=typeof(string), PropertyName="SummaryLevel"},            
             new CmdLineArg() { Flag = "v", Description = "Filter data by variable name file", DataType=typeof(string), PropertyName="IncludedVariableFile"},                        
             new CmdLineArg() { Flag = "f", Description = "Filter Spatially by optional shapefile", DataType=typeof(string), PropertyName="ExportFilterShapefile"},
@@ -64,6 +65,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new CmdLineArg() { Flag = "workingFolder", Description = "Specify where you'd like temporary files saved", DataType=typeof(string), PropertyName = "WorkingFolder"},
             new CmdLineArg() { Flag = "preserveJam", Description = "Optional flag to preserve non-numeric margin of error values", DataType=typeof(string), PropertyName="PreserveJam"},
             
+            new CmdLineArg() { Flag = "listYears", Description = "TODO------------------", DataType=typeof(string), PropertyName="ListYears"},
             new CmdLineArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
             new CmdLineArg() { Flag = "listSummaryLevels", Description = "Displays a list of available census summary levels", DataType=typeof(string), PropertyName="DisplaySummaryLevels"},
             new CmdLineArg() { Flag = "stripGEOIDColumn", Description = "Adds an extra column to the shapefile output named \"GEOID_STRP\" that contains the same data as the \"GEOID\" column but without the \"15000US\" prefix", DataType=typeof(string), PropertyName = "AddStrippedGEOIDcolumn" }
@@ -74,6 +76,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public string ArgumentLine;
 
         public AcsState State { get; set; }
+        public string Year { get; set; }
 
         public string ExportFilterShapefile { get; set; }
         //public string ExportFilterSRID { get; set; }
@@ -87,6 +90,9 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         
         public string DisplaySummaryLevels { get; set; }
         public string DisplayStateCodes { get; set; }
+        public string ListYears { get; set; }
+        
+
         public string GridEnvelope { get; set; }
         public string OutputProjection { get; set; }
         public string IncludeEmptyGridCells { get; set; }
@@ -221,6 +227,17 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         );
                     return true;
                 }
+                if (!string.IsNullOrEmpty(ListYears))
+                {
+                    var years = Settings.LoadYearConfigs();
+                    _log.InfoFormat("I found {0} year config files ", years.Count);
+                    foreach (var key in years.Keys)
+                    {
+                        _log.InfoFormat("{0} - {1}", key, years[key].GetFilename());
+                    }
+                    _log.InfoFormat("Done!");
+                    return true;
+                }
 
                 if (this.State == AcsState.None)
                 {
@@ -236,7 +253,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     _log.DebugFormat("Jobname was empty, using {0}", this.JobName);
                 }
 
-                var manager = new AcsDataManager(this.State, this.WorkingFolder);
+                var manager = new AcsDataManager(this.State, this.WorkingFolder, this.Year);
                 //TODO: check for bad combinations of inputs
                 manager.SummaryLevel = this.SummaryLevel;
                 manager.ExportFilterFilename = this.ExportFilterShapefile;

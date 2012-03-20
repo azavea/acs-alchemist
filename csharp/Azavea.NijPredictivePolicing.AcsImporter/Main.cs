@@ -58,6 +58,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         protected static void ShowWelcomeScreen()
         {
+            //_log.Warn("DEBUG - DEBUG - PAUSING FOR DRAMATIC EFFECT - DEBUG - DEBUG"); Console.ReadKey();
             _log.Debug("+--------------------------------------------+");
             _log.Debug("|   Welcome to _SOLUTIONNAME_                |");
             _log.Debug("+--------------------------------------------+");
@@ -72,6 +73,9 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             _log.Info(" This program comes with ABSOLUTELY NO WARRANTY;");
             _log.Info(" This is free software, and you are welcome to redistribute it");
             _log.Info(" under the terms of the GNU Lesser General Public License");
+
+            //TODO: are we obligated to list other libraries here?
+
             _log.Info("+-----------------------------------------------------+");
         }
 
@@ -82,6 +86,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             {
                 Settings.RestoreDefaults();
             }
+
+            Settings.LoadYearConfigs();
         }
 
 
