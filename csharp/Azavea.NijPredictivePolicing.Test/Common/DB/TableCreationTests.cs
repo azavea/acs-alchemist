@@ -50,7 +50,7 @@ namespace Azavea.NijPredictivePolicing.Test.Common.DB
             });
 
             string sql = SqliteDataClient.GenerateTableSQLFromFields("test", columns);
-            string expectedSql = @"CREATE TABLE test ( ixid INTEGER NOT NULL PRIMARY KEY, FILEID TEXT(6), WideText TEXT(200), Numeric INTEGER(200) ); ";
+            string expectedSql = "CREATE TABLE \"test\" ( ixid INTEGER NOT NULL PRIMARY KEY, FILEID TEXT(6), WideText TEXT(200), Numeric INTEGER(200) ); ";
             _log.Debug("Test generated " + sql);
 
             Assert.AreEqual(expectedSql, sql);
