@@ -147,20 +147,11 @@ namespace Azavea.NijPredictivePolicing.Common
 
         public List<object> GetList(string key)
         {
-            
+
             if (_data != null) //&& (_data.ContainsKey(key)))
             {
                 var o = _data[key];
-
-                //if (o is JArray)
-                //{
-                    //return (o as JArray);
-                    return new List<object>(o as IEnumerable<object>);
-                //}
-                //else if (o is Array)
-                //{
-                //    return new List<object>(o as IEnumerable<object>);                    
-                //}
+                return new List<object>(o as IEnumerable<object>);
             }
             return null;
         }
