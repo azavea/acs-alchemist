@@ -65,7 +65,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             new CmdLineArg() { Flag = "workingFolder", Description = "Specify where you'd like temporary files saved", DataType=typeof(string), PropertyName = "WorkingFolder"},
             new CmdLineArg() { Flag = "preserveJam", Description = "Optional flag to preserve non-numeric margin of error values", DataType=typeof(string), PropertyName="PreserveJam"},
             
-            new CmdLineArg() { Flag = "listYears", Description = "TODO------------------", DataType=typeof(string), PropertyName="ListYears"},
+            new CmdLineArg() { Flag = "listYears", Description = "Lists config file locations for each year it knows about", DataType=typeof(string), PropertyName="ListYears"},
             new CmdLineArg() { Flag = "listStateCodes", Description = "Displays a list of available state codes", DataType=typeof(string), PropertyName="DisplayStateCodes"},
             new CmdLineArg() { Flag = "listSummaryLevels", Description = "Displays a list of available census summary levels", DataType=typeof(string), PropertyName="DisplaySummaryLevels"},
             new CmdLineArg() { Flag = "stripGEOIDColumn", Description = "Adds an extra column to the shapefile output named \"GEOID_STRP\" that contains the same data as the \"GEOID\" column but without the \"15000US\" prefix", DataType=typeof(string), PropertyName = "AddStrippedGEOIDcolumn" }
