@@ -3,6 +3,7 @@ bin
 obj
 *.suo
 *.csproj.user
+scripts/installer/*.exe
 /csharp/temp
 /csharp/Azavea.NijPredictivePolicing.AcsImporter/ACSImporter
 /acsimporter_1_0_0/bin
