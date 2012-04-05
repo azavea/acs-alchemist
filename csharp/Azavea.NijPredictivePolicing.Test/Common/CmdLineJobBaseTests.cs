@@ -1,5 +1,5 @@
 ﻿/*
-  Copyright (c) 2011 Azavea, Inc.
+  Copyright (c) 2012 Azavea, Inc.
  
   This file is part of _SOLUTIONNAME_.
 

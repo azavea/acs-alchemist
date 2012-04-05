@@ -1,5 +1,5 @@
 ﻿/*
-  Copyright (c) 2011 Azavea, Inc.
+  Copyright (c) 2012 Azavea, Inc.
  
   This file is part of _SOLUTIONNAME_.
 
@@ -72,7 +72,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             _log.Info(" _SOLUTIONNAME_  Copyright (C) 2012 Azavea, Inc.");
             _log.Info(" This program comes with ABSOLUTELY NO WARRANTY;");
             _log.Info(" This is free software, and you are welcome to redistribute it");
-            _log.Info(" under the terms of the GNU Lesser General Public License");
+            _log.Info(" under the terms of the GNU General Public License");
 
             //TODO: are we obligated to list other libraries here?
 
