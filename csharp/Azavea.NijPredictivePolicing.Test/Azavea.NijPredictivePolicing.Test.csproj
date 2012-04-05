@@ -127,7 +127,7 @@
     <None Include="TestData\ParserTests\wellFormed.csv" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="lgpl-3.0.txt">
+    <Content Include="gpl.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestData\ParserTests\fixedWidth.txt" />
