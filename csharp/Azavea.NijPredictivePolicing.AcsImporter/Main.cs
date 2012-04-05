@@ -58,7 +58,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         protected static void ShowWelcomeScreen()
         {
-            _log.Warn("DEBUG - DEBUG - PAUSING FOR DRAMATIC EFFECT - DEBUG - DEBUG"); Console.ReadKey();
+            //_log.Warn("DEBUG - DEBUG - PAUSING FOR DRAMATIC EFFECT - DEBUG - DEBUG"); Console.ReadKey();
             _log.Debug("+--------------------------------------------+");
             _log.Debug("|   Welcome to _SOLUTIONNAME_                |");
             _log.Debug("+--------------------------------------------+");
