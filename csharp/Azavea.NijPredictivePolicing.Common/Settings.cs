@@ -457,6 +457,39 @@ namespace Azavea.NijPredictivePolicing.Common
             c.Set("CurrentAcsDirectory", "acs2010_5yr");
             c.Set("CurrentAcsAllStateTablesDirectory", "2006-2010_ACSSF_By_State_All_Tables");
             c.Set("ColumnMappingsFileName", "2010_SummaryFileTemplates");
+
+
+            c.Set("ShapeFileBlockGroupURL", "http://www2.census.gov/geo/tiger/GENZ2010/");
+            c.Set("ShapeFileBlockGroupFilename", "gz_2010_{FIPS-code}_150_00_500k.zip");
+
+            c.Set("ShapeFileTractURL", "http://www2.census.gov/geo/tiger/GENZ2010/");
+            c.Set("ShapeFileTractFilename", "gz_2010_{FIPS-code}_140_00_500k.zip");
+
+            c.Set("ShapeFileCountySubdivisionsURL", "http://www2.census.gov/geo/tiger/GENZ2010/");
+            c.Set("ShapeFileCountySubdivisionsFilename", "gz_2010_{FIPS-code}_060_00_500k.zip");
+
+
+            //upper / lower voting districts
+            //http://www.census.gov/geo/www/cob/cbf_states.html
+
+
+            //did not find here: http://www.census.gov/geo/www/cob/index.html
+            //c.Set("ShapeFileThreeDigitZipsURL", string.Empty);
+            //c.Set("ShapeFileThreeDigitZipsFilename", string.Empty);
+
+            //did not find here: http://www.census.gov/geo/www/cob/index.html
+            //c.Set("ShapeFileFiveDigitZipsURL", "http://www.census.gov/geo/cob/bdy/zt/z500shp/");
+            //c.Set("ShapeFileFiveDigitZipsFilename", "zt{FIPS-code}_d00_shp.zip");
+
+
+            // COUNTY SHAPES NOT UPDATED PER: http://www.census.gov/geo/www/cob/cbf_counties.html
+            //c.Set("ShapeFileCountiesURL", "http://www.census.gov/geo/cob/bdy/co/co00shp/");
+            //c.Set("ShapeFileCountiesFilename", "co{FIPS-code}_d00_shp.zip");
+
+            //c.Set("ShapeFileVotingURL", "http://www.census.gov/geo/cob/bdy/vt/vt00shp/");
+            //c.Set("ShapeFileVotingFilename", "vt{FIPS-code}_d00_shp.zip");
+
+            
             c.Save();
         }
 

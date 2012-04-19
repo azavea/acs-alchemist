@@ -447,6 +447,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
         public bool CreateColumnMappingsTable(DbConnection conn)
         {
+            DbClient.GetCommand(string.Format("DROP TABLE IF EXISTS \"{0}\";", DbConstants.TABLE_ColumnMappings), conn).ExecuteNonQuery();
+            
+
             //create table
             string createMappingsTableSql = DataClient.GenerateTableSQLFromFields(DbConstants.TABLE_ColumnMappings, SequenceFileReader.Columns);
             DbClient.GetCommand(createMappingsTableSql, conn).ExecuteNonQuery();
@@ -585,7 +588,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 }
 
                 _log.Debug("Checking for columnMappings table...");
-                if (!DataClient.HasTable(conn, DbClient, "columnMappings"))
+                if ((!DataClient.HasTable(conn, DbClient, "columnMappings"))
+                    || (DataClient.RowCount(conn, DbClient, "columnMappings") == 0))
                 {
                     if (!CreateColumnMappingsTable(conn))
                     {
@@ -686,11 +690,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         DbConstants.TABLE_DesiredColumns);
 
                     dt = DataClient.GetMagicTable(conn, DbClient, getRequestedVariablesSQL);
-                    //if (dt == null || dt.Rows == null || dt.Rows.Count == 0)
-                    //{
-                    //    dt = null;
-                    //    _log.Warn("I imported your variables file, but those variables don't exist!");
-                    //}
+
                     if ((dt == null) || (numDesired != dt.Rows.Count))
                     {
 
@@ -853,7 +853,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     DataTable reqVariablesDT = GetRequestedVariables(conn);
                     if ((reqVariablesDT == null) || (reqVariablesDT.Rows.Count == 0))
                     {
-                        _log.Fatal("I didn't understand those variables, can you check them and try again?");
+                        _log.Info("Zero variables found: I couldn't understand those variables, can you check them and try again?");
                         //_log.Warn("I didn't understand those variables, can you check them and try again?");
                         return false;
                     }
@@ -1019,8 +1019,17 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             //and g.TRACT like s.TRACT || '00'
             //and cast(g.BLKGRP as integer) = cast(s.BLKGROUP as integer) ";
 
-            var temp = DataClient.GetMagicTable(conn, DbClient, "select * from census_tracts"); // where logrecno like '%883%'
+            //var temp = DataClient.GetMagicTable(conn, DbClient, "select * from census_tracts"); // where logrecno like '%883%'
+
+            
+
+            
+
             string geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGRP) as blkgroup, GEOID from geographies order by county, tract, blkgrp ";
+            var wholeGeomTable = DataClient.GetMagicTable(conn, DbClient, geomSQL);
+
+
+           
 
             string shapeSQL = string.Empty;
             switch (this.SummaryLevel)
@@ -1038,19 +1047,36 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     shapeSQL = "select trim(COUNTY) as county, trim(TRACT) as tract, '' as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_tracts ";
                     break;
                 case "150":
-                    //block groups
-                    shapeSQL = "select trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGROUP) as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_blockgroups ";
-                    break;
                 default:
-                    shapeSQL = "select trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGROUP) as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_blockgroups ";
-                    _log.Error("No summary level listed, choosing blockgroups");
+                    if (this.SummaryLevel != "150")
+                    {
+                        _log.Error("No Summary Level Selected -- defaulting to Block groups \"150\" -- ");
+                    }
+
+                    /*
+                     * NOTE!  In the 2000 census shapefiles the block-group column name was "BLKGROUP", 
+                     * in 2010, it was "BLKGRP"... so, lets magically recover and adjust based on what we find.
+                     */
+
+                    bool hasAbbrevColumn = DataClient.HasColumn("BLKGRP", "census_blockgroups", conn, DbClient);
+                        string blkGroupColumn = (hasAbbrevColumn) ? "BLKGRP" : "BLKGROUP";
+                    
+                    //block groups
+                    shapeSQL = string.Format("select trim(COUNTY) as county, trim(TRACT) as tract, trim({0}) as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_blockgroups ",
+                        blkGroupColumn);
                     break;
             }
             shapeSQL += "order by county, tract, blkgroup";
 
-            var wholeGeomTable = DataClient.GetMagicTable(conn, DbClient, geomSQL);
-            var wholeShapeTable = DataClient.GetMagicTable(conn, DbClient, shapeSQL);
 
+            var wholeShapeTable = DataClient.GetMagicTable(conn, DbClient, shapeSQL);
+            if (wholeShapeTable == null)
+            {
+                _log.Error("This shapefile had different columns than I was expecting, bailing");
+                return null;
+            }
+
+            
 
             var geomKeys = new Dictionary<string, DataRow>();
             foreach (DataRow row in wholeGeomTable.Rows)

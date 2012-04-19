@@ -144,5 +144,46 @@ namespace Azavea.NijPredictivePolicing.Common.DB
             return false;
         }
 
+
+        public static int RowCount(DbConnection conn, IDataClient client, string tablename)
+        {
+            try
+            {
+                string sql = string.Format("select count(1) from {0}", tablename);
+                var cmd = client.GetCommand(sql, conn);
+                return Utilities.GetAs<int>(cmd.ExecuteScalar(), -1);
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Error while looking for table", ex);
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Returns true if a particular table has a particular column
+        /// </summary>
+        /// <param name="columnname"></param>
+        /// <param name="tablename"></param>
+        /// <param name="conn"></param>
+        /// <param name="client"></param>
+        /// <returns></returns>
+        public static bool HasColumn(string columnname, string tablename, DbConnection conn, IDataClient client)
+        {
+            string sql = string.Format("select * from {0} WHERE 0 = 1", tablename);
+
+            var dt = GetMagicTable(conn, client, sql);
+
+            var cmd = client.GetCommand(sql, conn);
+            var dba = client.GetDataAdapter(cmd);
+
+            dba.Fill(dt);
+
+            if (dt != null)
+            {
+                return dt.Columns.Contains(columnname);
+            }
+            return false;
+        }
     }
 }

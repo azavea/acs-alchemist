@@ -329,6 +329,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
                     _log.Debug("Exporting to shapefile... Done!");
                 }
+                else
+                {
+                    _log.Debug("\r\n/****  No shapefile export requested ****/\r\n");
+                }
 
                 if (!string.IsNullOrEmpty(ExportToGrid))
                 {
@@ -345,6 +349,11 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     _log.Debug("Exporting to gridded shapefile... Done!");
                 }
 
+                else
+                {
+                    _log.Debug("\r\n/****  No gridded shapefile export requested ****/\r\n");
+                }
+
                 _log.Info("Done!");
 
                 return true;
@@ -352,6 +361,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             catch (Exception ex)
             {
                 _log.Error("Error thrown during import job ", ex);
+                _log.Fatal("Please see the errors log file for details");
             }
             finally
             {
