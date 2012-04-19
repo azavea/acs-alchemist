@@ -668,6 +668,13 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                 if (importSucceeded)
                 {
+                    string getRequestedCount = string.Format(
+                      @"SELECT    * FROM ""{0}"" ;",
+                      DbConstants.TABLE_DesiredColumns);
+                    DataTable desiredVars = DataClient.GetMagicTable(conn, DbClient, getRequestedCount);
+                    int numDesired = desiredVars.Rows.Count;
+
+
                     _log.DebugFormat("Variable file {0} imported successfully", this.DesiredVariablesFilename);
                     string getRequestedVariablesSQL = string.Format(
                       @"SELECT    columnMappings.CENSUS_TABLE_ID, 
@@ -679,9 +686,34 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                         DbConstants.TABLE_DesiredColumns);
 
                     dt = DataClient.GetMagicTable(conn, DbClient, getRequestedVariablesSQL);
-                    if (dt == null || dt.Rows == null || dt.Rows.Count == 0)
+                    //if (dt == null || dt.Rows == null || dt.Rows.Count == 0)
+                    //{
+                    //    dt = null;
+                    //    _log.Warn("I imported your variables file, but those variables don't exist!");
+                    //}
+                    if ((dt == null) || (numDesired != dt.Rows.Count))
                     {
-                        dt = null;
+
+                        _log.Warn("I couldn't find one or more of the variables you requested.");
+                        HashSet<string> foundVarsSet = new HashSet<string>();
+                        if (dt != null)
+                        {
+                            foreach (DataRow dr in dt.Rows)
+                            {
+                                foundVarsSet.Add(dr["CENSUS_TABLE_ID"] as string);
+                            }
+                        }
+                        foreach (DataRow dr in desiredVars.Rows)
+                        {
+                            var varName = dr["CENSUS_TABLE_ID"] as string;
+                            if (!foundVarsSet.Contains(varName))
+                            {
+                                _log.ErrorFormat("Could not find requested variable \"{0}\"", varName);
+                            }
+                        }
+
+                        _log.Debug("Processing requested variables... Done -- with errors");
+                        return dt;
                     }
                 }
                 else
@@ -689,6 +721,10 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     _log.Warn("Processing requested variables... Failed!");
                     return null;
                 }
+            }
+            else
+            {
+                _log.Debug("No variables file specified");
             }
 
             _log.Debug("Processing requested variables... Done!");
@@ -817,7 +853,8 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                     DataTable reqVariablesDT = GetRequestedVariables(conn);
                     if ((reqVariablesDT == null) || (reqVariablesDT.Rows.Count == 0))
                     {
-                        _log.Warn("No variables requested");
+                        _log.Fatal("I didn't understand those variables, can you check them and try again?");
+                        //_log.Warn("I didn't understand those variables, can you check them and try again?");
                         return false;
                     }
 

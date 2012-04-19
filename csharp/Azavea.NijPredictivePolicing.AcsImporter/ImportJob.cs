@@ -310,7 +310,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                         _log.Error("Importing requested variables... Failed! A problem was detected, exiting.");
                         return false;
                     }
-                    _log.Debug("Importing requested variables... Done!");
+                    else
+                    {
+                        _log.Debug("Importing requested variables... Done!");
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(ExportToShapefile))

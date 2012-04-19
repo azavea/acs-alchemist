@@ -213,8 +213,6 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             try
             {
 
-
-
                 //empty/create our temporary table
                 DataTable dt = SetupTable(conn, client, tablename);
 
@@ -224,12 +222,12 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
 
                 //check all our error scenarios
                 TableChecker[] fnList = new TableChecker[] {
-                CheckForMaxColumns,
-                CheckForMinColumns,
-                CheckForDuplicates,
-                CheckForMOEDuplicates,
-                CheckForReserved
-            };
+                    CheckForMaxColumns,
+                    CheckForMinColumns,
+                    CheckForDuplicates,
+                    CheckForMOEDuplicates,
+                    CheckForReserved
+                };
 
                 bool noErrors = true;
                 foreach (var errCheckFn in fnList)
@@ -253,7 +251,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
             }
             catch (Exception ex)
             {
-                _log.Error("Variable Import Failed", ex);                
+                _log.Error("Variable Import Failed", ex);
                 RemoveTemporaryTable(conn, client);
             }
 
