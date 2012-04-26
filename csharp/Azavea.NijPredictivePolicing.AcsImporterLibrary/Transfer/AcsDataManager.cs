@@ -94,9 +94,9 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
         public string DesiredVariablesFilename;
 
         /// <summary>
-        /// If set, the manager will erase a previous job with the same name, and replace it
+        /// If set, the manager will re-use a previous job with the same name, instead of replacing it
         /// </summary>
-        public bool ReplaceTable = false;
+        public bool ReusePreviousJobTable = false;
 
         public string OutputProjectionFilename;
 
@@ -834,7 +834,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 {
                     if (DataClient.HasTable(conn, DbClient, tableName))
                     {
-                        if (ReplaceTable)
+                        if (!ReusePreviousJobTable)
                         {
                             DbClient.GetCommand(string.Format("DROP TABLE IF EXISTS \"{0}\";", tableName), conn).ExecuteNonQuery();
                         }

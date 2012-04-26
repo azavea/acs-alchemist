@@ -49,8 +49,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
             new CmdLineArg() { Flag = "j", Display=false, DataType=typeof(string), PropertyName="JobName"},
             new CmdLineArg() { Flag = "jobName", Description = "Specify a name for this job / shapefile", DataType=typeof(string), PropertyName="JobName"},
-            new CmdLineArg() { Flag = "r", Display=false,  DataType=typeof(string), PropertyName="ReplaceTable"},
-            new CmdLineArg() { Flag = "replaceJob", Description = "Replace the database for an existing job / shapefile", DataType=typeof(string), PropertyName="ReplaceTable"},
+            new CmdLineArg() { Flag = "reuse", Display=false,  DataType=typeof(string), PropertyName="ReusePreviousJobTable"},
+            new CmdLineArg() { Flag = "reuseJob", Description = "Reuse the database from a previous job", DataType=typeof(string), PropertyName="ReusePreviousJobTable"},
             
             new CmdLineArg() { Flag = "outputProjection", Description = "Provide the .prj file of a desired projection use", DataType=typeof(string), PropertyName="OutputProjection"},
 
@@ -258,7 +258,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 manager.SummaryLevel = this.SummaryLevel;
                 manager.ExportFilterFilename = this.ExportFilterShapefile;
                 manager.DesiredVariablesFilename = IncludedVariableFile;
-                manager.ReplaceTable = (!string.IsNullOrEmpty(this.ReplaceTable));
+                manager.ReusePreviousJobTable = (!string.IsNullOrEmpty(this.ReplaceTable));
                 manager.OutputProjectionFilename = this.OutputProjection;
                 manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
                 manager.AddStrippedGEOIDcolumn = (!string.IsNullOrEmpty(this.AddStrippedGEOIDcolumn));
