@@ -8,6 +8,8 @@ Name "ACS Data Ermine"
 !define VERSION 1.0.0
 !define COMPANY Azavea
 !define URL http://www.azavea.com
+#!define SOURCE_DIR C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\x86\Debug
+!define SOURCE_DIR "C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug"
 
 # MUI Symbol Definitions
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install-blue.ico"
@@ -77,9 +79,14 @@ Var Checkbox_State
 Section -Main SEC0000
     SetOutPath $INSTDIR
     SetOverwrite on
-    File /r C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\x86\Debug\*
+    File /r ${SOURCE_DIR}\*
     ;File /r C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug\*
     File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\README.txt
+	
+	#23265 -- any config files must be present!  otherwise the user will need to be an admin on first run, which is annoying
+	File ${SOURCE_DIR}\2009.year
+	File ${SOURCE_DIR}\2010.year	
+	
 	
 	SetOutPath $INSTDIR\Docs
 	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\README.txt
