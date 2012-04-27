@@ -81,7 +81,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
         protected static void LoadConfigFile()
         {
-            Settings.ConfigFile = new Config(Path.Combine(Settings.ApplicationPath, "importer.config"));
+            Settings.ConfigFile = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.config"));
             if (Settings.ConfigFile.IsEmpty())
             {
                 Settings.RestoreDefaults();

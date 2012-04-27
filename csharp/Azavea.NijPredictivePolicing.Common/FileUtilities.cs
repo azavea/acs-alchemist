@@ -126,6 +126,7 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             try
             {
+                
                 //I'd rather do this here, than directly in the constructor or class definition.
                 //The file system loves to throw exceptions, and I'd rather see em than a app 'exit'!
                 //In Soviet Russia, computer throws things at YOU!
@@ -244,5 +245,18 @@ namespace Azavea.NijPredictivePolicing.Common
         }
 
 
+
+        public static string CleanPath(string OutputFolder)
+        {
+            if (string.IsNullOrEmpty(OutputFolder))
+            {
+                _log.Error("Empty folder provided to \"CleanPath\"");
+                return null;
+            }
+
+            string tmp = OutputFolder.Trim('\"');
+
+            return tmp;
+        }
     }
 }

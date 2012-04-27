@@ -96,11 +96,30 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         public string GridEnvelope { get; set; }
         public string OutputProjection { get; set; }
         public string IncludeEmptyGridCells { get; set; }
-        public string OutputFolder { get; set; }
-        public string WorkingFolder { get; set; }
+        
         public string PreserveJam { get; set; }
         public string AddStrippedGEOIDcolumn { get; set; }
-        
+
+        protected string _outputFolder;
+        protected string _workingFolder;
+
+        public string OutputFolder
+        {
+            get { return _outputFolder; }
+            set
+            {
+                _outputFolder = FileUtilities.CleanPath(value);
+            }
+        }
+        public string WorkingFolder
+        {
+            get { return _workingFolder; }
+            set
+            {
+                _workingFolder = FileUtilities.CleanPath(value);
+            }
+        }
+
         
 
         
@@ -143,8 +162,19 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 //if we find a delim, make sure it is prefixed by whitespace
                 if (next > 0)
                 {
-                    if (!char.IsWhiteSpace(str[next - 1]))
+                    //if this one isn't prefixed by whitespace, check the next one
+                    bool done = char.IsWhiteSpace(str[next - 1]);
+                    while (!done)
+                    {
+                        next = str.IndexOf(d, next + 1);
+                        done = char.IsWhiteSpace(str[next - 1]) || (next == -1);
+                    }
+
+                    //didn't find a better one
+                    if (next < 0)
                         continue;
+
+                    //did find it
                 }
 
                 indices.Add(next);
@@ -259,12 +289,15 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 if (!string.IsNullOrEmpty(ListYears))
                 {
                     var years = Settings.LoadYearConfigs();
-                    _log.InfoFormat("I found {0} year config files ", years.Count);
+                    //_log.DebugFormat("I found {0} year config files ", years.Count);
+                    _log.InfoFormat("I found {0} years available:", years.Count);
                     foreach (var key in years.Keys)
                     {
-                        _log.InfoFormat("{0} - {1}", key, years[key].GetFilename());
+                        //_log.DebugFormat("{0} - {1}", key, years[key].GetFilename());
+
+                        _log.InfoFormat(" * {0} ", key);                        
                     }
-                    _log.InfoFormat("Done!");
+                    _log.InfoFormat(Environment.NewLine + "Done!");
                     return true;
                 }
 
@@ -282,7 +315,8 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                     _log.DebugFormat("Jobname was empty, using {0}", this.JobName);
                 }
 
-                var manager = new AcsDataManager(this.State, this.WorkingFolder, this.Year);
+                WorkingFolder = FileUtilities.CleanPath(WorkingFolder);
+                var manager = new AcsDataManager(this.State, WorkingFolder, this.Year);
                 //TODO: check for bad combinations of inputs
                 manager.SummaryLevel = this.SummaryLevel;
                 manager.ExportFilterFilename = this.ExportFilterShapefile;
@@ -291,7 +325,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 manager.OutputProjectionFilename = this.OutputProjection;
                 manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
                 manager.AddStrippedGEOIDcolumn = (!string.IsNullOrEmpty(this.AddStrippedGEOIDcolumn));
-                manager.OutputFolder = this.OutputFolder;
+                manager.OutputFolder = FileUtilities.CleanPath(OutputFolder);
 
                 //if (!string.IsNullOrEmpty(this.WorkingFolder))
                 //{
@@ -300,8 +334,10 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 manager.IncludeEmptyGridCells = (!string.IsNullOrEmpty(this.IncludeEmptyGridCells));
                 //manager.SRID = Utilities.GetAs<int>(this.ExportFilterSRID, -1);
 
+
                 if (FileUtilities.SafePathEnsure(OutputFolder) != OutputFolder)
                 {
+                    _log.ErrorFormat("Unable to set or create output folder, ( {0} ) exiting", OutputFolder);
                     _log.FatalFormat("Unable to set or create output folder, ( {0} ) exiting", OutputFolder);
                     return false;
                 }

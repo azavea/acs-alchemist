@@ -178,6 +178,29 @@ namespace Azavea.NijPredictivePolicing.Test.Common
             }
         }
 
+        [Test]
+        public void TestFullLine()
+        {
+            string[] args = "-s Wyoming -y 2010 -outputFolder \"c:\\sandbox\\ACSDataErmine\\\" -workingFolder \"c:\\sandbox\\ACSDataErmine\\Wo-rking\\\" -v test_vars.txt -exportToShape".Split(' ');
+            ImportJob job = new ImportJob();
+            if (!job.Load(args))
+            {
+                Assert.Fail("Couldn't parse standard line for full line");
+            }
+
+
+            Assert.AreEqual(AcsState.Wyoming, job.State, "State is wrong for args");
+            Assert.AreEqual("test_vars.txt", job.IncludedVariableFile, "variables file is wrong for args");
+            Assert.AreEqual("c:\\sandbox\\ACSDataErmine\\", job.OutputFolder, "Output folder is wrong!");
+            Assert.AreEqual("c:\\sandbox\\ACSDataErmine\\Wo-rking\\", job.WorkingFolder, "Working folder is wrong!");
+
+            Assert.AreEqual(true.ToString(), job.ExportToShapefile, true.ToString(), "flag param is wrong for args");
+
+
+
+
+        }
+
 
     }
 }

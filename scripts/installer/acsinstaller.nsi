@@ -84,8 +84,8 @@ Section -Main SEC0000
     File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\README.txt
 	
 	#23265 -- any config files must be present!  otherwise the user will need to be an admin on first run, which is annoying
-	File ${SOURCE_DIR}\2009.year
-	File ${SOURCE_DIR}\2010.year	
+	File ${SOURCE_DIR}\AcsAlchemist.2009.config
+	File ${SOURCE_DIR}\AcsAlchemist.2010.config
 	
 	
 	SetOutPath $INSTDIR\Docs
