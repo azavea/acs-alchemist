@@ -154,12 +154,14 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
                 Settings.RequestedYear = year;
             }
 
+
             if (!string.IsNullOrEmpty(workingFolder))
             {
                 //override where we're storing temporary files
                 //Settings.AppDataDirectory = FileUtilities.SafePathEnsure(workingFolder, Settings.RequestedYear);
                 Settings.AppDataDirectory = FileUtilities.SafePathEnsure(workingFolder);
             }
+            _log.InfoFormat("Working directory is {0} ", workingFolder);
             
             Init();
         }
@@ -336,12 +338,18 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
             var client = DbClient;
             using (var conn = client.GetConnection())
             {
+                //if (DataClient.HasTable(conn, client, tablename))
+                //{
+                //    _log.DebugFormat("{0} table already exists, skipping...", tablename);
+                //    return true;
+                //}
+                //else
+
                 if (DataClient.HasTable(conn, client, tablename))
                 {
-                    _log.DebugFormat("{0} table already exists, skipping...", tablename);
-                    return true;
+                    DbClient.GetCommand(string.Format("DROP TABLE IF EXISTS \"{0}\";", tablename), conn).ExecuteNonQuery();
                 }
-                else
+
                 {
                     _log.DebugFormat("{0} table not found, importing...", tablename);
 
@@ -532,7 +540,7 @@ namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
 
                 if ((table != null) && (table.Rows.Count > 0))
                 {
-                    _log.Debug("Saving...");
+                    _log.Debug("Saving... (This may take a while)");
                     adapter.Update(table);
                     table.AcceptChanges();
                 }
