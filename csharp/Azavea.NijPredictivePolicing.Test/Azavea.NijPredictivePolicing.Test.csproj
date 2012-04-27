@@ -131,9 +131,7 @@
     <None Include="TestData\ParserTests\wellFormed.csv" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="gpl.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="gpl.txt" />
     <Content Include="TestData\ParserTests\fixedWidth.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
