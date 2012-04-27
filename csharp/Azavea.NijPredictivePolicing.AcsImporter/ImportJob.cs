@@ -123,6 +123,35 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             return (indices.Count > 0) ? indices.Min() : -1;
         }
 
+        /// <summary>
+        /// Finds the first of any of our delimiters, 
+        /// but makes sure that the space before the delim contains a whitespace char
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="idx"></param>
+        /// <param name="delims"></param>
+        /// <returns></returns>
+        public int FindDelimAfterWhitespace(string str, int idx, params char[] delims)
+        {
+            List<int> indices = new List<int>(delims.Length);
+            foreach (char d in delims)
+            {
+                int next = str.IndexOf(d, idx);
+                if (next < 0)
+                    continue;
+
+                //if we find a delim, make sure it is prefixed by whitespace
+                if (next > 0)
+                {
+                    if (!char.IsWhiteSpace(str[next - 1]))
+                        continue;
+                }
+
+                indices.Add(next);
+            }
+            return (indices.Count > 0) ? indices.Min() : -1;
+        }
+
 
         public bool Load(string[] args)
         {
@@ -135,7 +164,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
             this.ArgumentLine = line;
             //char delim = '-';
             char[] delims = new char[] { (char)45, (char)8211, (char)65533 }; //'-', '–', '?';
-            int idx = IndexOf(line, 0, delims);     //int idx = line.IndexOf(delim);
+            int idx = FindDelimAfterWhitespace(line, 0, delims);     //int idx = line.IndexOf(delim);
 
             if (idx == -1)
             {
@@ -164,7 +193,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
 
             var thisType = typeof(ImportJob);
-            idx = IndexOf(line, 0, delims);     //int idx = line.IndexOf(delim);
+            idx = FindDelimAfterWhitespace(line, 0, delims);     //int idx = line.IndexOf(delim);
             while (idx >= 0)
             {
                 int nextSpace = line.IndexOf(' ', idx + 1);
@@ -173,7 +202,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
                 string contents = string.Empty;
 
                 idx += 1 + flag.Length;
-                int end = IndexOf(line, idx, delims);   //int end = line.IndexOf(delim, idx);
+                int end = FindDelimAfterWhitespace(line, idx, delims);   //int end = line.IndexOf(delim, idx);
                 if (end == -1)
                 {
                     end = line.Length;
@@ -188,7 +217,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
 
                     idx = end;
                 }
-                idx = IndexOf(line, idx, delims);       //idx = line.IndexOf(delim, idx);
+                idx = FindDelimAfterWhitespace(line, idx, delims);       //idx = line.IndexOf(delim, idx);
 
 
                 for (int p = 0; p < Arguments.Length; p++)
