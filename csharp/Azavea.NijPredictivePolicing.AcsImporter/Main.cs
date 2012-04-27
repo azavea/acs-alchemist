@@ -1,20 +1,20 @@
 ﻿/*
   Copyright (c) 2012 Azavea, Inc.
  
-  This file is part of _SOLUTIONNAME_.
+  This file is part of ACS Alchemist.
 
-  _SOLUTIONNAME_ is free software: you can redistribute it and/or modify
+  ACS Alchemist is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
-  _SOLUTIONNAME_ is distributed in the hope that it will be useful,
+  ACS Alchemist is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with _SOLUTIONNAME_.  If not, see <http://www.gnu.org/licenses/>.
+  along with ACS Alchemist.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 using System;
@@ -60,7 +60,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         {
             //_log.Warn("DEBUG - DEBUG - PAUSING FOR DRAMATIC EFFECT - DEBUG - DEBUG"); Console.ReadKey();
             _log.Debug("+--------------------------------------------+");
-            _log.Debug("|   Welcome to _SOLUTIONNAME_                |");
+            _log.Debug("|   Welcome to ACS Alchemist                |");
             _log.Debug("+--------------------------------------------+");
             _log.Debug("");
             _log.Debug("");
@@ -69,7 +69,7 @@ namespace Azavea.NijPredictivePolicing.AcsDataImporter
         protected static void ShowCopyrightAndLicense()
         {
             _log.Info("+-----------------------------------------------------+");
-            _log.Info(" _SOLUTIONNAME_  Copyright (C) 2012 Azavea, Inc.");
+            _log.Info(" ACS Alchemist  Copyright (C) 2012 Azavea, Inc.");
             _log.Info(" This program comes with ABSOLUTELY NO WARRANTY;");
             _log.Info(" This is free software, and you are welcome to redistribute it");
             _log.Info(" under the terms of the GNU General Public License");
