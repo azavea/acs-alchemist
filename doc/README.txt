@@ -143,7 +143,7 @@ The ACS Alchemist has lots of options (there are more listed in the UserManual.p
  - Blank lines and lines that start with "#", are ignored
  - All other lines should be a command line flag starting with -, followed by an argument (if required for the particular flag)
 
-In order to use a job file, simply specify its path as the only argument to the Data Ermine. Note that file paths specified in the job file should be relative to the directory the importer will be run in, not to the location of the job file.  An example job file named "myJob.txt" for the previous command would look something like this: 
+To use a job file simply provide the filename as the only argument to the utility. Note that file paths specified in the job file should be relative to the directory the importer will be run in, not to the location of the job file.  An example job file named "myJob.txt" for the previous command would look something like this: 
 
 #
 #Sample Job File - myJob.txt

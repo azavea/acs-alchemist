@@ -8,8 +8,8 @@
     <ProjectGuid>{F524B387-A813-4FE4-AD37-E21D7645A1DC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Azavea.NijPredictivePolicing.AcsImporterLibrary</RootNamespace>
-    <AssemblyName>Azavea.NijPredictivePolicing.AcsImporterLibrary</AssemblyName>
+    <RootNamespace>Azavea.NijPredictivePolicing.AcsAlchemistLibrary</RootNamespace>
+    <AssemblyName>Azavea.NijPredictivePolicing.AcsAlchemistLibrary</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
