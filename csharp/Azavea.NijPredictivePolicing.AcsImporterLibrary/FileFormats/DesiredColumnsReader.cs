@@ -125,9 +125,9 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
                 {
                     line++;     //base 1
 
-                    if ((row.Count < 1) || (string.IsNullOrEmpty(row[0])))
+                    if ((row.Count < 1) || (string.IsNullOrEmpty(row[0])) || (row[0].StartsWith("#")))
                     {
-                        //skip blank lines
+                        //skip blank lines / comments
                         continue;
                     }
                     if (row.Count > 2)
