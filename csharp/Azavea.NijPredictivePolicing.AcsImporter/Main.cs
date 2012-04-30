@@ -128,7 +128,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 }
             }
             _log.Info("");
-            _log.Info("**Pro Tip!  You can place all your arguments in a text file, and call the importer with just that filename");
+            _log.Info("**Pro Tip!  You can place all your arguments in a text file, and call AcsAlchemist.exe with just that filename");
             _log.Info("");
         }
 
