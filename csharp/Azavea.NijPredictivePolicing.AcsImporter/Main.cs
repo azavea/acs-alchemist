@@ -85,7 +85,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
 
         protected static void LoadConfigFile()
         {
-            Settings.ConfigFile = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.config"));
+            Settings.ConfigFile = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.json.config"));
             if (Settings.ConfigFile.IsEmpty())
             {
                 Settings.RestoreDefaults();

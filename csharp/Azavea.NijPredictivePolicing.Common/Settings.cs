@@ -231,6 +231,9 @@ namespace Azavea.NijPredictivePolicing.Common
                             string key = Path.GetFileNameWithoutExtension(filename);
 
                             key = key.Replace("AcsAlchemist.", string.Empty);
+                            if (key == "json")
+                                continue;
+
                             foundConfigs[key] = filename;
                         }
                     }
@@ -257,6 +260,9 @@ namespace Azavea.NijPredictivePolicing.Common
 
                 foreach (string key in foundConfigs.Keys)
                 {
+                    if (key == "json")
+                        continue;
+
                     _yearConfigs[key] = new Config(foundConfigs[key]);
                 }
             }
