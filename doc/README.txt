@@ -95,25 +95,25 @@ C:\...> ACSAlchemist.exe -s Wyoming -e 150 –y 2009 -v myVariablesFile.txt
 
 Specify an output directory
 -------------------------------------
-By default, the Data Ermine will use the "AppData" directory in your Windows user directory.  For example, on Windows 7, this might be something like: C:\Users\YourUserID\AppData\Local\ACSImporter\Data.  If you want to change this default, you can specify an output directory using the "-outputFolder" switch as follows:
+By default, the utility will create a folder in your Windows user directory under "AppData" to store intermediate census data files.  For example, on Windows 7, this might be something like: C:\Users\{YourUserID}\AppData\Local\ACSAlchemist\Data.  If you want to change this default, you can specify an output directory using the "-outputFolder" switch as follows:
 
 -outputFolder c:\Sandbox\ACS
 
 
 Naming your Job
 -------------------------------------
-Each run of the Data Ermine is called a "job".  The software will create a job name based on the state, the year and the date, unless you specify a job name.
+Each run of the utility is called a "job".  The software will create a job name based on the state, the year and the date, unless you specify a job name.  By default these are overwritten every run, but they can be reused if you also specify "-reuseJob".  This can save time during multiple exports.
 
 -jobName DesiredNameHere
 
 
 Putting it all together
 -------------------------------------
-Here is an example import using what was discussed so far:
+Here is an example using what was discussed so far:
   
 C:\...> ACSAlchemist.exe -s Wyoming -e 150 –y 2009 -v myVariablesFile.txt -jobName Test01 -outputFolder c:\Sandbox\ACS
 
-This command will make sure all necessary files are downloaded for Wyoming and import the selected variables for 2009 into an internal database (using SQLLite) named "Test01".  The variable values were at the blockgroup summary level.  From here you can also generate your results as a shapefile using either the summary geography or using a 'fishnet' grid of polygon cells.
+This command will make sure all necessary files are downloaded for Wyoming and import the selected variables for 2009 into an internal database (using SQLLite) named "Test01".  The variable values were at the blockgroup summary level.  From here you can also export your results to a shapefile using either the summary geography or using a 'fishnet' grid of polygon cells.
 
 
 Exporting to a Shapefile
@@ -131,37 +131,35 @@ Test01.shx
 
 Setting an Output Projection
 -------------------------------------
-The geographic data associated with the ACS variables (tract or blockroup boundaries) are downloaded from the Census Bureau in GRS80NAD83 decimal degrees (EPSG:4269).  If you wish to specify a different projection, you can either add an EPSG spatial reference ID (SRID) or specify a filename containing the WKT of the desired projection.  When a projection is listed, the Data Ermine will re-project when generating the shapefile.  The Data Ermine uses the PROJ.4 and ProjNET libraries and the supported SRIDs are listed in the "SRID.csv" file in the installation directory.  Here’s an example that uses the PRJ file approach:
+The geographic data associated with the ACS variables (tract or blockroup boundaries) are downloaded from the Census Bureau in GRS80NAD83 decimal degrees (EPSG:4269).  If you wish to specify a different projection, you can either add an EPSG spatial reference ID (SRID) or specify a filename containing the WKT of the desired projection.  When an output projection is provided, the ACS Alchemist will transform the census boundaries into the requested projection, and provide a corresponding .PRJ file with the export.  The utility uses the PROJ.4 and ProjNET libraries and the supported SRIDs are listed in the "SRID.csv" file in the installation directory.  Here’s an example that uses the PRJ file approach:
 
 C:\...> ACSAlchemist.exe -s Wyoming -e 150 –y 2009 -v myVariablesFile.txt -jobName Test01 -exportToShape -outputProjection myproj.prj
 
 
 Saving Job Files
 -------------------------------------
-The Data Ermine has a lot of options (there are more listed in the UserManual.pdf), it is easy to make mistakes with the command line flags.  We have therefore provided a mechanism for saving the variables as a "job file".  A job file contains all the arguments you would normally specify on the command line in a text file. The syntax is simple:
+The ACS Alchemist has lots of options (there are more listed in the UserManual.pdf), and it is easy to make mistakes when using command line flags.  We have therefore provided a mechanism for using saved arguments from a "job file".  A "job file" is simply a list of all the arguments you would normally specify on the command line in a text file. The syntax is simple:
 
  - Blank lines and lines that start with "#", are ignored
  - All other lines should be a command line flag starting with -, followed by an argument (if required for the particular flag)
 
 In order to use a job file, simply specify its path as the only argument to the Data Ermine. Note that file paths specified in the job file should be relative to the directory the importer will be run in, not to the location of the job file.  An example job file named "myJob.txt" for the previous command would look something like this: 
 
-# myJob.txt - gets some data about wyoming and puts it in a shapefile
-# specify Wyoming as the state
--s Wyoming
-# specify year
-–y 2009
-# extract blockgroups
--e 150
-# extract the variables in myVariablesFile.txt
--v myVariablesFile.txt
-# save the data to a directory
--outputFolder C:\sandbox\ACS\
-# use "Test01" as a job name
--jobName Test01
-# export results to a shapefile
--exportToShape
-# convert the output to projection specified in myproj.prj rather than using WGS84
--outputProjection myproj.prj
+#
+#Sample Job File - myJob.txt
+#       Block Group Summaries
+#       Using variables myVariablesFile.txt
+#       Wyoming 2009
+#
+ -s Wyoming						#specify Wyoming as the State
+ –y 2009						#specify Year
+ -e 150							#extract Blockgroups
+ -v myVariablesFile.txt			#extract the Variables in myVariablesFile.txt
+ -jobName Test01				#use "Test01" as a Job Name
+ -exportToShape					#Export results to a Shapefile
+ -outputProjection myproj.prj	#convert the output to projection specified in myproj.prj rather than using WGS84
+ -outputFolder C:\sandbox\ACS\	#save the data to a directory
+
 
 And could be run using this command:
 

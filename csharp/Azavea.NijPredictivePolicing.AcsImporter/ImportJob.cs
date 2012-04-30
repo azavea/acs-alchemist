@@ -208,7 +208,13 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                     {
                         if (chunk.StartsWith("#") || chunk.StartsWith("/"))
                             continue;
-                        sb.Append(chunk).Append(" ");
+
+                        if (string.IsNullOrEmpty(chunk))
+                            continue;
+
+                        string tmpChunk = Utilities.TrimComments(chunk, '#');
+
+                        sb.Append(tmpChunk.Trim()).Append(" ");
                     }
                     line = sb.ToString();
                 }

@@ -547,6 +547,40 @@ namespace Azavea.NijPredictivePolicing.Common
 
 
 
+        /// <summary>
+        /// returns the start of a string until it hits a delimiter character preceeded by whitespace
+        /// it will not consider it a comment if it is inside QUOTES
+        /// </summary>
+        /// <param name="chunk"></param>
+        /// <param name="delim"></param>
+        /// <returns></returns>
+        public static string TrimComments(string chunk, char delim)
+        {
+            bool inquotes = false;
+
+            for (int i = 0; i < chunk.Length; i++)
+            {
+                //if we find our 'comment delimiter'
+                //and its at the start of the line, or it's preceeded by whitespace
+
+                if (chunk[i] == '\"')
+                    inquotes = !inquotes;
+
+                if ((chunk[i] == delim)
+                && ((i == 0) || ((i > 0) && (char.IsWhiteSpace(chunk[i - 1])))))
+                {
+                    if (inquotes)
+                        continue;
+
+                    //return the string up to this point
+                    return chunk.Substring(0, i);
+                }
+            }
+
+            //otherwise return everything
+            return chunk;
+        }
+
 
     }
 }

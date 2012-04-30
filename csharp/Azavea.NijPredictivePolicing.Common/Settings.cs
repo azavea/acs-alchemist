@@ -99,7 +99,7 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <summary>
         /// Application Name -- also name of our temp folder
         /// </summary>
-        public const string ApplicationName = "ACSImporter";
+        public const string ApplicationName = "ACSAlchemist";
 
         /// <summary>
         /// Path to the application home folder
