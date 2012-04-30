@@ -710,7 +710,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
                     if ((dt == null) || (numDesired != dt.Rows.Count))
                     {
-
                         _log.Warn("I couldn't find one or more of the variables you requested.");
                         HashSet<string> foundVarsSet = new HashSet<string>();
                         if (dt != null)
@@ -730,6 +729,11 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                         }
 
                         _log.Debug("Processing requested variables... Done -- with errors");
+
+                        //make tests pass
+                        if (dt.Rows.Count == 0)
+                            return null;
+
                         return dt;
                     }
                 }

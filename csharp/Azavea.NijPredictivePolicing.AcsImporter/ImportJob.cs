@@ -167,7 +167,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                     while (!done)
                     {
                         next = str.IndexOf(d, next + 1);
-                        done = char.IsWhiteSpace(str[next - 1]) || (next == -1);
+                        done = (next == -1) || char.IsWhiteSpace(str[next - 1]);
                     }
 
                     //didn't find a better one

@@ -147,7 +147,11 @@ namespace Azavea.NijPredictivePolicing.Test.Common
             };
 
             CmdLineJobBase cmds = new CmdLineJobBase();
-            Assert.IsFalse(cmds.Load(args, Arguments, dest), "Load Succeeded???");  //assert should pass, load should fail
+
+            bool loadDidFail = cmds.Load(args, Arguments, dest);
+
+            //switched this, nunit was being weird
+            Assert.IsTrue(loadDidFail == false, "Load Succeeded???");  //assert should pass, load should fail
         }
 
         /// <summary>
@@ -157,9 +161,9 @@ namespace Azavea.NijPredictivePolicing.Test.Common
         public void TestStandardLine()
         {
             var argsList = new string[][]{
-                ("-s Wyoming -e 150 -v my-VariablesFile.txt -jobName Test01 " + (char)8211 + "exportToShape").Split(' '),
-                ("-s Wyoming -e 150 " + (char)8211 + "v my-VariablesFile.txt -jobName Test01 -exportToShape").Split(' '),
-                ((char)8211 + "s Wyoming -e 150 -v my-VariablesFile.txt -jobName Test01 -exportToShape").Split(' ')
+                ("-s Wyoming -e 150 -v my-VariablesFile.txt -jobName Test-01 " + (char)8211 + "exportToShape").Split(' '),
+                ("-s Wyoming -e 150 " + (char)8211 + "v my-VariablesFile.txt -jobName Test-01 -exportToShape").Split(' '),
+                ((char)8211 + "s Wyoming -e 150 -v my-VariablesFile.txt -jobName Test-01 -exportToShape").Split(' ')
             };
 
             for (int i = 0; i < argsList.Length; i++)
@@ -173,7 +177,7 @@ namespace Azavea.NijPredictivePolicing.Test.Common
 
                 Assert.AreEqual(AcsState.Wyoming, job.State, "State is wrong for argsList[{0}]", i);
                 Assert.AreEqual("my-VariablesFile.txt", job.IncludedVariableFile, "variables file is wrong for argsList[{0}]", i);
-                Assert.AreEqual("Test01", job.JobName, "Job name is wrong for argsList[{0}]", i);
+                Assert.AreEqual("Test-01", job.JobName, "Job name is wrong for argsList[{0}]", i);
                 Assert.AreEqual(true.ToString(), job.ExportToShapefile, true.ToString(), "flag param is wrong for argsList[{0}]", i);
             }
         }
