@@ -638,6 +638,16 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         {
             _log.Debug("Filtering requested LRUs");
             HashSet<string> results = new HashSet<string>();
+
+            
+            if (!string.IsNullOrEmpty(this.SummaryLevel))
+            {
+                //self-heal if summary level wasn't provided
+                _log.Error("No Summary Level Selected -- defaulting to Block groups \"150\" -- ");
+                this.SummaryLevel = "150";
+            }
+
+
             if (!string.IsNullOrEmpty(this.SummaryLevel))
             {
                 using (var cmd = DbClient.GetCommand("select LOGRECNO from geographies where SUMLEVEL = @sum", conn))
@@ -1059,6 +1069,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     if (this.SummaryLevel != "150")
                     {
                         _log.Error("No Summary Level Selected -- defaulting to Block groups \"150\" -- ");
+                        this.SummaryLevel = "150";
                     }
 
                     /*
