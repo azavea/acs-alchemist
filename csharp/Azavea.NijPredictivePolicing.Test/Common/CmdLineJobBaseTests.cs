@@ -121,7 +121,7 @@ namespace Azavea.NijPredictivePolicing.Test.Common
         [Test]
         public void TestQuotesInArguments()
         {
-            string[] args = "-somefile \"C:\\terrible path\\with spaces\\in it\\terrible_filename.txt\" -another param ".Split(' ');
+            string[] args = "-somefile \"C:\\terrible path\\with spaces\\in-it\\terrible_filename.txt\" -another param ".Split(' ');
 
             var dest = new CommandTestObj();
             CmdLineArg[] Arguments = new CmdLineArg[] {
@@ -133,7 +133,7 @@ namespace Azavea.NijPredictivePolicing.Test.Common
             Assert.IsTrue(cmds.Load(args, Arguments, dest), "Load failed!");
 
             Assert.AreEqual("param", dest.another, "parameter after filename with hypens was clobbered");
-            Assert.AreEqual("C:\\terrible path\\with spaces\\in it\\terrible_filename.txt", dest.somefile, "failed on filename with quotes");
+            Assert.AreEqual("C:\\terrible path\\with spaces\\in-it\\terrible_filename.txt", dest.somefile, "failed on filename with quotes");
         }
 
         [Test]
@@ -157,9 +157,9 @@ namespace Azavea.NijPredictivePolicing.Test.Common
         public void TestStandardLine()
         {
             var argsList = new string[][]{
-                ("-s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 " + (char)8211 + "exportToShape").Split(' '),
-                ("-s Wyoming -e 150 " + (char)8211 + "v myVariablesFile.txt -jobName Test01 -exportToShape").Split(' '),
-                ((char)8211 + "s Wyoming -e 150 -v myVariablesFile.txt -jobName Test01 -exportToShape").Split(' ')
+                ("-s Wyoming -e 150 -v my-VariablesFile.txt -jobName Test01 " + (char)8211 + "exportToShape").Split(' '),
+                ("-s Wyoming -e 150 " + (char)8211 + "v my-VariablesFile.txt -jobName Test01 -exportToShape").Split(' '),
+                ((char)8211 + "s Wyoming -e 150 -v my-VariablesFile.txt -jobName Test01 -exportToShape").Split(' ')
             };
 
             for (int i = 0; i < argsList.Length; i++)
@@ -172,7 +172,7 @@ namespace Azavea.NijPredictivePolicing.Test.Common
                 }
 
                 Assert.AreEqual(AcsState.Wyoming, job.State, "State is wrong for argsList[{0}]", i);
-                Assert.AreEqual("myVariablesFile.txt", job.IncludedVariableFile, "variables file is wrong for argsList[{0}]", i);
+                Assert.AreEqual("my-VariablesFile.txt", job.IncludedVariableFile, "variables file is wrong for argsList[{0}]", i);
                 Assert.AreEqual("Test01", job.JobName, "Job name is wrong for argsList[{0}]", i);
                 Assert.AreEqual(true.ToString(), job.ExportToShapefile, true.ToString(), "flag param is wrong for argsList[{0}]", i);
             }
