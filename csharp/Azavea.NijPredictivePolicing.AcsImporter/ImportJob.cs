@@ -390,9 +390,13 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                     if (!manager.ExportShapefile(this.JobName))
                     {
                         _log.Error("There was an error while exporting the shapefile");
-                    }
 
-                    _log.Debug("Exporting to shapefile... Done!");
+                        _log.Debug("\r\nExporting to shapefile... Failed!");
+                    }
+                    else
+                    {
+                        _log.Debug("Exporting to shapefile... Done!");
+                    }
                 }
                 else
                 {

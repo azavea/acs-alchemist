@@ -639,8 +639,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             _log.Debug("Filtering requested LRUs");
             HashSet<string> results = new HashSet<string>();
 
-            
-            if (!string.IsNullOrEmpty(this.SummaryLevel))
+            if (string.IsNullOrEmpty(this.SummaryLevel))
             {
                 //self-heal if summary level wasn't provided
                 _log.Error("No Summary Level Selected -- defaulting to Block groups \"150\" -- ");
@@ -1220,6 +1219,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 if ((variablesDT == null) || (variablesDT.Rows.Count == 0))
                 {
                     _log.Warn("Nothing to export, data table is empty");
+                    _log.Error("Nothing to export, data table is empty");
                     return null;
                 }
 
