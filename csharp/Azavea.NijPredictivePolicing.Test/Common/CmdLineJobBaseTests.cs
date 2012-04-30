@@ -24,8 +24,8 @@ using System.Text;
 using NUnit.Framework;
 using log4net;
 using Azavea.NijPredictivePolicing.Common;
-using Azavea.NijPredictivePolicing.AcsDataImporter;
-using Azavea.NijPredictivePolicing.AcsImporterLibrary;
+using Azavea.NijPredictivePolicing.ACSAlchemist;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary;
 
 namespace Azavea.NijPredictivePolicing.Test.Common
 {

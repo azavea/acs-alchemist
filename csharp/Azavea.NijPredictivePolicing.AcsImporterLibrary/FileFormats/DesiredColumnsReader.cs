@@ -29,7 +29,7 @@ using Azavea.NijPredictivePolicing.Common.DB;
 using Azavea.NijPredictivePolicing.Common;
 using System.Data;
 
-namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
+namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
 {
     /// <summary>
     /// Input should be a csv list of (CENSUS_TABLE_ID, Name) pairs, 

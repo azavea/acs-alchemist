@@ -26,7 +26,7 @@ using System.IO;
 using log4net;
 using Azavea.NijPredictivePolicing.Common;
 
-namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
+namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 {
     /// <summary>
     /// This class contains the logic for caching, and downloading a url

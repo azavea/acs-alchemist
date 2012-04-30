@@ -23,7 +23,7 @@ using System.Linq;
 using System.Text;
 using System.ComponentModel;
 
-namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
+namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
 {
     /// <summary>
     /// TODO: Unify these into classes?

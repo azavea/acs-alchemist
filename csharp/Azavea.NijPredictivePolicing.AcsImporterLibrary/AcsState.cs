@@ -23,7 +23,7 @@ using System.Linq;
 using System.Text;
 using Azavea.NijPredictivePolicing.Common;
 
-namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
+namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary
 {
     /// <summary>
     /// Contains an enumeration of the State fips codes,

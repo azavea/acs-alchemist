@@ -22,16 +22,16 @@ using log4net;
 using System.IO;
 using System.Collections.Generic;
 using Azavea.NijPredictivePolicing.Test.Helpers;
-using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer;
 using GeoAPI.Geometries;
-using Azavea.NijPredictivePolicing.AcsImporterLibrary;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary;
 using Azavea.NijPredictivePolicing.Common;
 using Azavea.NijPredictivePolicing.Common.DB;
 using System.Text;using System;using log4net.Core;
 using System.Data;
 using System.Data.Common;
 using ProjNet.CoordinateSystems;
-namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
+namespace Azavea.NijPredictivePolicing.Test.ACSAlchemistLibrary
 {
     [TestFixture]
     public class AcsDataManagerTests

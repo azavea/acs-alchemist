@@ -27,12 +27,12 @@ using System.Net;
 using System.IO;
 using Azavea.NijPredictivePolicing.Common;
 using Azavea.NijPredictivePolicing.Test.Helpers;
-using Azavea.NijPredictivePolicing.AcsImporterLibrary;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary;
 using System.Data;
-using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
-using Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats;
 
-namespace Azavea.NijPredictivePolicing.Test.AcsImporterLibrary
+namespace Azavea.NijPredictivePolicing.Test.ACSAlchemistLibrary
 {
     [TestFixture]
     public class ShapefileHelperTests

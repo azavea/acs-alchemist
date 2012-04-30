@@ -26,7 +26,7 @@ using System.Net;
 using Azavea.NijPredictivePolicing.Common;
 using log4net;
 
-namespace Azavea.NijPredictivePolicing.AcsImporterLibrary
+namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary
 {
     /// <summary>
     /// Provides utilities for downloading data from the ACS website

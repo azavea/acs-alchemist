@@ -25,7 +25,7 @@ using Azavea.NijPredictivePolicing.Common.Data;
 using log4net;
 using System.IO;
 
-namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
+namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
 {
     /// <summary>
     /// This class contains fixed width column definitons for reading the ACS geography file

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicing.AcsImporterLibrary", "Azavea.NijPredictivePolicing.AcsImporterLibrary\Azavea.NijPredictivePolicing.AcsImporterLibrary.csproj", "{F524B387-A813-4FE4-AD37-E21D7645A1DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicing.AcsAlchemistLibrary", "Azavea.NijPredictivePolicing.AcsImporterLibrary\Azavea.NijPredictivePolicing.AcsAlchemistLibrary.csproj", "{F524B387-A813-4FE4-AD37-E21D7645A1DC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9E1E6F34-233E-4145-8DB0-75BFA5DB1715} = {9E1E6F34-233E-4145-8DB0-75BFA5DB1715}
 	EndProjectSection
@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicin
 		{F524B387-A813-4FE4-AD37-E21D7645A1DC} = {F524B387-A813-4FE4-AD37-E21D7645A1DC}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicing.AcsDataImporter", "Azavea.NijPredictivePolicing.AcsImporter\Azavea.NijPredictivePolicing.AcsDataImporter.csproj", "{A8D5E203-EA5A-4560-A4D6-6586F8C3ABA6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicing.AcsAlchemist", "Azavea.NijPredictivePolicing.AcsImporter\Azavea.NijPredictivePolicing.AcsAlchemist.csproj", "{A8D5E203-EA5A-4560-A4D6-6586F8C3ABA6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azavea.NijPredictivePolicing.CrimeDataMerger", "Azavea.NijPredictivePolicing.CrimeDataMerger\Azavea.NijPredictivePolicing.CrimeDataMerger.csproj", "{CC7422BE-DF5E-453A-83B0-78845DC92E37}"
 EndProject

@@ -32,7 +32,7 @@ using Azavea.NijPredictivePolicing.Common;
 using System.Text.RegularExpressions;
 using GeoAPI.CoordinateSystems;
 
-namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
+namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
 {
     /// <summary>
     /// This class contains a number of small utilities to simplify the use of shapefiles in the importer

@@ -8,8 +8,8 @@
     <ProjectGuid>{A8D5E203-EA5A-4560-A4D6-6586F8C3ABA6}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Azavea.NijPredictivePolicing.AcsDataImporter</RootNamespace>
-    <AssemblyName>AcsDataImporter</AssemblyName>
+    <RootNamespace>Azavea.NijPredictivePolicing.ACSAlchemist</RootNamespace>
+    <AssemblyName>ACSAlchemist</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -78,9 +78,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Azavea.NijPredictivePolicing.AcsImporterLibrary\Azavea.NijPredictivePolicing.AcsImporterLibrary.csproj">
+    <ProjectReference Include="..\Azavea.NijPredictivePolicing.AcsImporterLibrary\Azavea.NijPredictivePolicing.AcsAlchemistLibrary.csproj">
       <Project>{F524B387-A813-4FE4-AD37-E21D7645A1DC}</Project>
-      <Name>Azavea.NijPredictivePolicing.AcsImporterLibrary</Name>
+      <Name>Azavea.NijPredictivePolicing.AcsAlchemistLibrary</Name>
     </ProjectReference>
     <ProjectReference Include="..\Azavea.NijPredictivePolicing.Common\Azavea.NijPredictivePolicing.Common.csproj">
       <Project>{9E1E6F34-233E-4145-8DB0-75BFA5DB1715}</Project>

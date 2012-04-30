@@ -26,7 +26,7 @@ using log4net;
 using System.IO;
 using Azavea.NijPredictivePolicing.Common.Data;
 
-namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats
+namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
 {
     /// <summary>
     /// This class contains the column definitions for the ACS Sequence file

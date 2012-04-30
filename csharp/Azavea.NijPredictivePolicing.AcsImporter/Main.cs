@@ -27,7 +27,7 @@ using log4net.Layout;
 using Azavea.NijPredictivePolicing.Common;
 using System.IO;
 
-namespace Azavea.NijPredictivePolicing.AcsDataImporter
+namespace Azavea.NijPredictivePolicing.ACSAlchemist
 {
     /// <summary>
     /// Contains main() entry point

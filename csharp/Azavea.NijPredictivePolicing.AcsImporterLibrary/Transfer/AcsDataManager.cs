@@ -25,7 +25,7 @@ using log4net;
 using Azavea.NijPredictivePolicing.Common;
 using System.IO;
 using Azavea.NijPredictivePolicing.Common.DB;
-using Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats;
 using System.Security.Policy;
 using System.Data;
 using GisSharpBlog.NetTopologySuite.Geometries;
@@ -40,7 +40,7 @@ using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.CoordinateSystems;
 using ProjNet.CoordinateSystems;
 
-namespace Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer
+namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 {
     public class AcsDataManager : IDisposable
     {

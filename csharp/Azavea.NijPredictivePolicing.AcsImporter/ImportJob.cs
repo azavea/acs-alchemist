@@ -21,16 +21,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Azavea.NijPredictivePolicing.AcsImporterLibrary;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary;
 using Azavea.NijPredictivePolicing.Common;
 using log4net;
-using Azavea.NijPredictivePolicing.AcsImporterLibrary.Transfer;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer;
 using Azavea.NijPredictivePolicing.Common.DB;
-using Azavea.NijPredictivePolicing.AcsImporterLibrary.FileFormats;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats;
 using Azavea.NijPredictivePolicing.Common.Data;
 using System.IO;
 
-namespace Azavea.NijPredictivePolicing.AcsDataImporter
+namespace Azavea.NijPredictivePolicing.ACSAlchemist
 {
     public class ImportJob
     {
