@@ -27,8 +27,7 @@
 Three goals for this project:
 	- Download the necessary data files from the ACS website and parse them into a usable format
 	- Extract desired information from them in the form of shapefiles
-	- Merge the census data with custom incident data
-	- The AcsImporter does the first two, the CrimeDataMerger does the last
+	- The AcsImporter does the first two
 	
 
 AcsImporter: 
@@ -38,10 +37,5 @@ Things you absolutely need:
 	-e Summary level (no output without it)
 	-exportToShape/exportToGrid  Output type
 	
-Weaknesses:
-	- Can't run more than one at once (unless they use different working directories), and it's not multithreaded
 	
-	
-CrimeDataMerger:
-	- Pretty simple, give it a shapefile to extract "cells" from
 	

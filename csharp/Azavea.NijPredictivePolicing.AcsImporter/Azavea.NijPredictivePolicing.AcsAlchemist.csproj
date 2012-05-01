@@ -142,8 +142,8 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\spatialite\*.dll "$(ProjectDir)$(OutDir)"
+    <PostBuildEvent>copy C:\projects\acs-alchemist\lib\spatialite\*.dll "$(ProjectDir)$(OutDir)"
 copy "$(ProjectDir)\WGS84NAD83.prj" "$(ProjectDir)$(OutDir)\WGS84NAD83.prj"
-copy C:\projects\Temple_Univ_NIJ_Predictive_Policing\data\*.csv "$(ProjectDir)$(OutDir)"</PostBuildEvent>
+copy C:\projects\acs-alchemist\data\*.csv "$(ProjectDir)$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

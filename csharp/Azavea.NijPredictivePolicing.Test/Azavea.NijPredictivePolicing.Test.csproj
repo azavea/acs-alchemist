@@ -144,6 +144,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\spatialite\*.dll "$(ProjectDir)$(OutDir)"</PostBuildEvent>
+    <PostBuildEvent>copy C:\projects\acs-alchemist\lib\spatialite\*.dll "$(ProjectDir)$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
