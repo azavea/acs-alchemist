@@ -8,11 +8,11 @@ Name "ACS Alchemist"
 !define VERSION 1.0.0
 !define COMPANY Azavea
 !define URL http://www.azavea.com
-!define SOURCE_DIR C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\x86\Debug
-#!define SOURCE_DIR "C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug"
+!define SOURCE_DIR C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\x86\Debug
+#!define SOURCE_DIR "C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug"
 
 # MUI Symbol Definitions
-!define MUI_ICON "C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\Icon1.ico"
+!define MUI_ICON "C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporter\Icon1.ico"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT HKLM
 !define MUI_STARTMENUPAGE_NODISABLE
@@ -80,8 +80,8 @@ Section -Main SEC0000
     SetOutPath $INSTDIR
     SetOverwrite on
     File /r ${SOURCE_DIR}\*
-    ;File /r C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug\*
-    File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\README.txt
+    ;File /r C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug\*
+    File C:\projects\acs-alchemist\doc\README.txt
 	
 	#23265 -- any config files must be present!  otherwise the user will need to be an admin on first run, which is annoying
 	File ${SOURCE_DIR}\AcsAlchemist.2009.config
@@ -89,39 +89,37 @@ Section -Main SEC0000
 	
 	
 	SetOutPath $INSTDIR\Docs
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\README.txt
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\Install.doc
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\Manual.doc
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\ACS_Alchemist_Flowchart.jpg
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\ACS2009_5-Year_TableShells.xls
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\doc\ACS2010_5-Year_TableShells.xls
+	File C:\projects\acs-alchemist\doc\README.txt
+	File C:\projects\acs-alchemist\doc\ACS_Alchemist_Flowchart.jpg
+	File C:\projects\acs-alchemist\doc\ACS2009_5-Year_TableShells.xls
+	File C:\projects\acs-alchemist\doc\ACS2010_5-Year_TableShells.xls
 	
 	#Licenses#
 	SetOutPath $INSTDIR\Licenses
 	SetOutPath $INSTDIR\Licenses\Ionic
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\dotnetzip\License.txt
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\dotnetzip\PleaseDonate.txt
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\dotnetzip\Readme.txt	
+	File C:\projects\acs-alchemist\lib\dotnetzip\License.txt
+	File C:\projects\acs-alchemist\lib\dotnetzip\PleaseDonate.txt
+	File C:\projects\acs-alchemist\lib\dotnetzip\Readme.txt	
 	SetOutPath $INSTDIR\Licenses\exceldatareader
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\excelDataReader\license.txt	
+	File C:\projects\acs-alchemist\lib\excelDataReader\license.txt	
 	SetOutPath $INSTDIR\Licenses\geoapi
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\geoapi\lgpl-2.1.txt
+	File C:\projects\acs-alchemist\lib\geoapi\lgpl-2.1.txt
 	SetOutPath $INSTDIR\Licenses\json
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\json\readme.txt
+	File C:\projects\acs-alchemist\lib\json\readme.txt
 	SetOutPath $INSTDIR\Licenses\log4net
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\log4net\LICENSE.txt
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\log4net\NOTICE.txt
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\log4net\README.txt
+	File C:\projects\acs-alchemist\lib\log4net\LICENSE.txt
+	File C:\projects\acs-alchemist\lib\log4net\NOTICE.txt
+	File C:\projects\acs-alchemist\lib\log4net\README.txt
 	SetOutPath $INSTDIR\Licenses\nettopologysuite
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\nettopologysuite\License.txt
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\nettopologysuite\lgpl-3.0.txt
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\nettopologysuite\lgpl-2.1.txt
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\nettopologysuite\Iesi.Collections.License.txt
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\nettopologysuite\Rtools.Util.License.txt
+	File C:\projects\acs-alchemist\lib\nettopologysuite\License.txt
+	File C:\projects\acs-alchemist\lib\nettopologysuite\lgpl-3.0.txt
+	File C:\projects\acs-alchemist\lib\nettopologysuite\lgpl-2.1.txt
+	File C:\projects\acs-alchemist\lib\nettopologysuite\Iesi.Collections.License.txt
+	File C:\projects\acs-alchemist\lib\nettopologysuite\Rtools.Util.License.txt
 	SetOutPath $INSTDIR\Licenses\spatialite
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\spatialite\lgpl-v3.txt
+	File C:\projects\acs-alchemist\lib\spatialite\lgpl-v3.txt
 	SetOutPath $INSTDIR\Licenses\sqlite
-	File C:\projects\Temple_Univ_NIJ_Predictive_Policing\lib\sqlite\license.txt	
+	File C:\projects\acs-alchemist\lib\sqlite\license.txt	
 	
     SetOutPath $SMPROGRAMS\$StartMenuGroup	
 	CreateShortcut "$SMPROGRAMS\$StartMenuGroup\View Files.lnk" "$INSTDIR"	
