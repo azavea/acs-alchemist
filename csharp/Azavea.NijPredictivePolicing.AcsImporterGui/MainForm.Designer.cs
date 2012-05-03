@@ -51,7 +51,7 @@
             this.btnBrowseBoundaryShpFile = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.txtOutputSRID = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.txtPrjFilePath = new System.Windows.Forms.TextBox();
             this.btnBrowsePrjFile = new System.Windows.Forms.Button();
@@ -85,6 +85,9 @@
             this.label15 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newJobToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -171,7 +174,7 @@
             this.groupBox1.Controls.Add(this.btnBrowseBoundaryShpFile);
             this.groupBox1.Controls.Add(this.label11);
             this.groupBox1.Controls.Add(this.label9);
-            this.groupBox1.Controls.Add(this.textBox3);
+            this.groupBox1.Controls.Add(this.txtOutputSRID);
             this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Controls.Add(this.txtPrjFilePath);
             this.groupBox1.Controls.Add(this.btnBrowsePrjFile);
@@ -255,7 +258,7 @@
             // 
             this.chkExportFishnet.Location = new System.Drawing.Point(132, 131);
             this.chkExportFishnet.Name = "chkExportFishnet";
-            this.chkExportFishnet.Size = new System.Drawing.Size(103, 17);
+            this.chkExportFishnet.Size = new System.Drawing.Size(106, 17);
             this.chkExportFishnet.TabIndex = 29;
             this.chkExportFishnet.Text = "Export Fishnet Shapefile";
             this.chkExportFishnet.UseVisualStyleBackColor = true;
@@ -325,13 +328,13 @@
             this.label9.TabIndex = 19;
             this.label9.Text = "Output SRID";
             // 
-            // textBox3
+            // txtOutputSRID
             // 
-            this.textBox3.BackColor = System.Drawing.Color.White;
-            this.textBox3.Location = new System.Drawing.Point(81, 186);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(52, 20);
-            this.textBox3.TabIndex = 18;
+            this.txtOutputSRID.BackColor = System.Drawing.Color.White;
+            this.txtOutputSRID.Location = new System.Drawing.Point(81, 186);
+            this.txtOutputSRID.Name = "txtOutputSRID";
+            this.txtOutputSRID.Size = new System.Drawing.Size(52, 20);
+            this.txtOutputSRID.TabIndex = 18;
             // 
             // label8
             // 
@@ -480,7 +483,8 @@
             // 
             this.menuStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(893, 24);
@@ -490,6 +494,7 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newJobToolStripMenuItem,
             this.openJobFileToolStripMenuItem,
             this.saveJobFileToolStripMenuItem,
             this.quitToolStripMenuItem});
@@ -500,21 +505,21 @@
             // openJobFileToolStripMenuItem
             // 
             this.openJobFileToolStripMenuItem.Name = "openJobFileToolStripMenuItem";
-            this.openJobFileToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.openJobFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.openJobFileToolStripMenuItem.Text = "Open Job File";
             this.openJobFileToolStripMenuItem.Click += new System.EventHandler(this.openJobFileToolStripMenuItem_Click);
             // 
             // saveJobFileToolStripMenuItem
             // 
             this.saveJobFileToolStripMenuItem.Name = "saveJobFileToolStripMenuItem";
-            this.saveJobFileToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.saveJobFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.saveJobFileToolStripMenuItem.Text = "Save Job File";
             this.saveJobFileToolStripMenuItem.Click += new System.EventHandler(this.saveJobFileToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.quitToolStripMenuItem.Text = "&Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -575,9 +580,9 @@
             // pictureBox1
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(12, 5);
+            this.pictureBox1.Location = new System.Drawing.Point(23, 3);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(199, 84);
+            this.pictureBox1.Size = new System.Drawing.Size(188, 86);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 26;
             this.pictureBox1.TabStop = false;
@@ -621,6 +626,26 @@
             // 
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.menuStrip1);
             // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "&Help";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Text = "&About";
+            // 
+            // newJobToolStripMenuItem
+            // 
+            this.newJobToolStripMenuItem.Name = "newJobToolStripMenuItem";
+            this.newJobToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newJobToolStripMenuItem.Text = "&New Job";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -630,7 +655,7 @@
             this.Controls.Add(this.toolStripContainer1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
-            this.Text = "ACS Data Ermine";
+            this.Text = "ACS Alchemist";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
@@ -673,7 +698,7 @@
         private System.Windows.Forms.Button btnSaveMessageLog;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox txtOutputSRID;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openJobFileToolStripMenuItem;
@@ -704,6 +729,8 @@
         private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.ToolStripContainer toolStripContainer1;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newJobToolStripMenuItem;
     }
 }
-
