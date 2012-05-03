@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -73,6 +73,7 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openJobFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveJobFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveFileJob = new System.Windows.Forms.SaveFileDialog();
             this.openFileBoundaryShp = new System.Windows.Forms.OpenFileDialog();
             this.openFileJob = new System.Windows.Forms.OpenFileDialog();
@@ -82,36 +83,36 @@
             this.openFileFishnetEnvelopeShp = new System.Windows.Forms.OpenFileDialog();
             this.saveFileMessageLog = new System.Windows.Forms.SaveFileDialog();
             this.label15 = new System.Windows.Forms.Label();
-            this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.toolStripContainer1.ContentPanel.SuspendLayout();
+            this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
+            this.toolStripContainer1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Calibri", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.HotTrack;
-            this.label1.Location = new System.Drawing.Point(8, 30);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(239, 39);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "ACS Data Ermine";
             // 
             // textBox1
             // 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox1.BackColor = System.Drawing.SystemColors.InactiveBorder;
             this.textBox1.Enabled = false;
-            this.textBox1.Location = new System.Drawing.Point(460, 98);
+            this.textBox1.Location = new System.Drawing.Point(509, 68);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(347, 440);
+            this.textBox1.Size = new System.Drawing.Size(381, 506);
             this.textBox1.TabIndex = 1;
             // 
             // label2
             // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(457, 82);
+            this.label2.Location = new System.Drawing.Point(506, 52);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(76, 13);
             this.label2.TabIndex = 2;
@@ -120,7 +121,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 75);
+            this.label3.Location = new System.Drawing.Point(20, 99);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(65, 13);
             this.label3.TabIndex = 3;
@@ -129,7 +130,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 101);
+            this.label4.Location = new System.Drawing.Point(20, 124);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(44, 13);
             this.label4.TabIndex = 4;
@@ -138,7 +139,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 128);
+            this.label5.Location = new System.Drawing.Point(20, 151);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(91, 13);
             this.label5.TabIndex = 5;
@@ -147,7 +148,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 162);
+            this.label6.Location = new System.Drawing.Point(20, 185);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(76, 13);
             this.label6.TabIndex = 6;
@@ -175,7 +176,7 @@
             this.groupBox1.Controls.Add(this.txtPrjFilePath);
             this.groupBox1.Controls.Add(this.btnBrowsePrjFile);
             this.groupBox1.Controls.Add(this.chkExportShapefile);
-            this.groupBox1.Location = new System.Drawing.Point(12, 224);
+            this.groupBox1.Location = new System.Drawing.Point(20, 247);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(433, 312);
             this.groupBox1.TabIndex = 7;
@@ -373,17 +374,20 @@
             // 
             // txtJobFilePath
             // 
+            this.txtJobFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.txtJobFilePath.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.txtJobFilePath.Location = new System.Drawing.Point(460, 46);
+            this.txtJobFilePath.Location = new System.Drawing.Point(595, 19);
             this.txtJobFilePath.Name = "txtJobFilePath";
-            this.txtJobFilePath.Size = new System.Drawing.Size(347, 20);
+            this.txtJobFilePath.Size = new System.Drawing.Size(262, 20);
             this.txtJobFilePath.TabIndex = 22;
             // 
             // btnSaveMessageLog
             // 
-            this.btnSaveMessageLog.Location = new System.Drawing.Point(751, 544);
+            this.btnSaveMessageLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSaveMessageLog.Location = new System.Drawing.Point(799, 578);
             this.btnSaveMessageLog.Name = "btnSaveMessageLog";
-            this.btnSaveMessageLog.Size = new System.Drawing.Size(56, 23);
+            this.btnSaveMessageLog.Size = new System.Drawing.Size(58, 23);
             this.btnSaveMessageLog.TabIndex = 21;
             this.btnSaveMessageLog.Text = "Browse";
             this.btnSaveMessageLog.UseVisualStyleBackColor = true;
@@ -391,8 +395,9 @@
             // 
             // label10
             // 
+            this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(457, 549);
+            this.label10.Location = new System.Drawing.Point(505, 583);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(86, 13);
             this.label10.TabIndex = 20;
@@ -401,7 +406,7 @@
             // cboACSYear
             // 
             this.cboACSYear.FormattingEnabled = true;
-            this.cboACSYear.Location = new System.Drawing.Point(114, 72);
+            this.cboACSYear.Location = new System.Drawing.Point(122, 95);
             this.cboACSYear.Name = "cboACSYear";
             this.cboACSYear.Size = new System.Drawing.Size(89, 21);
             this.cboACSYear.TabIndex = 8;
@@ -409,7 +414,7 @@
             // cboState
             // 
             this.cboState.FormattingEnabled = true;
-            this.cboState.Location = new System.Drawing.Point(114, 98);
+            this.cboState.Location = new System.Drawing.Point(122, 120);
             this.cboState.Name = "cboState";
             this.cboState.Size = new System.Drawing.Size(185, 21);
             this.cboState.TabIndex = 9;
@@ -417,7 +422,7 @@
             // cboSummaryLevel
             // 
             this.cboSummaryLevel.FormattingEnabled = true;
-            this.cboSummaryLevel.Location = new System.Drawing.Point(114, 125);
+            this.cboSummaryLevel.Location = new System.Drawing.Point(122, 147);
             this.cboSummaryLevel.Name = "cboSummaryLevel";
             this.cboSummaryLevel.Size = new System.Drawing.Size(121, 21);
             this.cboSummaryLevel.TabIndex = 10;
@@ -425,7 +430,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(12, 193);
+            this.label7.Location = new System.Drawing.Point(20, 216);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(96, 13);
             this.label7.TabIndex = 11;
@@ -437,7 +442,7 @@
             // 
             // btnBrowseVariableFile
             // 
-            this.btnBrowseVariableFile.Location = new System.Drawing.Point(379, 157);
+            this.btnBrowseVariableFile.Location = new System.Drawing.Point(387, 180);
             this.btnBrowseVariableFile.Name = "btnBrowseVariableFile";
             this.btnBrowseVariableFile.Size = new System.Drawing.Size(56, 23);
             this.btnBrowseVariableFile.TabIndex = 12;
@@ -447,7 +452,7 @@
             // 
             // btnBrowseOutputFolder
             // 
-            this.btnBrowseOutputFolder.Location = new System.Drawing.Point(379, 188);
+            this.btnBrowseOutputFolder.Location = new System.Drawing.Point(387, 211);
             this.btnBrowseOutputFolder.Name = "btnBrowseOutputFolder";
             this.btnBrowseOutputFolder.Size = new System.Drawing.Size(56, 23);
             this.btnBrowseOutputFolder.TabIndex = 13;
@@ -458,7 +463,7 @@
             // txtVariableFilePath
             // 
             this.txtVariableFilePath.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.txtVariableFilePath.Location = new System.Drawing.Point(114, 159);
+            this.txtVariableFilePath.Location = new System.Drawing.Point(122, 181);
             this.txtVariableFilePath.Name = "txtVariableFilePath";
             this.txtVariableFilePath.Size = new System.Drawing.Size(259, 20);
             this.txtVariableFilePath.TabIndex = 14;
@@ -466,18 +471,19 @@
             // txtOutputDirectoryPath
             // 
             this.txtOutputDirectoryPath.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.txtOutputDirectoryPath.Location = new System.Drawing.Point(114, 190);
+            this.txtOutputDirectoryPath.Location = new System.Drawing.Point(122, 212);
             this.txtOutputDirectoryPath.Name = "txtOutputDirectoryPath";
             this.txtOutputDirectoryPath.Size = new System.Drawing.Size(259, 20);
             this.txtOutputDirectoryPath.TabIndex = 15;
             // 
             // menuStrip1
             // 
+            this.menuStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(819, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(893, 24);
             this.menuStrip1.TabIndex = 16;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -494,16 +500,23 @@
             // openJobFileToolStripMenuItem
             // 
             this.openJobFileToolStripMenuItem.Name = "openJobFileToolStripMenuItem";
-            this.openJobFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openJobFileToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.openJobFileToolStripMenuItem.Text = "Open Job File";
             this.openJobFileToolStripMenuItem.Click += new System.EventHandler(this.openJobFileToolStripMenuItem_Click);
             // 
             // saveJobFileToolStripMenuItem
             // 
             this.saveJobFileToolStripMenuItem.Name = "saveJobFileToolStripMenuItem";
-            this.saveJobFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveJobFileToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.saveJobFileToolStripMenuItem.Text = "Save Job File";
             this.saveJobFileToolStripMenuItem.Click += new System.EventHandler(this.saveJobFileToolStripMenuItem_Click);
+            // 
+            // quitToolStripMenuItem
+            // 
+            this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.quitToolStripMenuItem.Text = "&Quit";
+            this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
             // saveFileJob
             // 
@@ -519,17 +532,19 @@
             // 
             // txtMessageLogFilePath
             // 
+            this.txtMessageLogFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.txtMessageLogFilePath.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.txtMessageLogFilePath.Location = new System.Drawing.Point(549, 546);
+            this.txtMessageLogFilePath.Location = new System.Drawing.Point(597, 580);
             this.txtMessageLogFilePath.Name = "txtMessageLogFilePath";
-            this.txtMessageLogFilePath.Size = new System.Drawing.Size(196, 20);
+            this.txtMessageLogFilePath.Size = new System.Drawing.Size(198, 20);
             this.txtMessageLogFilePath.TabIndex = 23;
             // 
             // pgbStatus
             // 
-            this.pgbStatus.Location = new System.Drawing.Point(3, 587);
+            this.pgbStatus.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pgbStatus.Location = new System.Drawing.Point(0, 610);
             this.pgbStatus.Name = "pgbStatus";
-            this.pgbStatus.Size = new System.Drawing.Size(811, 10);
+            this.pgbStatus.Size = new System.Drawing.Size(893, 22);
             this.pgbStatus.TabIndex = 24;
             this.pgbStatus.Visible = false;
             // 
@@ -547,50 +562,72 @@
             // 
             // label15
             // 
+            this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.label15.AutoSize = true;
             this.label15.BackColor = System.Drawing.SystemColors.Window;
-            this.label15.Location = new System.Drawing.Point(371, 49);
+            this.label15.Location = new System.Drawing.Point(506, 22);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(83, 13);
             this.label15.TabIndex = 25;
             this.label15.Text = "Current Job File:";
             // 
-            // quitToolStripMenuItem
+            // pictureBox1
             // 
-            this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.quitToolStripMenuItem.Text = "&Quit";
-            this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(12, 5);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(199, 84);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 26;
+            this.pictureBox1.TabStop = false;
+            // 
+            // toolStripContainer1
+            // 
+            // 
+            // toolStripContainer1.ContentPanel
+            // 
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.pgbStatus);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.txtOutputDirectoryPath);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.label15);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.txtVariableFilePath);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.txtJobFilePath);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.btnBrowseOutputFolder);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.txtMessageLogFilePath);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.btnBrowseVariableFile);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.textBox1);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.label7);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.btnSaveMessageLog);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.cboSummaryLevel);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.label10);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.cboState);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.label2);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.cboACSYear);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.pictureBox1);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.groupBox1);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.label3);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.label6);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.label4);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.label5);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(893, 632);
+            this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
+            this.toolStripContainer1.Name = "toolStripContainer1";
+            this.toolStripContainer1.Size = new System.Drawing.Size(893, 656);
+            this.toolStripContainer1.TabIndex = 27;
+            this.toolStripContainer1.Text = "toolStripContainer1";
+            // 
+            // toolStripContainer1.TopToolStripPanel
+            // 
+            this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.menuStrip1);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(819, 600);
-            this.Controls.Add(this.label15);
-            this.Controls.Add(this.pgbStatus);
-            this.Controls.Add(this.txtMessageLogFilePath);
-            this.Controls.Add(this.txtOutputDirectoryPath);
-            this.Controls.Add(this.txtVariableFilePath);
-            this.Controls.Add(this.btnBrowseOutputFolder);
-            this.Controls.Add(this.btnBrowseVariableFile);
-            this.Controls.Add(this.label7);
-            this.Controls.Add(this.cboSummaryLevel);
-            this.Controls.Add(this.cboState);
-            this.Controls.Add(this.cboACSYear);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label10);
-            this.Controls.Add(this.btnSaveMessageLog);
-            this.Controls.Add(this.txtJobFilePath);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.menuStrip1);
+            this.ClientSize = new System.Drawing.Size(893, 656);
+            this.Controls.Add(this.toolStripContainer1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.Text = "ACS Data Ermine";
@@ -598,14 +635,19 @@
             this.groupBox1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.toolStripContainer1.ContentPanel.ResumeLayout(false);
+            this.toolStripContainer1.ContentPanel.PerformLayout();
+            this.toolStripContainer1.TopToolStripPanel.ResumeLayout(false);
+            this.toolStripContainer1.TopToolStripPanel.PerformLayout();
+            this.toolStripContainer1.ResumeLayout(false);
+            this.toolStripContainer1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
@@ -660,6 +702,8 @@
         private System.Windows.Forms.SaveFileDialog saveFileMessageLog;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.ToolStripContainer toolStripContainer1;
     }
 }
 
