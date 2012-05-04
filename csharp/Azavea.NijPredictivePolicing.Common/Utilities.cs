@@ -284,6 +284,28 @@ namespace Azavea.NijPredictivePolicing.Common
         }
 
         /// <summary>
+        /// Enumerates over an Enumerated type, and return a list of keys as a list of strings
+        /// </summary>
+        /// <param name="label"></param>
+        /// <param name="enumType"></param>
+        public static List<string> GetEnumKeysAsList(Type enumType, HashSet<string> excluded)
+        {
+            var levels = Enum.GetValues(enumType);
+            var results = new List<string>(levels.Length);
+            foreach (var value in levels)
+            {
+                string val = value.ToString();
+                if (excluded.Contains(val))
+                    continue;
+
+                results.Add(val);
+            }
+            return results;
+        }
+
+
+
+        /// <summary>
         /// Simple helper to ensure a given string is no longer than maxlen
         /// </summary>
         /// <param name="str"></param>
