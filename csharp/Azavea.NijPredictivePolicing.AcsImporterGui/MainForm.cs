@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using log4net.Appender;
 using log4net.Layout;
 using log4net;
+using Azavea.NijPredictivePolicing.Common;
 
 namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 {
@@ -79,35 +80,83 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             txtJobFilePath.Text = saveFileJob.FileName;
         }
 
+       
+
+        #region File Browsers
+
+        /// <summary>
+        /// Opens a file dialog for -- Variables File
+        /// Extensions: *.txt, *.vars / All
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnBrowseVariableFile_Click(object sender, EventArgs e)
         {
-            openFileVariableFile.ShowDialog();
-            txtVariableFilePath.Text = openFileVariableFile.FileName;
+            if (ofdVariablesFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                txtVariableFilePath.Text = ofdVariablesFile.FileName;
+                txtVariableFilePath.Focus();
+            }
         }
 
+        /// <summary>
+        /// Browse for the "Output Folder"
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnBrowseOutputFolder_Click(object sender, EventArgs e)
         {
-            folderBrowserOutputDir.ShowDialog();
-            txtOutputDirectoryPath.Text = folderBrowserOutputDir.SelectedPath;
+            if (folderBrowserOutputDir.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                txtOutputDirectory.Text = folderBrowserOutputDir.SelectedPath;
+            }
         }
 
+        /// <summary>
+        /// Browse for "Grid boundary-alignment file"
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnBrowseFishnetEnvelopeFile_Click(object sender, EventArgs e)
         {
-            openFileFishnetEnvelopeShp.ShowDialog();
-            txtFishnetEnvelopeFilePath.Text = openFileFishnetEnvelopeShp.FileName;
+            if (ofdGridEnvelopeShp.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                txtFishnetEnvelopeFilePath.Text = ofdGridEnvelopeShp.FileName;
+            }
         }
 
+        /// <summary>
+        /// Browse for the "Output Projection File"
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnBrowsePrjFile_Click(object sender, EventArgs e)
         {
-            openFilePrjFile.ShowDialog();
-            txtPrjFilePath.Text = openFilePrjFile.FileName;
+            if (ofdOutputProjection.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                txtPrjFilePath.Text = ofdOutputProjection.FileName;
+            }
         }
 
+        /// <summary>
+        /// Browse for the "Output Filter Boundary" Shapefile
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnBrowseBoundaryShpFile_Click(object sender, EventArgs e)
         {
-            openFileBoundaryShp.ShowDialog();
-            txtBoundaryShpFilePath.Text = openFileBoundaryShp.FileName;
+            if (ofdExportBoundaryShp.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                txtBoundaryShpFilePath.Text = ofdExportBoundaryShp.FileName;
+            }
         }
+
+        #endregion File Browsers
+
+
+
+
+
 
         private void btnSaveMessageLog_Click(object sender, EventArgs e)
         {
@@ -139,6 +188,20 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
             MessageBox.Show(sb.ToString(), "An exception was caught");
         }
+
+        private void txtVariableFilePath_Validating(object sender, CancelEventArgs e)
+        {
+            //validate variables file
+            bool isValid = FormController.Instance.ValidateVariablesFile(txtVariableFilePath.Text);
+            e.Cancel = (isValid == false);      //set e.Cancel to true when the file is NOT valid
+
+            if (e.Cancel)
+            {
+                //this.errorProvider1.SetError(textBox1, errorMsg);     //TODO: error provider?
+            }
+        }
+
+        
 
 
     }

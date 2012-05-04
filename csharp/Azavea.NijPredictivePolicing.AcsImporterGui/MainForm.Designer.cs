@@ -64,11 +64,11 @@
             this.cboSummaryLevel = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.folderBrowserOutputDir = new System.Windows.Forms.FolderBrowserDialog();
-            this.openFileVariableFile = new System.Windows.Forms.OpenFileDialog();
+            this.ofdVariablesFile = new System.Windows.Forms.OpenFileDialog();
             this.btnBrowseVariableFile = new System.Windows.Forms.Button();
             this.btnBrowseOutputFolder = new System.Windows.Forms.Button();
             this.txtVariableFilePath = new System.Windows.Forms.TextBox();
-            this.txtOutputDirectoryPath = new System.Windows.Forms.TextBox();
+            this.txtOutputDirectory = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newJobToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -78,12 +78,12 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveFileJob = new System.Windows.Forms.SaveFileDialog();
-            this.openFileBoundaryShp = new System.Windows.Forms.OpenFileDialog();
+            this.ofdExportBoundaryShp = new System.Windows.Forms.OpenFileDialog();
             this.openFileJob = new System.Windows.Forms.OpenFileDialog();
             this.txtMessageLogFilePath = new System.Windows.Forms.TextBox();
             this.pgbStatus = new System.Windows.Forms.ProgressBar();
-            this.openFilePrjFile = new System.Windows.Forms.OpenFileDialog();
-            this.openFileFishnetEnvelopeShp = new System.Windows.Forms.OpenFileDialog();
+            this.ofdOutputProjection = new System.Windows.Forms.OpenFileDialog();
+            this.ofdGridEnvelopeShp = new System.Windows.Forms.OpenFileDialog();
             this.saveFileMessageLog = new System.Windows.Forms.SaveFileDialog();
             this.label15 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -104,7 +104,7 @@
             this.textBox1.BackColor = System.Drawing.SystemColors.InactiveBorder;
             this.textBox1.Enabled = false;
             this.textBox1.Location = new System.Drawing.Point(636, 84);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(4);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(537, 623);
@@ -116,7 +116,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(632, 64);
+            this.label2.Location = new System.Drawing.Point(633, 63);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(100, 17);
@@ -186,9 +186,9 @@
             this.groupBox1.Controls.Add(this.btnBrowsePrjFile);
             this.groupBox1.Controls.Add(this.chkExportShapefile);
             this.groupBox1.Location = new System.Drawing.Point(16, 324);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox1.Size = new System.Drawing.Size(577, 384);
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
@@ -208,7 +208,7 @@
             // 
             this.txtFishnetEnvelopeFilePath.BackColor = System.Drawing.SystemColors.ControlLight;
             this.txtFishnetEnvelopeFilePath.Location = new System.Drawing.Point(225, 190);
-            this.txtFishnetEnvelopeFilePath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtFishnetEnvelopeFilePath.Margin = new System.Windows.Forms.Padding(4);
             this.txtFishnetEnvelopeFilePath.Name = "txtFishnetEnvelopeFilePath";
             this.txtFishnetEnvelopeFilePath.Size = new System.Drawing.Size(252, 22);
             this.txtFishnetEnvelopeFilePath.TabIndex = 35;
@@ -216,7 +216,7 @@
             // btnBrowseFishnetEnvelopeFile
             // 
             this.btnBrowseFishnetEnvelopeFile.Location = new System.Drawing.Point(489, 187);
-            this.btnBrowseFishnetEnvelopeFile.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnBrowseFishnetEnvelopeFile.Margin = new System.Windows.Forms.Padding(4);
             this.btnBrowseFishnetEnvelopeFile.Name = "btnBrowseFishnetEnvelopeFile";
             this.btnBrowseFishnetEnvelopeFile.Size = new System.Drawing.Size(75, 28);
             this.btnBrowseFishnetEnvelopeFile.TabIndex = 34;
@@ -230,9 +230,9 @@
             this.chkStripExtraGeoID.Checked = true;
             this.chkStripExtraGeoID.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkStripExtraGeoID.Location = new System.Drawing.Point(255, 34);
-            this.chkStripExtraGeoID.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.chkStripExtraGeoID.Margin = new System.Windows.Forms.Padding(4);
             this.chkStripExtraGeoID.Name = "chkStripExtraGeoID";
-            this.chkStripExtraGeoID.Size = new System.Drawing.Size(225, 26);
+            this.chkStripExtraGeoID.Size = new System.Drawing.Size(169, 21);
             this.chkStripExtraGeoID.TabIndex = 33;
             this.chkStripExtraGeoID.Text = "Strip Extra GEOID text";
             this.chkStripExtraGeoID.UseVisualStyleBackColor = true;
@@ -241,9 +241,9 @@
             // 
             this.chkPreserveJamValues.AutoSize = true;
             this.chkPreserveJamValues.Location = new System.Drawing.Point(21, 34);
-            this.chkPreserveJamValues.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.chkPreserveJamValues.Margin = new System.Windows.Forms.Padding(4);
             this.chkPreserveJamValues.Name = "chkPreserveJamValues";
-            this.chkPreserveJamValues.Size = new System.Drawing.Size(260, 26);
+            this.chkPreserveJamValues.Size = new System.Drawing.Size(195, 21);
             this.chkPreserveJamValues.TabIndex = 32;
             this.chkPreserveJamValues.Text = "Preserve ACS Jam Values";
             this.chkPreserveJamValues.UseVisualStyleBackColor = true;
@@ -264,7 +264,7 @@
             this.txtFishnetCellSize.BackColor = System.Drawing.Color.White;
             this.txtFishnetCellSize.Enabled = false;
             this.txtFishnetCellSize.Location = new System.Drawing.Point(299, 159);
-            this.txtFishnetCellSize.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtFishnetCellSize.Margin = new System.Windows.Forms.Padding(4);
             this.txtFishnetCellSize.Name = "txtFishnetCellSize";
             this.txtFishnetCellSize.Size = new System.Drawing.Size(68, 22);
             this.txtFishnetCellSize.TabIndex = 30;
@@ -272,7 +272,7 @@
             // chkExportFishnet
             // 
             this.chkExportFishnet.Location = new System.Drawing.Point(176, 161);
-            this.chkExportFishnet.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.chkExportFishnet.Margin = new System.Windows.Forms.Padding(4);
             this.chkExportFishnet.Name = "chkExportFishnet";
             this.chkExportFishnet.Size = new System.Drawing.Size(141, 21);
             this.chkExportFishnet.TabIndex = 29;
@@ -285,9 +285,9 @@
             this.chkReplaceJob.Checked = true;
             this.chkReplaceJob.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkReplaceJob.Location = new System.Drawing.Point(353, 76);
-            this.chkReplaceJob.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.chkReplaceJob.Margin = new System.Windows.Forms.Padding(4);
             this.chkReplaceJob.Name = "chkReplaceJob";
-            this.chkReplaceJob.Size = new System.Drawing.Size(145, 26);
+            this.chkReplaceJob.Size = new System.Drawing.Size(109, 21);
             this.chkReplaceJob.TabIndex = 28;
             this.chkReplaceJob.Text = "Replace Job";
             this.chkReplaceJob.UseVisualStyleBackColor = true;
@@ -296,7 +296,7 @@
             // 
             this.txtJobName.BackColor = System.Drawing.Color.White;
             this.txtJobName.Location = new System.Drawing.Point(99, 74);
-            this.txtJobName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtJobName.Margin = new System.Windows.Forms.Padding(4);
             this.txtJobName.Name = "txtJobName";
             this.txtJobName.Size = new System.Drawing.Size(241, 22);
             this.txtJobName.TabIndex = 27;
@@ -315,7 +315,7 @@
             // 
             this.txtBoundaryShpFilePath.BackColor = System.Drawing.SystemColors.ControlLight;
             this.txtBoundaryShpFilePath.Location = new System.Drawing.Point(129, 340);
-            this.txtBoundaryShpFilePath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtBoundaryShpFilePath.Margin = new System.Windows.Forms.Padding(4);
             this.txtBoundaryShpFilePath.Name = "txtBoundaryShpFilePath";
             this.txtBoundaryShpFilePath.Size = new System.Drawing.Size(348, 22);
             this.txtBoundaryShpFilePath.TabIndex = 25;
@@ -323,7 +323,7 @@
             // btnBrowseBoundaryShpFile
             // 
             this.btnBrowseBoundaryShpFile.Location = new System.Drawing.Point(488, 337);
-            this.btnBrowseBoundaryShpFile.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnBrowseBoundaryShpFile.Margin = new System.Windows.Forms.Padding(4);
             this.btnBrowseBoundaryShpFile.Name = "btnBrowseBoundaryShpFile";
             this.btnBrowseBoundaryShpFile.Size = new System.Drawing.Size(75, 28);
             this.btnBrowseBoundaryShpFile.TabIndex = 24;
@@ -355,7 +355,7 @@
             // 
             this.txtOutputSRID.BackColor = System.Drawing.Color.White;
             this.txtOutputSRID.Location = new System.Drawing.Point(108, 229);
-            this.txtOutputSRID.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtOutputSRID.Margin = new System.Windows.Forms.Padding(4);
             this.txtOutputSRID.Name = "txtOutputSRID";
             this.txtOutputSRID.Size = new System.Drawing.Size(68, 22);
             this.txtOutputSRID.TabIndex = 18;
@@ -374,7 +374,7 @@
             // 
             this.txtPrjFilePath.BackColor = System.Drawing.SystemColors.ControlLight;
             this.txtPrjFilePath.Location = new System.Drawing.Point(299, 229);
-            this.txtPrjFilePath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtPrjFilePath.Margin = new System.Windows.Forms.Padding(4);
             this.txtPrjFilePath.Name = "txtPrjFilePath";
             this.txtPrjFilePath.Size = new System.Drawing.Size(179, 22);
             this.txtPrjFilePath.TabIndex = 16;
@@ -382,7 +382,7 @@
             // btnBrowsePrjFile
             // 
             this.btnBrowsePrjFile.Location = new System.Drawing.Point(489, 226);
-            this.btnBrowsePrjFile.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnBrowsePrjFile.Margin = new System.Windows.Forms.Padding(4);
             this.btnBrowsePrjFile.Name = "btnBrowsePrjFile";
             this.btnBrowsePrjFile.Size = new System.Drawing.Size(75, 28);
             this.btnBrowsePrjFile.TabIndex = 15;
@@ -396,9 +396,9 @@
             this.chkExportShapefile.Checked = true;
             this.chkExportShapefile.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkExportShapefile.Location = new System.Drawing.Point(21, 161);
-            this.chkExportShapefile.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.chkExportShapefile.Margin = new System.Windows.Forms.Padding(4);
             this.chkExportShapefile.Name = "chkExportShapefile";
-            this.chkExportShapefile.Size = new System.Drawing.Size(177, 26);
+            this.chkExportShapefile.Size = new System.Drawing.Size(133, 21);
             this.chkExportShapefile.TabIndex = 0;
             this.chkExportShapefile.Text = "Export Shapefile";
             this.chkExportShapefile.UseVisualStyleBackColor = true;
@@ -408,8 +408,8 @@
             this.txtJobFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtJobFilePath.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.txtJobFilePath.Location = new System.Drawing.Point(755, 23);
-            this.txtJobFilePath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtJobFilePath.Location = new System.Drawing.Point(753, 23);
+            this.txtJobFilePath.Margin = new System.Windows.Forms.Padding(4);
             this.txtJobFilePath.Name = "txtJobFilePath";
             this.txtJobFilePath.Size = new System.Drawing.Size(348, 22);
             this.txtJobFilePath.TabIndex = 22;
@@ -418,7 +418,7 @@
             // 
             this.btnSaveMessageLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnSaveMessageLog.Location = new System.Drawing.Point(1031, 715);
-            this.btnSaveMessageLog.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnSaveMessageLog.Margin = new System.Windows.Forms.Padding(4);
             this.btnSaveMessageLog.Name = "btnSaveMessageLog";
             this.btnSaveMessageLog.Size = new System.Drawing.Size(77, 28);
             this.btnSaveMessageLog.TabIndex = 21;
@@ -442,7 +442,7 @@
             this.cboYear.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboYear.FormattingEnabled = true;
             this.cboYear.Location = new System.Drawing.Point(152, 137);
-            this.cboYear.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cboYear.Margin = new System.Windows.Forms.Padding(4);
             this.cboYear.Name = "cboYear";
             this.cboYear.Size = new System.Drawing.Size(117, 24);
             this.cboYear.TabIndex = 8;
@@ -452,7 +452,7 @@
             this.cboStates.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboStates.FormattingEnabled = true;
             this.cboStates.Location = new System.Drawing.Point(152, 167);
-            this.cboStates.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cboStates.Margin = new System.Windows.Forms.Padding(4);
             this.cboStates.Name = "cboStates";
             this.cboStates.Size = new System.Drawing.Size(245, 24);
             this.cboStates.TabIndex = 9;
@@ -462,7 +462,7 @@
             this.cboSummaryLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboSummaryLevel.FormattingEnabled = true;
             this.cboSummaryLevel.Location = new System.Drawing.Point(152, 201);
-            this.cboSummaryLevel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cboSummaryLevel.Margin = new System.Windows.Forms.Padding(4);
             this.cboSummaryLevel.Name = "cboSummaryLevel";
             this.cboSummaryLevel.Size = new System.Drawing.Size(160, 24);
             this.cboSummaryLevel.TabIndex = 10;
@@ -477,14 +477,14 @@
             this.label7.TabIndex = 11;
             this.label7.Text = "5. Output Directory";
             // 
-            // openFileVariableFile
+            // ofdVariablesFile
             // 
-            this.openFileVariableFile.Filter = "Text files|*.txt";
+            this.ofdVariablesFile.Filter = "Text Files (*.txt,*.vars)|*.txt;*.var;*.vars|All Files (*.*)|*.*";
             // 
             // btnBrowseVariableFile
             // 
-            this.btnBrowseVariableFile.Location = new System.Drawing.Point(516, 206);
-            this.btnBrowseVariableFile.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnBrowseVariableFile.Location = new System.Drawing.Point(518, 239);
+            this.btnBrowseVariableFile.Margin = new System.Windows.Forms.Padding(4);
             this.btnBrowseVariableFile.Name = "btnBrowseVariableFile";
             this.btnBrowseVariableFile.Size = new System.Drawing.Size(75, 28);
             this.btnBrowseVariableFile.TabIndex = 12;
@@ -494,8 +494,8 @@
             // 
             // btnBrowseOutputFolder
             // 
-            this.btnBrowseOutputFolder.Location = new System.Drawing.Point(516, 244);
-            this.btnBrowseOutputFolder.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnBrowseOutputFolder.Location = new System.Drawing.Point(518, 278);
+            this.btnBrowseOutputFolder.Margin = new System.Windows.Forms.Padding(4);
             this.btnBrowseOutputFolder.Name = "btnBrowseOutputFolder";
             this.btnBrowseOutputFolder.Size = new System.Drawing.Size(75, 28);
             this.btnBrowseOutputFolder.TabIndex = 13;
@@ -507,19 +507,20 @@
             // 
             this.txtVariableFilePath.BackColor = System.Drawing.SystemColors.ControlLight;
             this.txtVariableFilePath.Location = new System.Drawing.Point(152, 242);
-            this.txtVariableFilePath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtVariableFilePath.Margin = new System.Windows.Forms.Padding(4);
             this.txtVariableFilePath.Name = "txtVariableFilePath";
             this.txtVariableFilePath.Size = new System.Drawing.Size(344, 22);
             this.txtVariableFilePath.TabIndex = 14;
+            this.txtVariableFilePath.Validating += new System.ComponentModel.CancelEventHandler(this.txtVariableFilePath_Validating);
             // 
-            // txtOutputDirectoryPath
+            // txtOutputDirectory
             // 
-            this.txtOutputDirectoryPath.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.txtOutputDirectoryPath.Location = new System.Drawing.Point(152, 281);
-            this.txtOutputDirectoryPath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.txtOutputDirectoryPath.Name = "txtOutputDirectoryPath";
-            this.txtOutputDirectoryPath.Size = new System.Drawing.Size(344, 22);
-            this.txtOutputDirectoryPath.TabIndex = 15;
+            this.txtOutputDirectory.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.txtOutputDirectory.Location = new System.Drawing.Point(152, 281);
+            this.txtOutputDirectory.Margin = new System.Windows.Forms.Padding(4);
+            this.txtOutputDirectory.Name = "txtOutputDirectory";
+            this.txtOutputDirectory.Size = new System.Drawing.Size(344, 22);
+            this.txtOutputDirectory.TabIndex = 15;
             // 
             // menuStrip1
             // 
@@ -589,9 +590,9 @@
             // 
             this.saveFileJob.Filter = "Text files|*.txt|Job files|*.job";
             // 
-            // openFileBoundaryShp
+            // ofdExportBoundaryShp
             // 
-            this.openFileBoundaryShp.Filter = "Shapefile|*.shp";
+            this.ofdExportBoundaryShp.Filter = "Shapefile|*.shp";
             // 
             // openFileJob
             // 
@@ -602,7 +603,7 @@
             this.txtMessageLogFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.txtMessageLogFilePath.BackColor = System.Drawing.SystemColors.ControlLight;
             this.txtMessageLogFilePath.Location = new System.Drawing.Point(759, 717);
-            this.txtMessageLogFilePath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtMessageLogFilePath.Margin = new System.Windows.Forms.Padding(4);
             this.txtMessageLogFilePath.Name = "txtMessageLogFilePath";
             this.txtMessageLogFilePath.Size = new System.Drawing.Size(263, 22);
             this.txtMessageLogFilePath.TabIndex = 23;
@@ -611,19 +612,19 @@
             // 
             this.pgbStatus.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pgbStatus.Location = new System.Drawing.Point(0, 752);
-            this.pgbStatus.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pgbStatus.Margin = new System.Windows.Forms.Padding(4);
             this.pgbStatus.Name = "pgbStatus";
             this.pgbStatus.Size = new System.Drawing.Size(1191, 27);
             this.pgbStatus.TabIndex = 24;
             this.pgbStatus.Visible = false;
             // 
-            // openFilePrjFile
+            // ofdOutputProjection
             // 
-            this.openFilePrjFile.Filter = "PRJ file|*.prj";
+            this.ofdOutputProjection.Filter = "Projection Files (*.prj)|*.prj|All Files (*.*)|*.*";
             // 
-            // openFileFishnetEnvelopeShp
+            // ofdGridEnvelopeShp
             // 
-            this.openFileFishnetEnvelopeShp.Filter = "Shapefile|*.shp";
+            this.ofdGridEnvelopeShp.Filter = "Shapefile|*.shp";
             // 
             // saveFileMessageLog
             // 
@@ -635,7 +636,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label15.AutoSize = true;
             this.label15.BackColor = System.Drawing.SystemColors.Window;
-            this.label15.Location = new System.Drawing.Point(636, 27);
+            this.label15.Location = new System.Drawing.Point(633, 26);
             this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(112, 17);
@@ -646,7 +647,7 @@
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(16, 23);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(251, 106);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -659,7 +660,7 @@
             // toolStripContainer1.ContentPanel
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.pgbStatus);
-            this.toolStripContainer1.ContentPanel.Controls.Add(this.txtOutputDirectoryPath);
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.txtOutputDirectory);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.label15);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.txtVariableFilePath);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.txtJobFilePath);
@@ -680,11 +681,11 @@
             this.toolStripContainer1.ContentPanel.Controls.Add(this.label6);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.label4);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.label5);
-            this.toolStripContainer1.ContentPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.toolStripContainer1.ContentPanel.Margin = new System.Windows.Forms.Padding(4);
             this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(1191, 779);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
-            this.toolStripContainer1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.toolStripContainer1.Margin = new System.Windows.Forms.Padding(4);
             this.toolStripContainer1.Name = "toolStripContainer1";
             this.toolStripContainer1.Size = new System.Drawing.Size(1191, 807);
             this.toolStripContainer1.TabIndex = 27;
@@ -703,7 +704,7 @@
             this.Controls.Add(this.toolStripContainer1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "ACS Alchemist";
             this.Load += new System.EventHandler(this.MainForm_Load);
@@ -737,14 +738,14 @@
         private System.Windows.Forms.ComboBox cboSummaryLevel;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserOutputDir;
-        private System.Windows.Forms.OpenFileDialog openFileVariableFile;
+        private System.Windows.Forms.OpenFileDialog ofdVariablesFile;
         private System.Windows.Forms.Button btnBrowseVariableFile;
         private System.Windows.Forms.Button btnBrowseOutputFolder;
         private System.Windows.Forms.TextBox txtVariableFilePath;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox txtPrjFilePath;
         private System.Windows.Forms.Button btnBrowsePrjFile;
-        private System.Windows.Forms.TextBox txtOutputDirectoryPath;
+        private System.Windows.Forms.TextBox txtOutputDirectory;
         private System.Windows.Forms.TextBox txtJobFilePath;
         private System.Windows.Forms.Button btnSaveMessageLog;
         private System.Windows.Forms.Label label10;
@@ -759,7 +760,7 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.TextBox txtJobName;
         private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.OpenFileDialog openFileBoundaryShp;
+        private System.Windows.Forms.OpenFileDialog ofdExportBoundaryShp;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.TextBox txtFishnetCellSize;
         private System.Windows.Forms.CheckBox chkExportFishnet;
@@ -773,8 +774,8 @@
         private System.Windows.Forms.ToolStripMenuItem saveJobFileToolStripMenuItem;
         private System.Windows.Forms.TextBox txtMessageLogFilePath;
         private System.Windows.Forms.ProgressBar pgbStatus;
-        private System.Windows.Forms.OpenFileDialog openFilePrjFile;
-        private System.Windows.Forms.OpenFileDialog openFileFishnetEnvelopeShp;
+        private System.Windows.Forms.OpenFileDialog ofdOutputProjection;
+        private System.Windows.Forms.OpenFileDialog ofdGridEnvelopeShp;
         private System.Windows.Forms.SaveFileDialog saveFileMessageLog;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;

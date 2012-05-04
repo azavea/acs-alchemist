@@ -205,5 +205,16 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
 
 
+
+        /// <summary>
+        /// TODO: Validate variables file:
+        /// (does it exist, can I read it, does it have at least one variable, etc.)
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        internal bool ValidateVariablesFile(string p)
+        {
+            return true;
+        }
     }
 }
