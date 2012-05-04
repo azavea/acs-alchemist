@@ -28,6 +28,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         {
             try
             {
+                ShowLoadingSpinner();
 
                 //TODO: special initializer for the logger / or something to get the output stream before the copyright / etc is shown
 
@@ -44,9 +45,13 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             {
                 this.DisplayException("Form Load", ex);
             }
+            finally
+            {
+                HideLoadingSpinner();
+            }
         }
 
-        
+
 
 
         /// <summary>
@@ -201,7 +206,15 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             }
         }
 
-        
+        protected void ShowLoadingSpinner()
+        {
+            this.pgbStatus.Style = ProgressBarStyle.Continuous;
+        }
+
+        protected void HideLoadingSpinner()
+        {
+            this.pgbStatus.Style = ProgressBarStyle.Blocks;
+        }
 
 
     }
