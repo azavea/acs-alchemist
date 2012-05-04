@@ -276,7 +276,7 @@ namespace Azavea.NijPredictivePolicing.Common
             foreach (var value in levels)
             {
                 string val = value.ToString();
-                if (excluded.Contains(val))
+                if ((excluded != null) && (excluded.Contains(val)))
                     continue;
 
                 _log.Info(value.ToString());
@@ -295,10 +295,30 @@ namespace Azavea.NijPredictivePolicing.Common
             foreach (var value in levels)
             {
                 string val = value.ToString();
-                if (excluded.Contains(val))
+                if ((excluded != null) && (excluded.Contains(val)))
                     continue;
 
                 results.Add(val);
+            }
+            return results;
+        }
+
+        /// <summary>
+        /// Enumerates over an Enumerated type, and return a list of the enum values
+        /// (makes it easy to put in a combobox)
+        /// </summary>
+        /// <param name="label"></param>
+        /// <param name="enumType"></param>
+        public static List<T> GetEnumAsList<T>(HashSet<T> excluded)
+        {
+            var levels = Enum.GetValues(typeof(T));
+            var results = new List<T>(levels.Length);
+            foreach (T value in levels)
+            {
+                if ((excluded != null) && (excluded.Contains(value)))
+                    continue;
+
+                results.Add(value);
             }
             return results;
         }

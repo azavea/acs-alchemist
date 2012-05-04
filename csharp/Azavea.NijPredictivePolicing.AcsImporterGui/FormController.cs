@@ -9,6 +9,7 @@ using log4net.Appender;
 using log4net.Layout;
 using Azavea.NijPredictivePolicing.ACSAlchemist;
 using Azavea.NijPredictivePolicing.ACSAlchemistLibrary;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats;
 
 namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 {
@@ -49,7 +50,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 if (_availableYears != null) { return _availableYears; }
 
                 //a quick initialization
-                _availableYears = new List<string>(Settings.LoadYearConfigs().Keys);                
+                _availableYears = new List<string>(Settings.LoadYearConfigs().Keys);
                 return _availableYears;
             }
             set { _availableYears = value; }
@@ -61,23 +62,44 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         /// Returns a modifiable list of states that correspond to ACS data that
         /// can be used as a live binding source for a form
         /// </summary>
-        public List<string> AvailableStates
+        public List<AcsState> AvailableStates
         {
             get
             {
                 if (_availableStates != null) { return _availableStates; }
-                
-                //a quick initialization                
-                _availableStates = new List<string>(Utilities.GetEnumKeysAsList(
-                    typeof(AcsState),
-                    new HashSet<string>(new string[] { "None" })
-                ));
+
+                //a quick initialization
+                _availableStates = Utilities.GetEnumAsList<AcsState>(
+                    new HashSet<AcsState>(new AcsState[] { AcsState.None })
+                    );
 
                 return _availableStates;
             }
             set { _availableStates = value; }
         }
-        protected List<string> _availableStates;
+        protected List<AcsState> _availableStates;
+
+        /// <summary>
+        /// Returns a modifiable list of summary levels that correspond to ACS data that
+        /// can be used as a live binding source for a form
+        /// </summary>
+        public List<BoundaryLevels> AvailableLevels
+        {
+            get
+            {
+                if (_availableLevels != null) { return _availableLevels; }
+
+                //a quick initialization
+                _availableLevels = Utilities.GetEnumAsList<BoundaryLevels>(null);
+
+                return _availableLevels;
+            }
+            set { _availableLevels = value; }
+        }
+        protected List<BoundaryLevels> _availableLevels;
+
+
+
 
         #endregion FormController Properties
 

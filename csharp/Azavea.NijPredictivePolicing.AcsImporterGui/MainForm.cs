@@ -56,7 +56,9 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         {
             this.cboYear.DataSource = new BindingSource(FormController.Instance.AvailableYears, string.Empty);
             this.cboStates.DataSource = new BindingSource(FormController.Instance.AvailableStates, string.Empty);
+            this.cboSummaryLevel.DataSource = new BindingSource(FormController.Instance.AvailableLevels, string.Empty);
 
+            
 
         }
 

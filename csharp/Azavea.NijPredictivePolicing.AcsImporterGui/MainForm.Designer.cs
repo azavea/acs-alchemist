@@ -439,6 +439,7 @@
             // 
             // cboYear
             // 
+            this.cboYear.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboYear.FormattingEnabled = true;
             this.cboYear.Location = new System.Drawing.Point(152, 137);
             this.cboYear.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
@@ -448,6 +449,7 @@
             // 
             // cboStates
             // 
+            this.cboStates.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboStates.FormattingEnabled = true;
             this.cboStates.Location = new System.Drawing.Point(152, 167);
             this.cboStates.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
@@ -457,6 +459,7 @@
             // 
             // cboSummaryLevel
             // 
+            this.cboSummaryLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboSummaryLevel.FormattingEnabled = true;
             this.cboSummaryLevel.Location = new System.Drawing.Point(152, 201);
             this.cboSummaryLevel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
@@ -698,6 +701,7 @@
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(1191, 807);
             this.Controls.Add(this.toolStripContainer1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "MainForm";
