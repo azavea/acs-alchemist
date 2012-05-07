@@ -406,6 +406,37 @@ namespace Azavea.NijPredictivePolicing.Common
             return null;
         }
 
+
+        /// <summary>
+        /// Scans through our SRID.csv file, and returns all available IDs
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> ListAllCoordinateSystemIDs()
+        {
+            if (!File.Exists("SRID.csv"))
+            {
+                _log.Error("Unable to lookup srid by number, no SRID.csv file");
+                return null;
+            }
+
+            List<string> results = new List<string>(4096);
+            StreamReader reader = new StreamReader("SRID.csv");
+            string line = string.Empty;
+
+            while ((line = reader.ReadLine()) != null)
+            {
+                results.Add(line.Split(';')[0]);
+            }
+            return results;
+        }
+        
+        /// <summary>
+        /// Normally I would optimize this if it were getting a lot of use,
+        /// but this seems to be incredibly fast on my machine, very easy to change
+        /// later if we want.
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         public static string GetCoordinateSystemWKTByID(string filename)
         {
             int outputSrid = Utilities.GetAs<int>(filename, -1);

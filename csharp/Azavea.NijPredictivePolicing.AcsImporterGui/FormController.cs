@@ -98,6 +98,24 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         }
         protected List<BoundaryLevels> _availableLevels;
 
+        /// <summary>
+        /// Returns a modifiable list of projections that correspond to SRID.csv
+        /// </summary>
+        public List<string> AvailableProjections
+        {
+            get
+            {
+                if (_availableProjections != null) { return _availableProjections; }
+
+                //a quick initialization
+                _availableProjections = Utilities.ListAllCoordinateSystemIDs();
+
+                return _availableProjections;
+            }
+            set { _availableProjections = value; }
+        }
+        protected List<string> _availableProjections;
+
 
 
 
@@ -115,7 +133,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
 
         private static ILog _log = null;
-        protected void InitLogging()
+        internal void InitLogging(IAppender appenderObj)
         {
             if (_log != null)
             {
@@ -137,6 +155,11 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 //con.Threshold = log4net.Core.Level.Info;
                 log4net.Config.BasicConfigurator.Configure(con);
                 _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+            }
+
+            if (appenderObj != null)
+            {
+                ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetLoggerRepository()).Root.AddAppender(appenderObj);
             }
         }
 
@@ -187,13 +210,13 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         /// </summary>
         internal void Initialize()
         {
-            InitLogging();
+            //InitLogging();
+
             LoadConfigFile();
             ShowWelcomeScreen();
             ShowCopyrightAndLicense();
             this.JobInstance = new ImportJob();
         }
-
 
 
         #endregion Initialization Boilerplate
@@ -212,9 +235,22 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        internal bool ValidateVariablesFile(string p)
+        internal bool ValidateVariablesFile(string filename, out string errorMessage)
         {
+            if (!File.Exists(filename))
+            {
+                errorMessage = "File does not exist";
+                return false;
+            }
+
+            //TODO: read in the file, make sure it is valid.
+
+
+
+            errorMessage = string.Empty;
             return true;
         }
+
+
     }
 }

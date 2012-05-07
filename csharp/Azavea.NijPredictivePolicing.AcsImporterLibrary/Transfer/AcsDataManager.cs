@@ -1736,6 +1736,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             {
                 //they provided both
                 this.GridCellHeight = Utilities.GetAs<double>(chunks[0], 10000);
+                this.GridCellHeight = Utilities.GetAs<double>(chunks[1], 10000);
             }
 
             _log.DebugFormat("Set Grid cell width to {0}, and height to {1} ",
