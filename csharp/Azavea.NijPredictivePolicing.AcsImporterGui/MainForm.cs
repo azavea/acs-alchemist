@@ -17,7 +17,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
     public partial class MainForm : Form
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
- 
+
 
         public MainForm()
         {
@@ -61,7 +61,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             }
         }
 
-      
+
 
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             txtJobFilePath.Text = saveFileJob.FileName;
         }
 
-       
+
 
         #region File Browsers
 
@@ -256,7 +256,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 this.btnBrowseFishnetEnvelopeFile.Enabled = enabledIfIdle;
             }
         }
-        
+
         private void radioDefaultSRID_CheckedChanged(object sender, EventArgs e)
         {
             SmartToggler();
@@ -302,7 +302,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         #endregion Event Boilerplate
 
 
-        
+
 
         private void btnSaveMessageLog_Click(object sender, EventArgs e)
         {
@@ -335,7 +335,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             MessageBox.Show(sb.ToString(), "An exception was caught");
         }
 
- 
+
 
         protected void ShowLoadingSpinner()
         {
@@ -357,11 +357,11 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             var importObj = FormController.Instance.JobInstance;
 
 
-            importObj.Year = cboYear.Text;                                  //1
-            importObj.State = (AcsState)cboStates.SelectedValue;            //2
-            importObj.SummaryLevel = cboSummaryLevel.Text;                  //3
-            importObj.IncludedVariableFile = txtVariableFilePath.Text;      //4
-            importObj.OutputFolder = txtOutputDirectory.Text;               //5
+            importObj.Year = cboYear.Text;                                             //1
+            importObj.State = (AcsState)cboStates.SelectedValue;                       //2
+            importObj.SummaryLevel = ((int)cboSummaryLevel.SelectedValue).ToString();  //3
+            importObj.IncludedVariableFile = txtVariableFilePath.Text;                 //4
+            importObj.OutputFolder = txtOutputDirectory.Text;                          //5
 
             //TODO: Stub in default output folder?
 
@@ -392,7 +392,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
             //job name:
             importObj.JobName = txtJobName.Text;
-            importObj.ReplaceTable = (chkReplaceJob.Checked) ? "true" : string.Empty;
+            importObj.ReusePreviousJobTable = (chkReplaceJob.Checked) ? string.Empty : "true";
 
             //shapefile:
             importObj.ExportToShapefile = (!isFishnet) ? "true" : string.Empty;
@@ -413,7 +413,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
 
 
-           
+
         }
 
 
@@ -428,12 +428,6 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             /** TODO: Gather all inputs and update our controller / job instance */
 
             var importObj = FormController.Instance.JobInstance;
-
-            importObj.Year = cboYear.Text;                                  //1
-            importObj.State = (AcsState)cboStates.SelectedValue;            //2
-            importObj.SummaryLevel = cboSummaryLevel.Text;                  //3
-            importObj.IncludedVariableFile = txtVariableFilePath.Text;      //4
-            importObj.OutputFolder = txtOutputDirectory.Text;               //5
 
             if (string.IsNullOrEmpty(importObj.Year))
             {
@@ -515,7 +509,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
             e.Result = job.ExecuteJob();
 
-            
+
 
             //TODO: add support for cancellation?
             //TODO: add progress reporting?
@@ -618,25 +612,6 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         }
 
         #endregion Control Validation
-
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

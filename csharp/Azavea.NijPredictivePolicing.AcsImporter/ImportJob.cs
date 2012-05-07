@@ -84,7 +84,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
         public string IncludedVariableFile { get; set; }
         public string JobName { get; set; }
         public string SummaryLevel { get; set; }
-        public string ReplaceTable { get; set; }
+        public string ReusePreviousJobTable { get; set; }
         public string ExportToShapefile { get; set; }
         public string ExportToGrid { get; set; }
         
@@ -342,7 +342,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 manager.SummaryLevel = this.SummaryLevel;
                 manager.ExportFilterFilename = this.ExportFilterShapefile;
                 manager.DesiredVariablesFilename = IncludedVariableFile;
-                manager.ReusePreviousJobTable = (!string.IsNullOrEmpty(this.ReplaceTable));
+                manager.ReusePreviousJobTable = (!string.IsNullOrEmpty(this.ReusePreviousJobTable));
                 manager.OutputProjectionFilename = this.OutputProjection;
                 manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
                 manager.AddStrippedGEOIDcolumn = (!string.IsNullOrEmpty(this.AddStrippedGEOIDcolumn));
