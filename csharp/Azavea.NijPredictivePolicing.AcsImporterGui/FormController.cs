@@ -166,9 +166,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         protected void ShowWelcomeScreen()
         {
-            //_log.Warn("DEBUG - DEBUG - PAUSING FOR DRAMATIC EFFECT - DEBUG - DEBUG"); Console.ReadKey();
             _log.Debug("+--------------------------------------------+");
-            _log.Debug("|   Welcome to ACS Alchemist                |");
+            _log.Debug("|   Welcome to ACS Alchemist                 |");
             _log.Debug("+--------------------------------------------+");
             _log.Debug("");
             _log.Debug(" This tool was developed by Azavea in collaboration with");
@@ -177,12 +176,13 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             _log.Debug(" (Award # 2010-DE-BX-K004). ");
 
             _log.Debug(" The source code is released under a GPLv3 license.");
+            _log.Debug(" available here: https://github.com/azavea/acs-alchemist ");
             _log.Debug("");
         }
 
         protected void ShowCopyrightAndLicense()
         {
-            _log.Info("+-----------------------------------------------------+");
+            _log.Info("+-------------------------------------------------------------+");
             _log.Info(" ACS Alchemist  Copyright (C) 2012 Azavea, Inc.");
             _log.Info(" This program comes with ABSOLUTELY NO WARRANTY;");
             _log.Info(" This is free software, and you are welcome to redistribute it");
@@ -190,7 +190,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
             //TODO: are we obligated to list other libraries here?
 
-            _log.Info("+-----------------------------------------------------+");
+            _log.Info("+-------------------------------------------------------------+");
         }
 
         protected void LoadConfigFile()

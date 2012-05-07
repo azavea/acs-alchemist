@@ -114,11 +114,12 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.txtLogConsole.BackColor = System.Drawing.SystemColors.InactiveBorder;
-            this.txtLogConsole.Enabled = false;
             this.txtLogConsole.Font = new System.Drawing.Font("Liberation Mono", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtLogConsole.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.txtLogConsole.Location = new System.Drawing.Point(489, 73);
             this.txtLogConsole.Multiline = true;
             this.txtLogConsole.Name = "txtLogConsole";
+            this.txtLogConsole.ReadOnly = true;
             this.txtLogConsole.Size = new System.Drawing.Size(348, 433);
             this.txtLogConsole.TabIndex = 1;
             // 
