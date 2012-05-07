@@ -121,7 +121,7 @@
             this.txtLogConsole.Name = "txtLogConsole";
             this.txtLogConsole.ReadOnly = true;
             this.txtLogConsole.Size = new System.Drawing.Size(348, 433);
-            this.txtLogConsole.TabIndex = 1;
+            this.txtLogConsole.TabIndex = 13;
             // 
             // label2
             // 
@@ -179,7 +179,7 @@
             this.groupBox1.Location = new System.Drawing.Point(331, 193);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(152, 114);
-            this.groupBox1.TabIndex = 7;
+            this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Optional Parameters";
             // 
@@ -191,7 +191,7 @@
             this.cboIncludeEmptyGeom.Location = new System.Drawing.Point(7, 72);
             this.cboIncludeEmptyGeom.Name = "cboIncludeEmptyGeom";
             this.cboIncludeEmptyGeom.Size = new System.Drawing.Size(133, 19);
-            this.cboIncludeEmptyGeom.TabIndex = 34;
+            this.cboIncludeEmptyGeom.TabIndex = 2;
             this.cboIncludeEmptyGeom.Text = "Include Empty Cells";
             this.cboIncludeEmptyGeom.UseVisualStyleBackColor = true;
             // 
@@ -203,7 +203,7 @@
             this.chkStripExtraGeoID.Location = new System.Drawing.Point(7, 47);
             this.chkStripExtraGeoID.Name = "chkStripExtraGeoID";
             this.chkStripExtraGeoID.Size = new System.Drawing.Size(123, 19);
-            this.chkStripExtraGeoID.TabIndex = 33;
+            this.chkStripExtraGeoID.TabIndex = 1;
             this.chkStripExtraGeoID.Text = "Strip Extra GEOID";
             this.chkStripExtraGeoID.UseVisualStyleBackColor = true;
             // 
@@ -215,7 +215,7 @@
             this.chkPreserveJamValues.Location = new System.Drawing.Point(7, 22);
             this.chkPreserveJamValues.Name = "chkPreserveJamValues";
             this.chkPreserveJamValues.Size = new System.Drawing.Size(127, 19);
-            this.chkPreserveJamValues.TabIndex = 32;
+            this.chkPreserveJamValues.TabIndex = 0;
             this.chkPreserveJamValues.Text = "Preserve ACS Jam";
             this.chkPreserveJamValues.UseVisualStyleBackColor = true;
             // 
@@ -225,14 +225,14 @@
             this.txtBoundaryShpFilePath.Location = new System.Drawing.Point(63, 63);
             this.txtBoundaryShpFilePath.Name = "txtBoundaryShpFilePath";
             this.txtBoundaryShpFilePath.Size = new System.Drawing.Size(147, 21);
-            this.txtBoundaryShpFilePath.TabIndex = 25;
+            this.txtBoundaryShpFilePath.TabIndex = 2;
             // 
             // btnBrowseBoundaryShpFile
             // 
             this.btnBrowseBoundaryShpFile.Location = new System.Drawing.Point(217, 61);
             this.btnBrowseBoundaryShpFile.Name = "btnBrowseBoundaryShpFile";
             this.btnBrowseBoundaryShpFile.Size = new System.Drawing.Size(65, 27);
-            this.btnBrowseBoundaryShpFile.TabIndex = 24;
+            this.btnBrowseBoundaryShpFile.TabIndex = 3;
             this.btnBrowseBoundaryShpFile.Text = "Browse";
             this.btnBrowseBoundaryShpFile.UseVisualStyleBackColor = true;
             this.btnBrowseBoundaryShpFile.Click += new System.EventHandler(this.btnBrowseBoundaryShpFile_Click);
@@ -252,7 +252,7 @@
             this.txtPrjFilePath.Location = new System.Drawing.Point(119, 73);
             this.txtPrjFilePath.Name = "txtPrjFilePath";
             this.txtPrjFilePath.Size = new System.Drawing.Size(107, 21);
-            this.txtPrjFilePath.TabIndex = 16;
+            this.txtPrjFilePath.TabIndex = 2;
             this.txtPrjFilePath.Validating += new System.ComponentModel.CancelEventHandler(this.txtPrjFilePath_Validating);
             // 
             // btnBrowsePrjFile
@@ -260,7 +260,7 @@
             this.btnBrowsePrjFile.Location = new System.Drawing.Point(232, 68);
             this.btnBrowsePrjFile.Name = "btnBrowsePrjFile";
             this.btnBrowsePrjFile.Size = new System.Drawing.Size(65, 27);
-            this.btnBrowsePrjFile.TabIndex = 15;
+            this.btnBrowsePrjFile.TabIndex = 3;
             this.btnBrowsePrjFile.Text = "Browse";
             this.btnBrowsePrjFile.UseVisualStyleBackColor = true;
             this.btnBrowsePrjFile.Click += new System.EventHandler(this.btnBrowsePrjFile_Click);
@@ -280,14 +280,14 @@
             this.txtFishnetEnvelopeFilePath.Location = new System.Drawing.Point(14, 80);
             this.txtFishnetEnvelopeFilePath.Name = "txtFishnetEnvelopeFilePath";
             this.txtFishnetEnvelopeFilePath.Size = new System.Drawing.Size(145, 21);
-            this.txtFishnetEnvelopeFilePath.TabIndex = 35;
+            this.txtFishnetEnvelopeFilePath.TabIndex = 1;
             // 
             // btnBrowseFishnetEnvelopeFile
             // 
             this.btnBrowseFishnetEnvelopeFile.Location = new System.Drawing.Point(166, 77);
             this.btnBrowseFishnetEnvelopeFile.Name = "btnBrowseFishnetEnvelopeFile";
             this.btnBrowseFishnetEnvelopeFile.Size = new System.Drawing.Size(65, 27);
-            this.btnBrowseFishnetEnvelopeFile.TabIndex = 34;
+            this.btnBrowseFishnetEnvelopeFile.TabIndex = 2;
             this.btnBrowseFishnetEnvelopeFile.Text = "Browse";
             this.btnBrowseFishnetEnvelopeFile.UseVisualStyleBackColor = true;
             this.btnBrowseFishnetEnvelopeFile.Click += new System.EventHandler(this.btnBrowseFishnetEnvelopeFile_Click);
@@ -307,7 +307,7 @@
             this.txtFishnetCellSize.Location = new System.Drawing.Point(72, 23);
             this.txtFishnetCellSize.Name = "txtFishnetCellSize";
             this.txtFishnetCellSize.Size = new System.Drawing.Size(60, 21);
-            this.txtFishnetCellSize.TabIndex = 30;
+            this.txtFishnetCellSize.TabIndex = 0;
             this.txtFishnetCellSize.Validating += new System.ComponentModel.CancelEventHandler(this.txtFishnetCellSize_Validating);
             // 
             // chkReplaceJob
@@ -317,8 +317,8 @@
             this.chkReplaceJob.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkReplaceJob.Location = new System.Drawing.Point(217, 30);
             this.chkReplaceJob.Name = "chkReplaceJob";
-            this.chkReplaceJob.Size = new System.Drawing.Size(71, 17);
-            this.chkReplaceJob.TabIndex = 28;
+            this.chkReplaceJob.Size = new System.Drawing.Size(77, 19);
+            this.chkReplaceJob.TabIndex = 1;
             this.chkReplaceJob.Text = "Overwrite";
             this.chkReplaceJob.UseVisualStyleBackColor = true;
             // 
@@ -328,7 +328,7 @@
             this.txtJobName.Location = new System.Drawing.Point(61, 28);
             this.txtJobName.Name = "txtJobName";
             this.txtJobName.Size = new System.Drawing.Size(124, 21);
-            this.txtJobName.TabIndex = 27;
+            this.txtJobName.TabIndex = 0;
             // 
             // label12
             // 
@@ -347,7 +347,7 @@
             this.txtJobFilePath.Location = new System.Drawing.Point(591, 22);
             this.txtJobFilePath.Name = "txtJobFilePath";
             this.txtJobFilePath.Size = new System.Drawing.Size(244, 21);
-            this.txtJobFilePath.TabIndex = 22;
+            this.txtJobFilePath.TabIndex = 9;
             // 
             // btnSaveMessageLog
             // 
@@ -355,7 +355,7 @@
             this.btnSaveMessageLog.Location = new System.Drawing.Point(769, 513);
             this.btnSaveMessageLog.Name = "btnSaveMessageLog";
             this.btnSaveMessageLog.Size = new System.Drawing.Size(68, 27);
-            this.btnSaveMessageLog.TabIndex = 21;
+            this.btnSaveMessageLog.TabIndex = 15;
             this.btnSaveMessageLog.Text = "Browse";
             this.btnSaveMessageLog.UseVisualStyleBackColor = true;
             this.btnSaveMessageLog.Click += new System.EventHandler(this.btnSaveMessageLog_Click);
@@ -377,7 +377,7 @@
             this.cboYear.Location = new System.Drawing.Point(133, 21);
             this.cboYear.Name = "cboYear";
             this.cboYear.Size = new System.Drawing.Size(103, 23);
-            this.cboYear.TabIndex = 8;
+            this.cboYear.TabIndex = 0;
             // 
             // cboStates
             // 
@@ -386,7 +386,7 @@
             this.cboStates.Location = new System.Drawing.Point(133, 54);
             this.cboStates.Name = "cboStates";
             this.cboStates.Size = new System.Drawing.Size(140, 23);
-            this.cboStates.TabIndex = 9;
+            this.cboStates.TabIndex = 1;
             // 
             // cboSummaryLevel
             // 
@@ -395,7 +395,7 @@
             this.cboSummaryLevel.Location = new System.Drawing.Point(133, 88);
             this.cboSummaryLevel.Name = "cboSummaryLevel";
             this.cboSummaryLevel.Size = new System.Drawing.Size(140, 23);
-            this.cboSummaryLevel.TabIndex = 10;
+            this.cboSummaryLevel.TabIndex = 2;
             // 
             // label7
             // 
@@ -415,7 +415,7 @@
             this.btnBrowseVariableFile.Location = new System.Drawing.Point(373, 120);
             this.btnBrowseVariableFile.Name = "btnBrowseVariableFile";
             this.btnBrowseVariableFile.Size = new System.Drawing.Size(65, 27);
-            this.btnBrowseVariableFile.TabIndex = 12;
+            this.btnBrowseVariableFile.TabIndex = 4;
             this.btnBrowseVariableFile.Text = "Browse";
             this.btnBrowseVariableFile.UseVisualStyleBackColor = true;
             this.btnBrowseVariableFile.Click += new System.EventHandler(this.btnBrowseVariableFile_Click);
@@ -425,7 +425,7 @@
             this.btnBrowseOutputFolder.Location = new System.Drawing.Point(373, 153);
             this.btnBrowseOutputFolder.Name = "btnBrowseOutputFolder";
             this.btnBrowseOutputFolder.Size = new System.Drawing.Size(65, 27);
-            this.btnBrowseOutputFolder.TabIndex = 13;
+            this.btnBrowseOutputFolder.TabIndex = 6;
             this.btnBrowseOutputFolder.Text = "Browse";
             this.btnBrowseOutputFolder.UseVisualStyleBackColor = true;
             this.btnBrowseOutputFolder.Click += new System.EventHandler(this.btnBrowseOutputFolder_Click);
@@ -436,7 +436,7 @@
             this.txtVariableFilePath.Location = new System.Drawing.Point(133, 122);
             this.txtVariableFilePath.Name = "txtVariableFilePath";
             this.txtVariableFilePath.Size = new System.Drawing.Size(233, 21);
-            this.txtVariableFilePath.TabIndex = 14;
+            this.txtVariableFilePath.TabIndex = 3;
             this.txtVariableFilePath.Validating += new System.ComponentModel.CancelEventHandler(this.txtVariableFilePath_Validating);
             // 
             // txtOutputDirectory
@@ -445,7 +445,7 @@
             this.txtOutputDirectory.Location = new System.Drawing.Point(133, 157);
             this.txtOutputDirectory.Name = "txtOutputDirectory";
             this.txtOutputDirectory.Size = new System.Drawing.Size(233, 21);
-            this.txtOutputDirectory.TabIndex = 15;
+            this.txtOutputDirectory.TabIndex = 5;
             // 
             // menuStrip1
             // 
@@ -456,7 +456,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(848, 24);
-            this.menuStrip1.TabIndex = 16;
+            this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // fileToolStripMenuItem
@@ -531,7 +531,7 @@
             this.txtMessageLogFilePath.Location = new System.Drawing.Point(593, 516);
             this.txtMessageLogFilePath.Name = "txtMessageLogFilePath";
             this.txtMessageLogFilePath.Size = new System.Drawing.Size(170, 21);
-            this.txtMessageLogFilePath.TabIndex = 23;
+            this.txtMessageLogFilePath.TabIndex = 14;
             // 
             // pgbStatus
             // 
@@ -613,7 +613,7 @@
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
             this.toolStripContainer1.Size = new System.Drawing.Size(848, 594);
-            this.toolStripContainer1.TabIndex = 27;
+            this.toolStripContainer1.TabIndex = 0;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
             // toolStripContainer1.TopToolStripPanel
@@ -633,7 +633,7 @@
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox4.Size = new System.Drawing.Size(307, 103);
-            this.groupBox4.TabIndex = 45;
+            this.groupBox4.TabIndex = 9;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Shapefile Options";
             // 
@@ -650,7 +650,7 @@
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox3.Size = new System.Drawing.Size(304, 113);
-            this.groupBox3.TabIndex = 44;
+            this.groupBox3.TabIndex = 10;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Fishnet Options";
             // 
@@ -660,7 +660,7 @@
             this.label1.Location = new System.Drawing.Point(138, 27);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(27, 15);
-            this.label1.TabIndex = 37;
+            this.label1.TabIndex = 1;
             this.label1.Text = "feet";
             // 
             // btnFishnet
@@ -669,7 +669,7 @@
             this.btnFishnet.Margin = new System.Windows.Forms.Padding(2);
             this.btnFishnet.Name = "btnFishnet";
             this.btnFishnet.Size = new System.Drawing.Size(132, 53);
-            this.btnFishnet.TabIndex = 43;
+            this.btnFishnet.TabIndex = 12;
             this.btnFishnet.Text = "Export To Fishnet / Gridded Shapefile";
             this.btnFishnet.UseVisualStyleBackColor = true;
             this.btnFishnet.Click += new System.EventHandler(this.btnFishnet_Click);
@@ -680,7 +680,7 @@
             this.btnShapefile.Margin = new System.Windows.Forms.Padding(2);
             this.btnShapefile.Name = "btnShapefile";
             this.btnShapefile.Size = new System.Drawing.Size(132, 53);
-            this.btnShapefile.TabIndex = 42;
+            this.btnShapefile.TabIndex = 11;
             this.btnShapefile.Text = "Export To Shapefile";
             this.btnShapefile.UseVisualStyleBackColor = true;
             this.btnShapefile.Click += new System.EventHandler(this.btnShapefile_Click);
@@ -698,7 +698,7 @@
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox2.Size = new System.Drawing.Size(307, 114);
-            this.groupBox2.TabIndex = 41;
+            this.groupBox2.TabIndex = 7;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Output Projection";
             // 
@@ -708,8 +708,8 @@
             this.radioSRIDFile.Location = new System.Drawing.Point(14, 73);
             this.radioSRIDFile.Margin = new System.Windows.Forms.Padding(2);
             this.radioSRIDFile.Name = "radioSRIDFile";
-            this.radioSRIDFile.Size = new System.Drawing.Size(64, 17);
-            this.radioSRIDFile.TabIndex = 40;
+            this.radioSRIDFile.Size = new System.Drawing.Size(71, 19);
+            this.radioSRIDFile.TabIndex = 3;
             this.radioSRIDFile.TabStop = true;
             this.radioSRIDFile.Text = "PRJ File";
             this.radioSRIDFile.UseVisualStyleBackColor = true;
@@ -721,8 +721,8 @@
             this.radioDefaultSRID.Location = new System.Drawing.Point(14, 22);
             this.radioDefaultSRID.Margin = new System.Windows.Forms.Padding(2);
             this.radioDefaultSRID.Name = "radioDefaultSRID";
-            this.radioDefaultSRID.Size = new System.Drawing.Size(180, 17);
-            this.radioDefaultSRID.TabIndex = 37;
+            this.radioDefaultSRID.Size = new System.Drawing.Size(203, 19);
+            this.radioDefaultSRID.TabIndex = 0;
             this.radioDefaultSRID.TabStop = true;
             this.radioDefaultSRID.Text = "Default SRID (census projection)";
             this.radioDefaultSRID.UseVisualStyleBackColor = true;
@@ -735,7 +735,7 @@
             this.cboProjections.Margin = new System.Windows.Forms.Padding(2);
             this.cboProjections.Name = "cboProjections";
             this.cboProjections.Size = new System.Drawing.Size(107, 23);
-            this.cboProjections.TabIndex = 39;
+            this.cboProjections.TabIndex = 1;
             this.cboProjections.SelectedIndexChanged += new System.EventHandler(this.cboProjections_SelectedIndexChanged);
             this.cboProjections.Validating += new System.ComponentModel.CancelEventHandler(this.cboProjections_Validating);
             // 
@@ -745,8 +745,8 @@
             this.radioSRIDFromList.Location = new System.Drawing.Point(14, 47);
             this.radioSRIDFromList.Margin = new System.Windows.Forms.Padding(2);
             this.radioSRIDFromList.Name = "radioSRIDFromList";
-            this.radioSRIDFromList.Size = new System.Drawing.Size(90, 17);
-            this.radioSRIDFromList.TabIndex = 38;
+            this.radioSRIDFromList.Size = new System.Drawing.Size(100, 19);
+            this.radioSRIDFromList.TabIndex = 1;
             this.radioSRIDFromList.TabStop = true;
             this.radioSRIDFromList.Text = "Desired SRID";
             this.radioSRIDFromList.UseVisualStyleBackColor = true;
