@@ -146,7 +146,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
                 // if it's not cancelled
                 txtJobFilePath.Text = saveFileJob.FileName;
-                this.GatherInputs(false);
+                this.GatherInputs(true);        //gather all the settings
                 FormController.Instance.JobInstance.SaveJobFile(txtJobFilePath.Text);
             }
         }

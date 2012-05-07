@@ -513,12 +513,19 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
 
                 if (prop.PropertyType == typeof(string))
                 {
+                    string valStr = val as string;
+
                     //skip it before it set it to empty so we can write it prettily
-                    if (string.IsNullOrEmpty(val as string))
+                    if (string.IsNullOrEmpty(valStr))
                         continue;
 
-                    if (((string)val) == "true")
+                    if (valStr == "true")
                         val = string.Empty;
+
+                    if (!string.IsNullOrEmpty(valStr) && (valStr.Contains(' ')))
+                    {
+                        val = "\"" + val + "\"";
+                    }
                 }
                 else if (prop.PropertyType == typeof(AcsState))
                 {

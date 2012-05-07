@@ -319,7 +319,7 @@
             this.chkReplaceJob.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkReplaceJob.Location = new System.Drawing.Point(217, 30);
             this.chkReplaceJob.Name = "chkReplaceJob";
-            this.chkReplaceJob.Size = new System.Drawing.Size(71, 17);
+            this.chkReplaceJob.Size = new System.Drawing.Size(77, 19);
             this.chkReplaceJob.TabIndex = 1;
             this.chkReplaceJob.Text = "Overwrite";
             this.chkReplaceJob.UseVisualStyleBackColor = true;
@@ -329,7 +329,7 @@
             this.txtJobName.BackColor = System.Drawing.Color.White;
             this.txtJobName.Location = new System.Drawing.Point(61, 28);
             this.txtJobName.Name = "txtJobName";
-            this.txtJobName.Size = new System.Drawing.Size(124, 21);
+            this.txtJobName.Size = new System.Drawing.Size(149, 21);
             this.txtJobName.TabIndex = 0;
             // 
             // label12
