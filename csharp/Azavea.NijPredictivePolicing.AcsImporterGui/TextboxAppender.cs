@@ -18,7 +18,19 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         protected override void Append(log4net.Core.LoggingEvent loggingEvent)
         {
-            this._control.AppendText(loggingEvent.RenderedMessage + Environment.NewLine);
+            if (!this._control.InvokeRequired)
+            {
+                this._control.AppendText(loggingEvent.RenderedMessage + Environment.NewLine);
+            }
+            else
+            {
+                this._control.Invoke((MethodInvoker)delegate
+                {
+                    this._control.AppendText(loggingEvent.RenderedMessage + Environment.NewLine);
+                });
+            }
         }
+
+
     }
 }

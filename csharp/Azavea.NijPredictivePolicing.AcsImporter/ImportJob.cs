@@ -273,9 +273,26 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
 
         #endregion Command Line Stuff
 
+        #region Progress Reporting Stuff
+        
+        public delegate void ProgressUpdateHandler(int percentage);
+        public event ProgressUpdateHandler OnProgressUpdated;
+        public void UpdateProgress(int value)
+        {
+            if (this.OnProgressUpdated != null)
+            {
+                this.OnProgressUpdated(value);
+            }
+        }
+        
+        #endregion Progress Reporting Stuff
+
+
 
         public bool ExecuteJob()
         {
+            this.UpdateProgress(0);
+
             DateTime startTime = DateTime.Now;
             try
             {
@@ -313,8 +330,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                     return false;
                 }
 
-
-
                 if ((string.IsNullOrEmpty(this.JobName)) || (this.JobName == true.ToString()))
                 {
                     this.JobName = string.Format("{0}_{1}_{2}", this.Year, this.State, DateTime.Now.ToShortDateString().Replace('/', '_'));
@@ -348,6 +363,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                     return false;
                 }
 
+                this.UpdateProgress(25);
+
                 if (string.IsNullOrEmpty(this.OutputProjection))
                 {
                     _log.Warn(Constants.Warning_MissingProjection);
@@ -367,7 +384,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                     return false;
                 }
                 _log.Debug("Loading Prerequisites... Done!\r\n");
-
+                this.UpdateProgress(35);
 
 
                 if (!string.IsNullOrEmpty(IncludedVariableFile) && !string.IsNullOrEmpty(this.JobName))
@@ -386,6 +403,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                         _log.Debug("Importing requested variables... Done!");
                     }
                 }
+                this.UpdateProgress(50);
 
                 if (!string.IsNullOrEmpty(ExportToShapefile))
                 {
@@ -408,6 +426,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 {
                     _log.Debug("\r\n/****  No shapefile export requested ****/\r\n");
                 }
+                this.UpdateProgress(75);
 
                 if (!string.IsNullOrEmpty(ExportToGrid))
                 {
@@ -423,11 +442,11 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
 
                     _log.Debug("Exporting to gridded shapefile... Done!");
                 }
-
                 else
                 {
                     _log.Debug("\r\n/****  No gridded shapefile export requested ****/\r\n");
                 }
+                this.UpdateProgress(100);
 
                 _log.Info("Done!");
 

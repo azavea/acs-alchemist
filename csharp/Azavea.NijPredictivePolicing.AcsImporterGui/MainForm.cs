@@ -10,6 +10,7 @@ using log4net.Layout;
 using log4net;
 using Azavea.NijPredictivePolicing.Common;
 using Azavea.NijPredictivePolicing.ACSAlchemistLibrary;
+using Azavea.NijPredictivePolicing.ACSAlchemist;
 
 namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 {
@@ -213,11 +214,47 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             //if (radioDefaultSRID.Checked) { }     //nothing to do here
 
             //projection list
-            cboProjections.Enabled = (radioSRIDFromList.Checked);
+            cboProjections.Enabled = (radioSRIDFromList.Checked && !backgroundWorker1.IsBusy);
 
             //projection file controls
-            txtPrjFilePath.Enabled = (radioSRIDFile.Checked);
-            btnBrowsePrjFile.Enabled = (radioSRIDFile.Checked);
+            txtPrjFilePath.Enabled = (radioSRIDFile.Checked && !backgroundWorker1.IsBusy);
+            btnBrowsePrjFile.Enabled = (radioSRIDFile.Checked && !backgroundWorker1.IsBusy);
+
+
+            {
+                bool enabledIfIdle = !backgroundWorker1.IsBusy;
+
+                this.btnShapefile.Enabled = enabledIfIdle;
+                this.btnFishnet.Enabled = enabledIfIdle;
+
+                this.cboYear.Enabled = enabledIfIdle;
+                this.cboStates.Enabled = enabledIfIdle;
+                this.cboSummaryLevel.Enabled = enabledIfIdle;
+                this.txtVariableFilePath.Enabled = enabledIfIdle;
+                this.txtOutputDirectory.Enabled = enabledIfIdle;
+
+                this.radioDefaultSRID.Enabled = enabledIfIdle;
+                this.radioSRIDFromList.Enabled = enabledIfIdle;
+                this.radioSRIDFile.Enabled = enabledIfIdle;
+
+
+                this.txtJobName.Enabled = enabledIfIdle;
+
+                this.chkReplaceJob.Enabled = enabledIfIdle;
+                this.txtFishnetCellSize.Enabled = enabledIfIdle;
+                this.txtFishnetEnvelopeFilePath.Enabled = enabledIfIdle;
+                this.cboIncludeEmptyGeom.Enabled = enabledIfIdle;
+                this.txtBoundaryShpFilePath.Enabled = enabledIfIdle;
+                this.chkPreserveJamValues.Enabled = enabledIfIdle;
+                this.chkStripExtraGeoID.Enabled = enabledIfIdle;
+
+
+
+                this.btnBrowseVariableFile.Enabled = enabledIfIdle;
+                this.btnBrowseOutputFolder.Enabled = enabledIfIdle;
+                this.btnBrowseBoundaryShpFile.Enabled = enabledIfIdle;
+                this.btnBrowseFishnetEnvelopeFile.Enabled = enabledIfIdle;
+            }
         }
         
         private void radioDefaultSRID_CheckedChanged(object sender, EventArgs e)
@@ -436,6 +473,9 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
 
 
+
+
+
         private void btnShapefile_Click(object sender, EventArgs e)
         {
             GatherInputs(false);
@@ -445,7 +485,10 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             }
 
             _log.Debug("Ready to go!");
-            
+            HideLoadingSpinner();
+            this.backgroundWorker1.RunWorkerAsync(FormController.Instance.JobInstance);
+
+            SmartToggler();
         }
 
         private void btnFishnet_Click(object sender, EventArgs e)
@@ -457,8 +500,47 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             }
 
             _log.Debug("Ready to go!");
+            HideLoadingSpinner();
+            this.backgroundWorker1.RunWorkerAsync(FormController.Instance.JobInstance);
+
+            SmartToggler();
+        }
+
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            ImportJob job = (ImportJob)e.Argument;
+
+            job.OnProgressUpdated += new ImportJob.ProgressUpdateHandler(this.backgroundWorker1.ReportProgress);
+
+            e.Result = job.ExecuteJob();
+
+            
+
+            //TODO: add support for cancellation?
+            //TODO: add progress reporting?
+
 
         }
+
+
+        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            this.pgbStatus.Value = e.ProgressPercentage;
+            //this.pgbStatus
+            //string message = (string)e.UserState;
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (!(bool)e.Result)
+            {
+                ShowLoadingSpinner();
+            }
+
+            SmartToggler();
+        }
+
 
         #region Control Validation
 
@@ -536,6 +618,13 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         }
 
         #endregion Control Validation
+
+      
+
+
+
+
+
 
 
 

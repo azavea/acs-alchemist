@@ -148,7 +148,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy C:\projects\acs-alchemist\data\*.csv "$(ProjectDir)$(OutDir)"</PostBuildEvent>
+    <PostBuildEvent>copy C:\projects\acs-alchemist\lib\spatialite\*.dll "$(ProjectDir)$(OutDir)"
+copy "$(ProjectDir)\WGS84NAD83.prj" "$(ProjectDir)$(OutDir)\WGS84NAD83.prj"
+copy C:\projects\acs-alchemist\data\*.csv "$(ProjectDir)$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -96,6 +96,7 @@
             this.cboProjections = new System.Windows.Forms.ComboBox();
             this.radioSRIDFromList = new System.Windows.Forms.RadioButton();
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -120,6 +121,7 @@
             this.txtLogConsole.Multiline = true;
             this.txtLogConsole.Name = "txtLogConsole";
             this.txtLogConsole.ReadOnly = true;
+            this.txtLogConsole.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtLogConsole.Size = new System.Drawing.Size(348, 433);
             this.txtLogConsole.TabIndex = 13;
             // 
@@ -190,7 +192,7 @@
             this.cboIncludeEmptyGeom.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cboIncludeEmptyGeom.Location = new System.Drawing.Point(7, 72);
             this.cboIncludeEmptyGeom.Name = "cboIncludeEmptyGeom";
-            this.cboIncludeEmptyGeom.Size = new System.Drawing.Size(133, 19);
+            this.cboIncludeEmptyGeom.Size = new System.Drawing.Size(118, 17);
             this.cboIncludeEmptyGeom.TabIndex = 2;
             this.cboIncludeEmptyGeom.Text = "Include Empty Cells";
             this.cboIncludeEmptyGeom.UseVisualStyleBackColor = true;
@@ -202,7 +204,7 @@
             this.chkStripExtraGeoID.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkStripExtraGeoID.Location = new System.Drawing.Point(7, 47);
             this.chkStripExtraGeoID.Name = "chkStripExtraGeoID";
-            this.chkStripExtraGeoID.Size = new System.Drawing.Size(123, 19);
+            this.chkStripExtraGeoID.Size = new System.Drawing.Size(111, 17);
             this.chkStripExtraGeoID.TabIndex = 1;
             this.chkStripExtraGeoID.Text = "Strip Extra GEOID";
             this.chkStripExtraGeoID.UseVisualStyleBackColor = true;
@@ -214,7 +216,7 @@
             this.chkPreserveJamValues.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkPreserveJamValues.Location = new System.Drawing.Point(7, 22);
             this.chkPreserveJamValues.Name = "chkPreserveJamValues";
-            this.chkPreserveJamValues.Size = new System.Drawing.Size(127, 19);
+            this.chkPreserveJamValues.Size = new System.Drawing.Size(114, 17);
             this.chkPreserveJamValues.TabIndex = 0;
             this.chkPreserveJamValues.Text = "Preserve ACS Jam";
             this.chkPreserveJamValues.UseVisualStyleBackColor = true;
@@ -317,7 +319,7 @@
             this.chkReplaceJob.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkReplaceJob.Location = new System.Drawing.Point(217, 30);
             this.chkReplaceJob.Name = "chkReplaceJob";
-            this.chkReplaceJob.Size = new System.Drawing.Size(77, 19);
+            this.chkReplaceJob.Size = new System.Drawing.Size(71, 17);
             this.chkReplaceJob.TabIndex = 1;
             this.chkReplaceJob.Text = "Overwrite";
             this.chkReplaceJob.UseVisualStyleBackColor = true;
@@ -347,7 +349,7 @@
             this.txtJobFilePath.Location = new System.Drawing.Point(591, 22);
             this.txtJobFilePath.Name = "txtJobFilePath";
             this.txtJobFilePath.Size = new System.Drawing.Size(244, 21);
-            this.txtJobFilePath.TabIndex = 9;
+            this.txtJobFilePath.TabIndex = 10;
             // 
             // btnSaveMessageLog
             // 
@@ -540,7 +542,6 @@
             this.pgbStatus.Name = "pgbStatus";
             this.pgbStatus.Size = new System.Drawing.Size(848, 25);
             this.pgbStatus.TabIndex = 24;
-            this.pgbStatus.Visible = false;
             // 
             // ofdOutputProjection
             // 
@@ -708,7 +709,7 @@
             this.radioSRIDFile.Location = new System.Drawing.Point(14, 73);
             this.radioSRIDFile.Margin = new System.Windows.Forms.Padding(2);
             this.radioSRIDFile.Name = "radioSRIDFile";
-            this.radioSRIDFile.Size = new System.Drawing.Size(71, 19);
+            this.radioSRIDFile.Size = new System.Drawing.Size(64, 17);
             this.radioSRIDFile.TabIndex = 3;
             this.radioSRIDFile.TabStop = true;
             this.radioSRIDFile.Text = "PRJ File";
@@ -721,7 +722,7 @@
             this.radioDefaultSRID.Location = new System.Drawing.Point(14, 22);
             this.radioDefaultSRID.Margin = new System.Windows.Forms.Padding(2);
             this.radioDefaultSRID.Name = "radioDefaultSRID";
-            this.radioDefaultSRID.Size = new System.Drawing.Size(203, 19);
+            this.radioDefaultSRID.Size = new System.Drawing.Size(180, 17);
             this.radioDefaultSRID.TabIndex = 0;
             this.radioDefaultSRID.TabStop = true;
             this.radioDefaultSRID.Text = "Default SRID (census projection)";
@@ -745,7 +746,7 @@
             this.radioSRIDFromList.Location = new System.Drawing.Point(14, 47);
             this.radioSRIDFromList.Margin = new System.Windows.Forms.Padding(2);
             this.radioSRIDFromList.Name = "radioSRIDFromList";
-            this.radioSRIDFromList.Size = new System.Drawing.Size(100, 19);
+            this.radioSRIDFromList.Size = new System.Drawing.Size(90, 17);
             this.radioSRIDFromList.TabIndex = 1;
             this.radioSRIDFromList.TabStop = true;
             this.radioSRIDFromList.Text = "Desired SRID";
@@ -755,6 +756,13 @@
             // errorProvider1
             // 
             this.errorProvider1.ContainerControl = this;
+            // 
+            // backgroundWorker1
+            // 
+            this.backgroundWorker1.WorkerReportsProgress = true;
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
+            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             // 
             // MainForm
             // 
@@ -859,5 +867,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox cboIncludeEmptyGeom;
         private System.Windows.Forms.ErrorProvider errorProvider1;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
