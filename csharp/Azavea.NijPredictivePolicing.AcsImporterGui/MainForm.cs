@@ -12,6 +12,7 @@ using Azavea.NijPredictivePolicing.Common;
 using Azavea.NijPredictivePolicing.ACSAlchemistLibrary;
 using Azavea.NijPredictivePolicing.ACSAlchemist;
 using System.IO;
+using Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats;
 
 namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 {
@@ -120,11 +121,16 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             {
                 txtJobFilePath.Text = openFileJob.FileName;
 
-                FormController.Instance.JobInstance = new ImportJob();
-                FormController.Instance.JobInstance.Load(new string[] { txtJobFilePath.Text });
+                FormController.Instance.LoadNewJobInstance(txtJobFilePath.Text);
 
                 this.PopulateControls();
             }
+        }
+
+        private void newJobToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormController.Instance.NewDefaultJobInstance();
+            this.PopulateControls();
         }
 
        
@@ -450,9 +456,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
             cboYear.Text = importObj.Year;                                          //1
             cboStates.SelectedItem = importObj.State;                               //2
-            cboSummaryLevel.SelectedItem = importObj.SummaryLevel;                  //3
-
-            txtVariableFilePath.Text = importObj.IncludedVariableFile.Trim('\"');   //4
+            cboSummaryLevel.SelectedItem = Utilities.GetAs<BoundaryLevels>(importObj.SummaryLevel, BoundaryLevels.census_tracts);   //3
+            txtVariableFilePath.Text = (importObj.IncludedVariableFile + string.Empty).Trim('\"');   //4
             txtOutputDirectory.Text = importObj.OutputFolder;                       //5
 
 
@@ -690,6 +695,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         }
 
         #endregion Control Validation
+
+        
 
 
 

@@ -252,5 +252,30 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         }
 
 
+        internal void LoadNewJobInstance(string filename)
+        {
+
+            FormController.Instance.JobInstance = new ImportJob();
+            FormController.Instance.JobInstance.Load(new string[] { filename });
+
+        }
+
+        /// <summary>
+        /// There is no structure ensuring these defaults are the same that will show up when the form loads,
+        /// This function is meant to reflect whatever the form defaults are.
+        /// </summary>
+        internal void NewDefaultJobInstance()
+        {
+            FormController.Instance.JobInstance = new ImportJob();
+
+            //we need to set some defaults here, to keep things happy
+            FormController.Instance.JobInstance.PreserveJam = "true";
+            FormController.Instance.JobInstance.AddStrippedGEOIDcolumn = "true";
+            FormController.Instance.JobInstance.IncludeEmptyGridCells = "true";
+            FormController.Instance.JobInstance.Year = "2009";
+            FormController.Instance.JobInstance.State = AcsState.Alabama;
+            FormController.Instance.JobInstance.SummaryLevel = BoundaryLevels.census_tracts.ToString();
+        }
+
     }
 }

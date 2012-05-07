@@ -479,6 +479,7 @@
             this.newJobToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
             this.newJobToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.newJobToolStripMenuItem.Text = "&New Job";
+            this.newJobToolStripMenuItem.Click += new System.EventHandler(this.newJobToolStripMenuItem_Click);
             // 
             // openJobFileToolStripMenuItem
             // 
@@ -723,6 +724,7 @@
             // radioDefaultSRID
             // 
             this.radioDefaultSRID.AutoSize = true;
+            this.radioDefaultSRID.Checked = true;
             this.radioDefaultSRID.Location = new System.Drawing.Point(14, 22);
             this.radioDefaultSRID.Margin = new System.Windows.Forms.Padding(2);
             this.radioDefaultSRID.Name = "radioDefaultSRID";
