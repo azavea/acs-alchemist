@@ -467,5 +467,89 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
         }
 
 
+
+        /// <summary>
+        /// Saves a nicely commented job file at the location provided
+        /// </summary>
+        /// <param name="filename"></param>
+        public void SaveJobFile(string filename)
+        {
+            var thisType = typeof(ImportJob);
+            string nl = Environment.NewLine;
+
+            StringBuilder sb = new StringBuilder(2048);
+            sb.Append("#").Append(nl);
+            sb.Append("#  ACS Alchemist save file").Append(nl);
+            sb.AppendFormat("#  Generated automatically at {0} - {1}", 
+                DateTime.Now.ToLongDateString(),
+                DateTime.Now.ToShortTimeString()
+                ).Append(nl);
+            sb.Append(nl).Append(nl);
+            HashSet<string> distinctProps = new HashSet<string>();
+
+
+            for (int p = 0; p < Arguments.Length; p++)
+            {
+                var arg = Arguments[p];
+
+                if (!arg.Display)
+                {
+                    //these generally are aliases, and don't have descriptions, skip them before we check unique props
+                    continue;
+                }
+
+                if (!distinctProps.Add(arg.PropertyName))
+                {
+                    //already added, some command line params refer to the same properties,
+                    //just keep the first one we find, not both, that's confusing to the user.
+                    continue;
+                }
+               
+
+                var prop = thisType.GetProperty(arg.PropertyName);
+                object val = prop.GetValue(this, null);
+                if (prop.PropertyType == typeof(AcsState))
+                    val = (int)val;
+
+                if (prop.PropertyType == typeof(string))
+                {
+                    //skip it before it set it to empty so we can write it prettily
+                    if (string.IsNullOrEmpty(val as string))
+                        continue;
+
+                    if (((string)val) == "true")
+                        val = string.Empty;
+                }
+                else if (prop.PropertyType == typeof(AcsState))
+                {
+                    val = ((AcsState)val).ToString();
+                }
+
+                if (arg.PropertyName == "SummaryLevel")
+                {
+                    val = val + "       #" + Utilities.GetAs<BoundaryLevels>(val, BoundaryLevels.census_blockgroups);
+                }
+
+
+
+                //sb.Append("#").Append(nl);
+                sb.Append("# ").Append(arg.Description).Append(nl);
+                //sb.Append("#").Append(nl);
+                sb.Append("-" + arg.Flag).Append(" ").Append(val).Append(nl);
+                sb.Append(nl);
+
+
+               
+                //object defval = (prop.PropertyType == typeof(AcsState)) ? (object)AcsState.None : null;
+                //prop.GetValue(this, Utilities.GetAsType(prop.PropertyType, contents, defval), null);
+                
+                //break;
+            }
+
+            File.WriteAllText(filename, sb.ToString());
+        }
+
+
+
     }
 }

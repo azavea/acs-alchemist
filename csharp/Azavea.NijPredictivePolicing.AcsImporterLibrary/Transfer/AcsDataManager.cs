@@ -435,7 +435,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
                 if ((table != null) && (table.Rows.Count > 0))
                 {
-                    _log.Debug("Saving...");
+                    _log.Debug("Saving... (This can take a while)");
 
                     //this.StateFIPS = (table.Rows[0]["STATE"] as string);
 

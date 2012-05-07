@@ -11,6 +11,7 @@ using log4net;
 using Azavea.NijPredictivePolicing.Common;
 using Azavea.NijPredictivePolicing.ACSAlchemistLibrary;
 using Azavea.NijPredictivePolicing.ACSAlchemist;
+using System.IO;
 
 namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 {
@@ -115,15 +116,39 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         private void openJobFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            openFileJob.ShowDialog();
-            txtJobFilePath.Text = openFileJob.FileName;
+            if (openFileJob.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                txtJobFilePath.Text = openFileJob.FileName;
+
+            }
         }
 
         private void saveJobFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            saveFileJob.ShowDialog();
-            // if it's not cancelled
-            txtJobFilePath.Text = saveFileJob.FileName;
+            if (saveFileJob.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                if (string.IsNullOrEmpty(saveFileJob.FileName))
+                {
+                    MessageBox.Show("No file provided", "Unable to save job file");
+                    return;
+                }
+
+                //if (File.Exists(saveFileJob.FileName))
+                //{
+                //    if (MessageBox.Show("File exists, overwrite?", "Unable to save job file", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+                //        == System.Windows.Forms.DialogResult.No)
+                //    {
+                //        saveJobFileToolStripMenuItem_Click(sender, e);
+                //        return;
+                //    }
+                //}
+
+
+                // if it's not cancelled
+                txtJobFilePath.Text = saveFileJob.FileName;
+                this.GatherInputs(false);
+                FormController.Instance.JobInstance.SaveJobFile(txtJobFilePath.Text);
+            }
         }
 
 
