@@ -120,8 +120,14 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             {
                 txtJobFilePath.Text = openFileJob.FileName;
 
+                FormController.Instance.JobInstance = new ImportJob();
+                FormController.Instance.JobInstance.Load(new string[] { txtJobFilePath.Text });
+
+                this.PopulateControls();
             }
         }
+
+       
 
         private void saveJobFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -435,10 +441,57 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             //optional flags
             importObj.PreserveJam = (chkPreserveJamValues.Checked) ? "true" : string.Empty;
             importObj.AddStrippedGEOIDcolumn = (chkStripExtraGeoID.Checked) ? "true" : string.Empty;
+        }
 
 
+        protected void PopulateControls()
+        {
+            var importObj = FormController.Instance.JobInstance;
+
+            cboYear.Text = importObj.Year;                                          //1
+            cboStates.SelectedItem = importObj.State;                               //2
+            cboSummaryLevel.SelectedItem = importObj.SummaryLevel;                  //3
+
+            txtVariableFilePath.Text = importObj.IncludedVariableFile.Trim('\"');   //4
+            txtOutputDirectory.Text = importObj.OutputFolder;                       //5
 
 
+            if (string.IsNullOrEmpty(importObj.OutputProjection))
+            {
+                radioDefaultSRID.Checked = true;
+            }
+            else if (File.Exists(importObj.OutputProjection))
+            {
+                radioSRIDFile.Checked = true;
+                this.txtPrjFilePath.Text = importObj.OutputProjection;
+            }
+            else
+            {
+                radioSRIDFromList.Checked = true;
+                this.cboProjections.Text = importObj.OutputProjection;
+            }
+
+
+            ////job name:
+            txtJobName.Text = importObj.JobName;
+            chkReplaceJob.Checked = (string.IsNullOrEmpty(importObj.ReusePreviousJobTable));
+
+            //nothing to do here
+            //importObj.ExportToShapefile = (!isFishnet) ? "true" : string.Empty;
+
+            //fishnet:
+            txtFishnetCellSize.Text = importObj.ExportToGrid;
+            txtFishnetEnvelopeFilePath.Text = importObj.GridEnvelope;
+
+            //this applies to both shapefile and fishnet exports (despite its name)
+            cboIncludeEmptyGeom.Checked = (!string.IsNullOrEmpty(importObj.IncludeEmptyGridCells));
+
+            //clip bounds
+            txtBoundaryShpFilePath.Text = importObj.ExportFilterShapefile;
+
+            //optional flags
+            chkPreserveJamValues.Checked = (!string.IsNullOrEmpty(importObj.PreserveJam));
+            chkStripExtraGeoID.Checked = (!string.IsNullOrEmpty(importObj.AddStrippedGEOIDcolumn));
         }
 
 

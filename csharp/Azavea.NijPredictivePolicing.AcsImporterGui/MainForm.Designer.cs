@@ -319,7 +319,7 @@
             this.chkReplaceJob.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkReplaceJob.Location = new System.Drawing.Point(217, 30);
             this.chkReplaceJob.Name = "chkReplaceJob";
-            this.chkReplaceJob.Size = new System.Drawing.Size(77, 19);
+            this.chkReplaceJob.Size = new System.Drawing.Size(71, 17);
             this.chkReplaceJob.TabIndex = 1;
             this.chkReplaceJob.Text = "Overwrite";
             this.chkReplaceJob.UseVisualStyleBackColor = true;
@@ -348,6 +348,7 @@
             this.txtJobFilePath.BackColor = System.Drawing.SystemColors.ControlLight;
             this.txtJobFilePath.Location = new System.Drawing.Point(591, 22);
             this.txtJobFilePath.Name = "txtJobFilePath";
+            this.txtJobFilePath.ReadOnly = true;
             this.txtJobFilePath.Size = new System.Drawing.Size(244, 21);
             this.txtJobFilePath.TabIndex = 10;
             // 
@@ -475,20 +476,23 @@
             // newJobToolStripMenuItem
             // 
             this.newJobToolStripMenuItem.Name = "newJobToolStripMenuItem";
-            this.newJobToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.newJobToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.newJobToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.newJobToolStripMenuItem.Text = "&New Job";
             // 
             // openJobFileToolStripMenuItem
             // 
             this.openJobFileToolStripMenuItem.Name = "openJobFileToolStripMenuItem";
-            this.openJobFileToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.openJobFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.openJobFileToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.openJobFileToolStripMenuItem.Text = "Open Job File";
             this.openJobFileToolStripMenuItem.Click += new System.EventHandler(this.openJobFileToolStripMenuItem_Click);
             // 
             // saveJobFileToolStripMenuItem
             // 
             this.saveJobFileToolStripMenuItem.Name = "saveJobFileToolStripMenuItem";
-            this.saveJobFileToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.saveJobFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.saveJobFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveJobFileToolStripMenuItem.Text = "Save Job File";
             this.saveJobFileToolStripMenuItem.Click += new System.EventHandler(this.saveJobFileToolStripMenuItem_Click);
             // 
