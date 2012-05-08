@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ACS_Data_Ermine_Form")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Acs Alchemist")]
+[assembly: AssemblyDescription("This tool was developed by Azavea in collaboration with Jerry Ratcliffe and Ralph Taylor of Temple University and partially funded by a Predictive Policing grant from the National Institute of Justice (Award # 2010-DE-BX-K004).  The source code is released under a GPLv3 license, and is available here: https://github.com/azavea/acs-alchemist")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ACS_Data_Ermine_Form")]
-[assembly: AssemblyCopyright("Copyright ©  2012")]
+[assembly: AssemblyCompany("Azavea ( http://www.azavea.com )")]
+[assembly: AssemblyProduct("AcsAlchemist")]
+[assembly: AssemblyCopyright("Copyright © Azavea 2011-2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

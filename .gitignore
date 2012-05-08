@@ -15,3 +15,5 @@ scripts/installer/*.exe
 /csharp/Azavea.NijPredictivePolicing.Test/2005-2009_SummaryFileXLS.zip
 /csharp/Azavea.NijPredictivePolicing.Test/TestData/2010_Wyoming_Tracts_Block_Groups_Only.zip
 /csharp/Azavea.NijPredictivePolicing.Test/TestData/2009_Wyoming_Tracts_Block_Groups_Only.zip
+/csharp/Azavea.NijPredictivePolicing.Test/Working/Wyoming/database/acs2005_2009_5yr.sqlite
+/csharp/Azavea.NijPredictivePolicing.Test/Working/Wyoming/database/acs2010_5yr.sqlite

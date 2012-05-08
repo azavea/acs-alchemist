@@ -192,7 +192,7 @@
             this.cboIncludeEmptyGeom.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cboIncludeEmptyGeom.Location = new System.Drawing.Point(6, 72);
             this.cboIncludeEmptyGeom.Name = "cboIncludeEmptyGeom";
-            this.cboIncludeEmptyGeom.Size = new System.Drawing.Size(157, 22);
+            this.cboIncludeEmptyGeom.Size = new System.Drawing.Size(152, 21);
             this.cboIncludeEmptyGeom.TabIndex = 2;
             this.cboIncludeEmptyGeom.Text = "Include Empty Cells";
             this.cboIncludeEmptyGeom.UseVisualStyleBackColor = true;
@@ -204,7 +204,7 @@
             this.chkStripExtraGeoID.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkStripExtraGeoID.Location = new System.Drawing.Point(6, 47);
             this.chkStripExtraGeoID.Name = "chkStripExtraGeoID";
-            this.chkStripExtraGeoID.Size = new System.Drawing.Size(147, 22);
+            this.chkStripExtraGeoID.Size = new System.Drawing.Size(143, 21);
             this.chkStripExtraGeoID.TabIndex = 1;
             this.chkStripExtraGeoID.Text = "Strip Extra GEOID";
             this.chkStripExtraGeoID.UseVisualStyleBackColor = true;
@@ -216,7 +216,7 @@
             this.chkPreserveJamValues.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkPreserveJamValues.Location = new System.Drawing.Point(6, 22);
             this.chkPreserveJamValues.Name = "chkPreserveJamValues";
-            this.chkPreserveJamValues.Size = new System.Drawing.Size(150, 22);
+            this.chkPreserveJamValues.Size = new System.Drawing.Size(148, 21);
             this.chkPreserveJamValues.TabIndex = 0;
             this.chkPreserveJamValues.Text = "Preserve ACS Jam";
             this.chkPreserveJamValues.UseVisualStyleBackColor = true;
@@ -319,7 +319,7 @@
             this.chkReplaceJob.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkReplaceJob.Location = new System.Drawing.Point(193, 30);
             this.chkReplaceJob.Name = "chkReplaceJob";
-            this.chkReplaceJob.Size = new System.Drawing.Size(92, 22);
+            this.chkReplaceJob.Size = new System.Drawing.Size(90, 21);
             this.chkReplaceJob.TabIndex = 1;
             this.chkReplaceJob.Text = "Overwrite";
             this.chkReplaceJob.UseVisualStyleBackColor = true;
@@ -516,8 +516,9 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(119, 24);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 24);
             this.aboutToolStripMenuItem.Text = "&About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // saveFileJob
             // 
@@ -715,7 +716,7 @@
             this.radioSRIDFile.Location = new System.Drawing.Point(12, 73);
             this.radioSRIDFile.Margin = new System.Windows.Forms.Padding(2);
             this.radioSRIDFile.Name = "radioSRIDFile";
-            this.radioSRIDFile.Size = new System.Drawing.Size(77, 22);
+            this.radioSRIDFile.Size = new System.Drawing.Size(81, 21);
             this.radioSRIDFile.TabIndex = 3;
             this.radioSRIDFile.TabStop = true;
             this.radioSRIDFile.Text = "PRJ File";
@@ -729,7 +730,7 @@
             this.radioDefaultSRID.Location = new System.Drawing.Point(12, 22);
             this.radioDefaultSRID.Margin = new System.Windows.Forms.Padding(2);
             this.radioDefaultSRID.Name = "radioDefaultSRID";
-            this.radioDefaultSRID.Size = new System.Drawing.Size(243, 22);
+            this.radioDefaultSRID.Size = new System.Drawing.Size(235, 21);
             this.radioDefaultSRID.TabIndex = 0;
             this.radioDefaultSRID.TabStop = true;
             this.radioDefaultSRID.Text = "Default SRID (census projection)";
@@ -753,7 +754,7 @@
             this.radioSRIDFromList.Location = new System.Drawing.Point(12, 47);
             this.radioSRIDFromList.Margin = new System.Windows.Forms.Padding(2);
             this.radioSRIDFromList.Name = "radioSRIDFromList";
-            this.radioSRIDFromList.Size = new System.Drawing.Size(115, 22);
+            this.radioSRIDFromList.Size = new System.Drawing.Size(114, 21);
             this.radioSRIDFromList.TabIndex = 1;
             this.radioSRIDFromList.TabStop = true;
             this.radioSRIDFromList.Text = "Desired SRID";

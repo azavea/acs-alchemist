@@ -769,6 +769,14 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         #endregion Control Validation
 
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (AboutBox1 about = new AboutBox1())
+            {
+                about.ShowDialog();
+            }
+        }
+
      
         
 
