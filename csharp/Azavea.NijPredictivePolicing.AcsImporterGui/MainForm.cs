@@ -13,6 +13,8 @@ using Azavea.NijPredictivePolicing.ACSAlchemistLibrary;
 using Azavea.NijPredictivePolicing.ACSAlchemist;
 using System.IO;
 using Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats;
+using System.Reflection;
+using System.Drawing.Text;
 
 namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 {
@@ -49,6 +51,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 // Initialize the rest of the form
                 //
 
+                this.LoadFonts();
                 this.PopulateLists();
                 this.AddDefaultTooltips();
                 this.SmartToggler();
@@ -62,6 +65,52 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 HideLoadingSpinner();
             }
         }
+
+        /// <summary>
+        /// We're doing this because fonts are rarely consistent between machines
+        /// (in this case, my dev laptop, and my dev workstation).  This changes the
+        /// appearance of the console log, and the controls quite significantly (stuff disappears),
+        /// so it's pretty important that the font is right.
+        /// </summary>
+        protected void LoadFonts()
+        {
+            try
+            {
+                //copied from http://dotnet-coding-helpercs.blogspot.com/
+                unsafe
+                {
+                    var fonts = new List<byte[]>();
+                    fonts.Add(Resource1.LiberationMono_Regular);
+                    fonts.Add(Resource1.LiberationSans_Regular);
+
+                    foreach (var buffer in fonts)
+                    {
+                        fixed (byte* pFontData = buffer)
+                        {
+                            uint dummy = 0;
+                            _fontCollection.AddMemoryFont((IntPtr)pFontData, buffer.Length);
+                            AddFontMemResourceEx((IntPtr)pFontData, (uint)buffer.Length, IntPtr.Zero, ref dummy);
+                        }
+                    }
+                }
+
+                //opting to leave the form alone for the moment, because these fonts aren't especially awesome
+                //this.Font =  new Font(_fontCollection.Families[1], 9);
+
+                //however, we absolutely need a monospaced font here for this to look correct.
+                txtLogConsole.Font = new Font(_fontCollection.Families[0], 8);
+            }
+            catch (Exception ex)
+            {
+                this.DisplayException("Error Loading Embedded Font", ex);
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        private static extern IntPtr AddFontMemResourceEx(IntPtr pbFont, uint cbFont,
+        IntPtr pdv, [System.Runtime.InteropServices.In] ref uint pcFonts);
+        private PrivateFontCollection _fontCollection = new PrivateFontCollection();
+
 
 
 
@@ -120,6 +169,11 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             if (openFileJob.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 txtJobFilePath.Text = openFileJob.FileName;
+
+                //change the current working directory to the folder where the job file was
+                //so that relative paths work as expected
+                Environment.CurrentDirectory = Path.GetDirectoryName(txtJobFilePath.Text);
+
 
                 FormController.Instance.LoadNewJobInstance(txtJobFilePath.Text);
 
@@ -452,6 +506,12 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         protected void PopulateControls()
         {
+            foreach (Control ctl in this.Controls)
+            {
+                this.errorProvider1.SetError(ctl, string.Empty);
+            }
+
+
             var importObj = FormController.Instance.JobInstance;
 
             cboYear.Text = importObj.Year;                                          //1
