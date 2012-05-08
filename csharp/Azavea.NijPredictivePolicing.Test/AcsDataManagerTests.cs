@@ -37,7 +37,7 @@ namespace Azavea.NijPredictivePolicing.Test.ACSAlchemistLibrary
     public class AcsDataManagerTests
     {
         private static ILog _log = null;
-        public const string WorkingPath = @"C:\projects\Temple_Univ_NIJ_Predictive_Policing\csharp\Azavea.NijPredictivePolicing.Test";
+        public const string WorkingPath = @"C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.Test";
         
 
         /// <summary>
@@ -121,6 +121,92 @@ namespace Azavea.NijPredictivePolicing.Test.ACSAlchemistLibrary
                 }
             }
         }
+
+        [Test]
+        public void TestRead2009SequenceFiles()
+        {
+            string testYear = "2009";
+
+            //CENSUS_TABLE_ID, NAME, COLNO, SEQNO
+            string[] testVariables = new string[] {
+                    "B00001001,ALLPOP,6,9",
+                    "B01001002,TOTALMALE,7,10",
+                    "B01001003,TOTMALE1,8,10",
+                    "B01001026,TOTALFEMALE,31,10"
+                };
+            TestReadSequenceFiles(testYear, testVariables);
+        }
+
+        [Test]
+        public void TestRead2010SequenceFiles()
+        {
+            string testYear = "2010";
+
+            //CENSUS_TABLE_ID, NAME, COLNO, SEQNO
+            string[] testVariables = new string[] {
+                    "B00001001,ALLPOP,6,9",
+                    "B01001002,TOTALMALE,7,10",
+                    "B01001003,TOTMALE1,8,10",
+                    "B01001026,TOTALFEMALE,31,10"
+                };
+            TestReadSequenceFiles(testYear, testVariables);
+        }
+
+
+        /// <summary>
+        /// Ensure we're grabbing the correct columns given the requested variable name
+        /// </summary>
+        [Test]
+        public void TestReadSequenceFiles(string year, string[] testVariables)
+        {
+            //Grab our 'Wyoming' manager object
+            var man = GetManager(year);
+
+            Assert.IsTrue(man.CheckColumnMappingsFile(), "Couldn't get required file");
+            Assert.IsTrue(man.CheckBlockGroupFile(), "Couldn't get required file");
+
+
+            using (var conn = man.DbClient.GetConnection())
+            {
+
+                if (!man.CreateColumnMappingsTable(conn))
+                {
+                    Assert.Fail("Could not import sequence files");
+                }
+
+                string sqlTemplate = @"SELECT    columnMappings.CENSUS_TABLE_ID, 
+                                  columnMappings.COLNO, 
+                                  columnMappings.SEQNO
+                                  
+                        FROM      columnMappings
+                        WHERE     columnMappings.CENSUS_TABLE_ID = '{0}';";
+
+                foreach (string testRow in testVariables)
+                {
+                    string[] chunks = testRow.Split(',');
+                    int expectedColNo = Utilities.GetAs(chunks[2], -1);
+                    int expectedSeqNo = Utilities.GetAs(chunks[3], -1);
+
+                    string sql = string.Format(sqlTemplate, chunks[0]);
+                    DataTable dt = DataClient.GetMagicTable(conn, man.DbClient, sql);
+
+                    Assert.IsNotNull(dt, "DataTable was null!");
+                    Assert.IsTrue(dt.Rows.Count > 0, "DataTable was empty!");
+
+                    int colNo = Utilities.GetAs(dt.Rows[0]["COLNO"], -1);
+                    int seqNo = Utilities.GetAs(dt.Rows[0]["SEQNO"], -1);
+
+                
+                    _log.DebugFormat("Column, Sequence for {0} is {1}, {2}", chunks[0], colNo, seqNo);
+
+                    Assert.AreEqual(expectedColNo, colNo, "COLUMN NUMBER MISMATCH for variable " + chunks[0]);
+                    Assert.AreEqual(expectedSeqNo, seqNo, "COLUMN NUMBER MISMATCH for variable " + chunks[0]);
+
+                }
+            }
+        }
+
+
 
         [Test]
         public void ImportVariablesFileSuccesses()
@@ -234,10 +320,14 @@ namespace Azavea.NijPredictivePolicing.Test.ACSAlchemistLibrary
             Assert.IsFalse(manager.CheckBuildVariableTable("TestTooMany"));
         }
 
-
         protected AcsDataManager GetManager()
         {
-            AcsDataManager m = new AcsDataManager(AcsState.Wyoming);            
+            return GetManager("2009");
+        }
+
+        protected AcsDataManager GetManager(string year)
+        {
+            AcsDataManager m = new AcsDataManager(AcsState.Wyoming, WorkingPath, year);            
             m.WorkingPath = FileUtilities.PathEnsure(WorkingPath, "TestData");
 
             string dbPath = FileUtilities.PathEnsure(m.WorkingPath, "database");
