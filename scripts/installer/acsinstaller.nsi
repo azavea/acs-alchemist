@@ -38,7 +38,7 @@ Var StartMenuGroup
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_STARTMENU Application $StartMenuGroup
 
-Page custom onPathPageCreate onPathPageLeave "Add directory to system path?"
+Page custom onPathPageCreate onPathPageLeave " Add directory to system path?"
 
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -232,6 +232,8 @@ FunctionEnd
 Function onPathPageCreate
  nsDialogs::Create 1018
  Pop $Dialog
+ 
+  !insertmacro MUI_HEADER_TEXT "ACS Alchemist" "Add directory to system path"
 
  ${If} $Dialog == error
   Abort
