@@ -79,10 +79,17 @@ Var Checkbox_State
 Section -Main SEC0000
     SetOutPath $INSTDIR
     SetOverwrite on
-    File /r /x *.log ${SOURCE_DIR}\* 
+    File /r /x *.log /x logs ${SOURCE_DIR}\* 
     ;File /r C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug\*
     File C:\projects\acs-alchemist\doc\README.txt
 	
+	;SetOutPath $INSTDIR\logs
+	;File /r /x *.log ${SOURCE_DIR}\logs
+	
+	CreateDirectory $INSTDIR\logs
+	AccessControl::GrantOnFile "$INSTDIR\logs" "Everyone" "FullAccess"
+	
+	SetOutPath $INSTDIR
 	#23265 -- any config files must be present!  otherwise the user will need to be an admin on first run, which is annoying
 	File ${SOURCE_DIR}\AcsAlchemist.2009.config
 	File ${SOURCE_DIR}\AcsAlchemist.2010.config
