@@ -351,6 +351,7 @@
             this.txtJobFilePath.ReadOnly = true;
             this.txtJobFilePath.Size = new System.Drawing.Size(290, 26);
             this.txtJobFilePath.TabIndex = 10;
+            this.txtJobFilePath.TabStop = false;
             // 
             // btnSaveMessageLog
             // 
