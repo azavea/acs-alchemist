@@ -93,6 +93,8 @@ Section -Main SEC0000
 	File C:\projects\acs-alchemist\doc\ACS_Alchemist_Flowchart.jpg
 	File C:\projects\acs-alchemist\doc\ACS2009_5-Year_TableShells.xls
 	File C:\projects\acs-alchemist\doc\ACS2010_5-Year_TableShells.xls
+	File C:\projects\acs-alchemist\doc\ACS-Alchemist-UserManual.docx
+	File C:\projects\acs-alchemist\doc\ACS-Alchemist-UserManual.pdf
 	
 	#Licenses#
 	SetOutPath $INSTDIR\Licenses
