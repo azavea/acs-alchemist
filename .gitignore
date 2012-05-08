@@ -9,3 +9,9 @@ scripts/installer/*.exe
 /acsimporter_1_0_0/bin
 /csharp/Backup
 /csharp/_UpgradeReport_Files
+/csharp/Azavea.NijPredictivePolicing.Test/2010_SummaryFileTemplates
+/csharp/Azavea.NijPredictivePolicing.Test/2005-2009_SummaryFileXLS
+/csharp/Azavea.NijPredictivePolicing.Test/2010_SummaryFileTemplates.zip
+/csharp/Azavea.NijPredictivePolicing.Test/2005-2009_SummaryFileXLS.zip
+/csharp/Azavea.NijPredictivePolicing.Test/TestData/2010_Wyoming_Tracts_Block_Groups_Only.zip
+/csharp/Azavea.NijPredictivePolicing.Test/TestData/2009_Wyoming_Tracts_Block_Groups_Only.zip
