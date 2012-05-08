@@ -131,6 +131,7 @@
     <None Include="fonts\LiberationSans-Regular.ttf" />
     <None Include="fonts\LiberationSansNarrow-Regular.ttf" />
     <None Include="fonts\LiberationSerif-Regular.ttf" />
+    <None Include="Logging.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
