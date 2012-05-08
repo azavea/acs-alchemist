@@ -8,7 +8,7 @@ Name "ACS Alchemist"
 !define VERSION 1.0.0
 !define COMPANY Azavea
 !define URL http://www.azavea.com
-!define SOURCE_DIR C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\x86\Debug
+!define SOURCE_DIR C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporterGui\bin\x86\Debug
 #!define SOURCE_DIR "C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug"
 
 # MUI Symbol Definitions
@@ -131,6 +131,8 @@ Section -Main SEC0000
 	File C:\projects\acs-alchemist\lib\sqlite\license.txt	
 	
     SetOutPath $SMPROGRAMS\$StartMenuGroup	
+	CreateShortcut "$SMPROGRAMS\$StartMenuGroup\ACS Alchemist GUI.lnk" "$INSTDIR\AcsAlchemistGui.exe"	
+	
 	CreateShortcut "$SMPROGRAMS\$StartMenuGroup\View Files.lnk" "$INSTDIR"	
     CreateShortcut "${SHORTCUTFILE}" "cmd" "/k cd $INSTDIR"
 	#ShellLink::SetRunAsAdministrator "${SHORTCUTFILE}"

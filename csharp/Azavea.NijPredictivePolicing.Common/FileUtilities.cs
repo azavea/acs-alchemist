@@ -24,6 +24,7 @@ using System.Text;
 using System.IO;
 using log4net;
 using Ionic.Zip;
+using System.Reflection;
 
 namespace Azavea.NijPredictivePolicing.Common
 {
@@ -257,6 +258,14 @@ namespace Azavea.NijPredictivePolicing.Common
             string tmp = OutputFolder.Trim('\"');
 
             return tmp;
+        }
+
+        public static string GetApplicationPath()
+        {
+            string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetName().CodeBase);
+            appPath = appPath.Replace("file:\\", string.Empty);
+
+            return appPath;
         }
     }
 }

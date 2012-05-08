@@ -72,6 +72,9 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Icon1.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net">
       <HintPath>..\..\lib\log4net\log4net.dll</HintPath>
@@ -172,6 +175,9 @@
       <Project>{9E1E6F34-233E-4145-8DB0-75BFA5DB1715}</Project>
       <Name>Azavea.NijPredictivePolicing.Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Icon1.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

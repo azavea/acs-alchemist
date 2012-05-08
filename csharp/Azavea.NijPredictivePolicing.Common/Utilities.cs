@@ -413,14 +413,15 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <returns></returns>
         public static List<string> ListAllCoordinateSystemIDs()
         {
-            if (!File.Exists("SRID.csv"))
+            string sridFilename = Path.Combine(FileUtilities.GetApplicationPath(), "SRID.csv");
+            if (!File.Exists(sridFilename))
             {
                 _log.Error("Unable to lookup srid by number, no SRID.csv file");
                 return null;
             }
 
             List<string> results = new List<string>(4096);
-            StreamReader reader = new StreamReader("SRID.csv");
+            StreamReader reader = new StreamReader(sridFilename);
             string line = string.Empty;
 
             while ((line = reader.ReadLine()) != null)
@@ -452,11 +453,12 @@ namespace Azavea.NijPredictivePolicing.Common
              * This is not efficient, but it is very convenient
              */
             //BRUTE FORCE find the srid in our srids file
-            if (!File.Exists("SRID.csv"))
+            string sridFilename = Path.Combine(FileUtilities.GetApplicationPath(), "SRID.csv");
+            if (!File.Exists(sridFilename))
             {
                 _log.Error("Unable to lookup srid by number, no SRID.csv file");
             }
-            StreamReader reader = new StreamReader("SRID.csv");
+            StreamReader reader = new StreamReader(sridFilename);
             string line = string.Empty;
             string key = outputSrid + ";";
             while ((line = reader.ReadLine()) != null)
