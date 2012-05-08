@@ -79,7 +79,7 @@ Var Checkbox_State
 Section -Main SEC0000
     SetOutPath $INSTDIR
     SetOverwrite on
-    File /r ${SOURCE_DIR}\*
+    File /r ${SOURCE_DIR}\* /x errors.*.log /x importer.*.log
     ;File /r C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug\*
     File C:\projects\acs-alchemist\doc\README.txt
 	
