@@ -87,7 +87,7 @@
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblGridCellUnits = new System.Windows.Forms.Label();
             this.btnFishnet = new System.Windows.Forms.Button();
             this.btnShapefile = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -646,7 +646,7 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.label1);
+            this.groupBox3.Controls.Add(this.lblGridCellUnits);
             this.groupBox3.Controls.Add(this.txtFishnetCellSize);
             this.groupBox3.Controls.Add(this.label13);
             this.groupBox3.Controls.Add(this.txtFishnetEnvelopeFilePath);
@@ -661,14 +661,14 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Fishnet Options";
             // 
-            // label1
+            // lblGridCellUnits
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(136, 26);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(34, 18);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "feet";
+            this.lblGridCellUnits.AutoSize = true;
+            this.lblGridCellUnits.Location = new System.Drawing.Point(136, 26);
+            this.lblGridCellUnits.Name = "lblGridCellUnits";
+            this.lblGridCellUnits.Size = new System.Drawing.Size(106, 18);
+            this.lblGridCellUnits.TabIndex = 1;
+            this.lblGridCellUnits.Text = "projection units";
             // 
             // btnFishnet
             // 
@@ -871,7 +871,7 @@
         private System.Windows.Forms.Button btnShapefile;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblGridCellUnits;
         private System.Windows.Forms.CheckBox cboIncludeEmptyGeom;
         private System.Windows.Forms.ErrorProvider errorProvider1;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;

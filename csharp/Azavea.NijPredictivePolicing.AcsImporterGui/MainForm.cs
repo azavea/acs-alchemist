@@ -157,7 +157,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             this.SetTooltip(chkStripExtraGeoID, "When checked, it adds a copy of the GEOID column \"GEOID_STRP\" except without the \"15000US\" prefix ");
             this.SetTooltip(cboIncludeEmptyGeom, "When checked, it keeps all cells or polygons in the output, even if they don't have any data ");
 
-
+            this.SetTooltip(txtFishnetCellSize, "These units MUST match the currently selected projection units (meters, degrees, feet, etc)");
+            this.SetTooltip(lblGridCellUnits, "These units MUST match the currently selected projection units (meters, degrees, feet, etc)");
         }
 
 
