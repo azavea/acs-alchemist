@@ -174,10 +174,9 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 //so that relative paths work as expected
                 Environment.CurrentDirectory = Path.GetDirectoryName(txtJobFilePath.Text);
 
-
                 FormController.Instance.LoadNewJobInstance(txtJobFilePath.Text);
-
                 this.PopulateControls();
+                this.ValidateChildren();
             }
         }
 
@@ -503,14 +502,10 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             importObj.AddStrippedGEOIDcolumn = (chkStripExtraGeoID.Checked) ? "true" : string.Empty;
         }
 
-
         protected void PopulateControls()
         {
-            foreach (Control ctl in this.Controls)
-            {
-                this.errorProvider1.SetError(ctl, string.Empty);
-            }
-
+            this.errorProvider1.Clear();
+           
 
             var importObj = FormController.Instance.JobInstance;
 
@@ -557,6 +552,9 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             //optional flags
             chkPreserveJamValues.Checked = (!string.IsNullOrEmpty(importObj.PreserveJam));
             chkStripExtraGeoID.Checked = (!string.IsNullOrEmpty(importObj.AddStrippedGEOIDcolumn));
+
+
+            
         }
 
 
@@ -681,6 +679,20 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         #region Control Validation
 
+        private void cboYear_Validating(object sender, CancelEventArgs e)
+        {
+            //this can be set to a bad value during a job load
+            string errMessage = string.Empty;
+
+            bool valid = !string.IsNullOrEmpty(cboYear.SelectedValue as string);
+            if (!valid)
+            {
+                errMessage = "Please select a year from the list";
+            }
+
+            this.errorProvider1.SetError(this.cboYear, errMessage);
+        }
+
 
         private void txtVariableFilePath_Validating(object sender, CancelEventArgs e)
         {
@@ -756,6 +768,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         #endregion Control Validation
 
+     
         
 
 

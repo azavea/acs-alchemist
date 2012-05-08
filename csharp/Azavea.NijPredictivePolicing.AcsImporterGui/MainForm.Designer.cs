@@ -381,6 +381,7 @@
             this.cboYear.Name = "cboYear";
             this.cboYear.Size = new System.Drawing.Size(125, 26);
             this.cboYear.TabIndex = 0;
+            this.cboYear.Validating += new System.ComponentModel.CancelEventHandler(this.cboYear_Validating);
             // 
             // cboStates
             // 
