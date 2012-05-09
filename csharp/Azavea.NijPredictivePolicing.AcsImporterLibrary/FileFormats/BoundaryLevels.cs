@@ -26,7 +26,7 @@ using System.ComponentModel;
 namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
 {
     /// <summary>
-    /// TODO: Unify these into classes?
+    /// Describes the supported census boundary levels
     /// </summary>
     public enum BoundaryLevels
     {

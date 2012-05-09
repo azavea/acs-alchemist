@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Azavea.NijPredictivePolicing.Common</RootNamespace>
-    <AssemblyName>Common</AssemblyName>
+    <AssemblyName>Azavea.NijPredictivePolicing.Common</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>

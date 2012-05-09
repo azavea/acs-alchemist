@@ -42,6 +42,9 @@ using ProjNet.CoordinateSystems;
 
 namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 {
+    /// <summary>
+    /// This class does most of the heavy lifting of the ACS Alchemist
+    /// </summary>
     public class AcsDataManager : IDisposable
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -111,19 +114,14 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
         public bool IncludeEmptyGridCells = false;
         public string OutputFolder;
-        
-        public bool PreserveJam;
 
-        /// <summary>
-        /// SRID to use for shapefile filter
-        /// </summary>
-        //public int SRID;
+        public bool PreserveJam;
 
         /// <summary>
         /// If true, add column GEOID_STRP to the shapefile output with values the same as GEOID except without the "15000US" prefix
         /// </summary>
         public bool AddStrippedGEOIDcolumn = false;
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -162,7 +160,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 Settings.AppDataDirectory = FileUtilities.SafePathEnsure(workingFolder);
             }
             _log.InfoFormat("Working directory is {0} ", workingFolder);
-            
+
             Init();
         }
 
@@ -178,11 +176,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
             this.ShapePath = FileUtilities.PathEnsure(this.WorkingPath, "shapes");
             this.CurrentDataPath = FileUtilities.PathEnsure(this.WorkingPath, Settings.CurrentAcsDirectory);
-
-
-            //this.DataPath = FileLocator.GetStateBlockGroupDataDir(this.State);
-            //this.ShpPath = FileLocator.GetStateBlockGroupDataDir(this.State);            
-            //this.DBPath = FileUtilities.PathCombine(this.DataPath, this.State.ToString() + ".sqlite");
 
             this.DbClient = DataClient.GetDefaultClient(this.DBFilename);
         }
@@ -202,23 +195,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         {
             return FileUtilities.PathCombine(Settings.AppDataDirectory, Settings.ColumnMappingsFileName);
         }
-        
-
-
-        //public string GetRemoteStateShapefileURL()
-        //{
-        //    string url = Settings.StateBlockGroupShapefileRootURL +  Settings.StateBlockGroupShapefileFormatURL;
-        //    url = url.Replace("{FIPS-code}", this.StateFIPS);
-        //    return url;
-        //}
-        //public string GetLocalBlockGroupShapefilename()
-        //{
-        //    string template = Settings.StateBlockGroupShapefileFormatURL;
-        //    template = template.Replace("{FIPS-code}", this.StateFIPS);
-
-        //    return Path.Combine(this.WorkingPath, template);
-        //}
-
 
         public bool CheckColumnMappingsFile()
         {
@@ -400,12 +376,12 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             return (DbClient.TestDatabaseConnection());
         }
 
-        
+
 
         public bool CreateGeographiesTable(DbConnection conn)
         {
             //create the table
-            string createGeographyTableSQL = DataClient.GenerateTableSQLFromFields(DbConstants.TABLE_Geographies,  GeographyFileReader.Columns);
+            string createGeographyTableSQL = DataClient.GenerateTableSQLFromFields(DbConstants.TABLE_Geographies, GeographyFileReader.Columns);
             DbClient.GetCommand(createGeographyTableSQL, conn).ExecuteNonQuery();
 
             //parse in the file
@@ -456,7 +432,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         public bool CreateColumnMappingsTable(DbConnection conn)
         {
             DbClient.GetCommand(string.Format("DROP TABLE IF EXISTS \"{0}\";", DbConstants.TABLE_ColumnMappings), conn).ExecuteNonQuery();
-            
+
 
             //create table
             string createMappingsTableSql = DataClient.GenerateTableSQLFromFields(DbConstants.TABLE_ColumnMappings, SequenceFileReader.Columns);
@@ -560,16 +536,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             }
         }
 
-        ///// <summary>
-        ///// Given a csv file containing a list of TABLEIDs and optional Names, create a table from it
-        ///// </summary>
-        ///// <param name="conn"></param>
-        ///// <param name="filename"></param>
-        //public void CreateDesiredColumnsTable(DbConnection conn)
-        //{
-
-        //}
-
 
         /// <summary>
         /// Call this anyway, should only execute code inside safe blocks
@@ -610,15 +576,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
             return true;
         }
-
-
-
-
-
-
-
-
-
 
 
         /// <summary>
@@ -662,11 +619,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     }
                 }
             }
-            //else if (!string.IsNullOrEmpty(this.WKTFilterFilename))
-            //{
-            //    //TODO: implement
-            //    _log.Warn("Not Yet Implemented");
-            //}
+
             return results;
         }
 
@@ -751,33 +704,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             _log.Debug("Processing requested variables... Done!");
             return dt;
         }
-
-
-        //public List<IGeometry> GetFilteringGeometries()
-        //{
-        //    List<IGeometry> results = null;
-        //    if (!string.IsNullOrEmpty(this.ExportFilterFilename))
-        //    {
-        //        if (!File.Exists(this.ExportFilterFilename))
-        //        {
-        //            _log.Error("Provided WKT file doesn't exist");
-        //            return null;
-        //        }
-
-        //        WKTReader reader = new WKTReader(ShapefileHelper.GetGeomFactory());
-        //        string[] lines = File.ReadAllLines(this.ExportFilterFilename);
-        //        results = new List<IGeometry>(lines.Length);
-
-        //        foreach (string line in lines)
-        //        {
-        //            if (string.IsNullOrEmpty(line) || line.StartsWith("#") || line.StartsWith("//"))
-        //                continue;
-
-        //            results.Add(reader.Read(line));
-        //        }
-        //    }
-        //    return results;
-        //}
 
         public List<IGeometry> GetFilteringGeometries(string filename, ICoordinateSystem outputCrs)
         {
@@ -882,7 +808,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
                     DataTable newTable = new DataTable();
                     newTable.Columns.Add("LOGRECNO", typeof(string));
-                    Dictionary<string, DataRow> rowsByLRN = new Dictionary<string, DataRow>(requestedLRNs.Count);                                        
+                    Dictionary<string, DataRow> rowsByLRN = new Dictionary<string, DataRow>(requestedLRNs.Count);
                     foreach (var id in requestedLRNs)
                     {
                         var row = newTable.NewRow();
@@ -893,7 +819,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     }
 
                     bool shouldNotParseErrorValues = PreserveJam;
-                    
+
                     _log.Debug("Importing Columns");
                     int varNum = 0;
                     foreach (DataRow variableRow in reqVariablesDT.Rows)
@@ -942,7 +868,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                         {
                             newTable.Columns.Add(newErrorMarginColumnName, typeof(double));
                         }
-                        
+
 
 
                         _log.DebugFormat("Importing {0}...", newColumnName);
@@ -1024,33 +950,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
         protected Dictionary<string, DataRow> GetShapeRowsByLOGRECNO(DbConnection conn)
         {
-            ////shapefile
-            //if (!DataClient.HasTable(conn, DbClient, "shapetable"))
-            //{
-            //    this.CreateShapefileTable(conn, "shapetable");
-            //}
-
-            //really, we should be able to do this in one SQL statement, but for whatever reason, 
-            //sqlite doesn't want to let us
-
-            //something like this:
-            //            string shapeSQL = @"
-            //select s.pkuid, s.Geometry, g.LOGRECNO from shapetable s, geographies g 
-            //where cast(g.COUNTY as integer) = cast(s.COUNTY as integer)
-            //and g.TRACT like s.TRACT || '00'
-            //and cast(g.BLKGRP as integer) = cast(s.BLKGROUP as integer) ";
-
-            //var temp = DataClient.GetMagicTable(conn, DbClient, "select * from census_tracts"); // where logrecno like '%883%'
-
-            
-
-            
-
             string geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGRP) as blkgroup, GEOID from geographies order by county, tract, blkgrp ";
             var wholeGeomTable = DataClient.GetMagicTable(conn, DbClient, geomSQL);
-
-
-           
 
             string shapeSQL = string.Empty;
             switch (this.SummaryLevel)
@@ -1081,8 +982,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                      */
 
                     bool hasAbbrevColumn = DataClient.HasColumn("BLKGRP", "census_blockgroups", conn, DbClient);
-                        string blkGroupColumn = (hasAbbrevColumn) ? "BLKGRP" : "BLKGROUP";
-                    
+                    string blkGroupColumn = (hasAbbrevColumn) ? "BLKGRP" : "BLKGROUP";
+
                     //block groups
                     shapeSQL = string.Format("select trim(COUNTY) as county, trim(TRACT) as tract, trim({0}) as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_blockgroups ",
                         blkGroupColumn);
@@ -1098,7 +999,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 return null;
             }
 
-            
+
 
             var geomKeys = new Dictionary<string, DataRow>();
             foreach (DataRow row in wholeGeomTable.Rows)
@@ -1146,7 +1047,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                          * As this link indicates, tracts 9400 - 9499 are especially prone to this phenomenon:
                          * http://www.census.gov/geo/www/cob/tr_metadata.html
                          */
-                        
+
                         _log.DebugFormat("Duplicate records encountered for logical record number {0} (County:{1}, Tract:{2}, Block Group:{3}).", logrecno, county, tract, blkgroup);
                         if (row["GEOID"] != dict[logrecno]["GEOID"])
                         {
@@ -1173,7 +1074,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 }
                 else
                 {
-                    _log.DebugFormat("Couldn't find a geometry matching County:{0}, Tract:{1}, Block Group:{2}", 
+                    _log.DebugFormat("Couldn't find a geometry matching County:{0}, Tract:{1}, Block Group:{2}",
                         county, tract, blkgroup);
                 }
             }
@@ -1200,7 +1101,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                         {
                             //double commonArea = fg.Intersection(geom).Area;
                             //if(commonArea > 0.01 * fg.Area || commonArea > 0.01 * geom.Area)
-                                return true;
+                            return true;
                         }
                     }
                 }
@@ -1232,7 +1133,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 ICoordinateSystem destCRS = null;
                 if (!string.IsNullOrEmpty(this.OutputProjectionFilename))
                 {
-                    destCRS = Utilities.GetCoordinateSystemByWKTFile(this.OutputProjectionFilename);                    
+                    destCRS = Utilities.GetCoordinateSystemByWKTFile(this.OutputProjectionFilename);
                     reprojector = Utilities.BuildTransformationObject(GeographicCoordinateSystem.WGS84, destCRS);
 
                     //Reproject everything in this file to the requested projection...                    
@@ -1474,7 +1375,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 }
 
                 //if we need to reproject:
-                List<IGeometry> filteringGeoms = GetFilteringGeometries(this.ExportFilterFilename, outputCrs);         
+                List<IGeometry> filteringGeoms = GetFilteringGeometries(this.ExportFilterFilename, outputCrs);
 
                 //put everything into a basic spatial index
                 Envelope env = new Envelope();
@@ -1516,11 +1417,11 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 //var cellStepPoint = Utilities.GetCellFeetForProjection(GridCellWidthFeet, GridCellHeightFeet);
                 //double cellWidth = cellStepPoint.X;
                 //double cellHeight = cellStepPoint.Y;
-                
+
                 double cellWidth = GridCellWidth;
                 double cellHeight = GridCellHeight;
                 bool discardEmptyGridCells = !IncludeEmptyGridCells;
-                
+
 
                 int numRows = (int)Math.Ceiling(env.Height / cellHeight);
                 int numCols = (int)Math.Ceiling(env.Width / cellWidth);
@@ -1625,7 +1526,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                             }
                             attribs["CELLID"] = cellID;
                         }
-                        
+
                         features.Add(new Feature(cellGeom, attribs));
                     }
                 }
@@ -1696,7 +1597,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     break;
                 }
             }
-            
+
             return env;
         }
 
