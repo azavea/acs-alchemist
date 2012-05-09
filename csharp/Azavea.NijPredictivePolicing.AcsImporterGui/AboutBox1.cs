@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 {
@@ -38,6 +39,10 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             this.labelCopyright.Text = AssemblyCopyright;
             this.labelCompanyName.Text = AssemblyCompany;
             this.textBoxDescription.Text = AssemblyDescription;
+
+            this.labelCompanyName.LinkBehavior = LinkBehavior.HoverUnderline;
+            labelCompanyName.Links.Remove(labelCompanyName.Links[0]);
+            labelCompanyName.Links.Add(0, labelCompanyName.Text.Length + 2, "http://www.azavea.com");
         }
 
         #region Assembly Attribute Accessors
@@ -119,6 +124,17 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             }
         }
         #endregion
+
+        private void labelCompanyName_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            ProcessStartInfo sInfo = new ProcessStartInfo(e.Link.LinkData.ToString());
+            Process.Start(sInfo);
+        }
+
+
+
+
+     
 
 
     }
