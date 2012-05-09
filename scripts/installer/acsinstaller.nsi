@@ -227,7 +227,7 @@ ${If} $Checkbox_State == ${BST_CHECKED}
     NsExec::ExecToLog 'setx PATH "%path%;$INSTDIR;"'
     
     #reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_SZ /d %path%;c:\FOO
-    NsExec::ExecToLog 'reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_SZ /d "%path%;$INSTDIR;"'
+    #NsExec::ExecToLog 'reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_SZ /d "%path%;$INSTDIR;"'
 
     DetailPrint "Added install dir to path"
 

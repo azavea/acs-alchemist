@@ -55,6 +55,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 this.PopulateLists();
                 this.AddDefaultTooltips();
                 this.SmartToggler();
+
+                this.FixWeirdStyles();
             }
             catch (Exception ex)
             {
@@ -63,6 +65,16 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             finally
             {
                 HideLoadingSpinner();
+            }
+        }
+
+        protected void FixWeirdStyles()
+        {
+            //fix for windows with weird styles
+            if (this.txtLogConsole.ForeColor.ToArgb() == this.txtLogConsole.BackColor.ToArgb())
+            {
+                //this happens on some windows configurations:
+                this.txtLogConsole.ForeColor = System.Drawing.SystemColors.WindowText;
             }
         }
 
