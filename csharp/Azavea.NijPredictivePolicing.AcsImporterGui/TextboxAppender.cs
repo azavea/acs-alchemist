@@ -7,6 +7,9 @@ using log4net.Appender;
 
 namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 {
+    /// <summary>
+    /// Simple helper class so we can append our log to the form in a thread safe way
+    /// </summary>
     public class TextboxAppender : AppenderSkeleton
     {
         protected TextBox _control;

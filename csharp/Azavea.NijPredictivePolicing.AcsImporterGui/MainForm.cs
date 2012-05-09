@@ -68,6 +68,10 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             }
         }
 
+        /// <summary>
+        /// Windows configurations differ in the actual colors used for different elements 'InactiveText', 'BackgroundColor', etc.
+        /// Our log text is a little 'grayed out' to be less distracting, but on some configurations this can make it invisible.
+        /// </summary>
         protected void FixWeirdStyles()
         {
             //fix for windows with weird styles
@@ -118,10 +122,14 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             }
         }
 
+        #region Fancy Font Stuff
+
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]
         private static extern IntPtr AddFontMemResourceEx(IntPtr pbFont, uint cbFont,
         IntPtr pdv, [System.Runtime.InteropServices.In] ref uint pcFonts);
         private PrivateFontCollection _fontCollection = new PrivateFontCollection();
+
+        #endregion Fancy Font Stuff
 
 
 
@@ -175,6 +183,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
 
 
+        #region Menu Events
 
 
         private void openJobFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -199,7 +208,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             this.PopulateControls();
         }
 
-       
+
 
         private void saveJobFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -211,17 +220,6 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                     return;
                 }
 
-                //if (File.Exists(saveFileJob.FileName))
-                //{
-                //    if (MessageBox.Show("File exists, overwrite?", "Unable to save job file", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
-                //        == System.Windows.Forms.DialogResult.No)
-                //    {
-                //        saveJobFileToolStripMenuItem_Click(sender, e);
-                //        return;
-                //    }
-                //}
-
-
                 // if it's not cancelled
                 txtJobFilePath.Text = saveFileJob.FileName;
                 this.GatherInputs(true);        //gather all the settings
@@ -229,6 +227,39 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             }
         }
 
+
+        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (AboutBox1 about = new AboutBox1())
+            {
+                about.ShowDialog();
+            }
+        }
+
+
+        /// <summary>
+        /// TODO: This is not yet implemented, providing a helpful error message
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnSaveMessageLog_Click(object sender, EventArgs e)
+        {
+            txtMessageLogFilePath.Text = Path.Combine(FileUtilities.GetApplicationPath(), "logs");
+
+            _log.Debug("Redirecting Log output to a specified file is not yet supported by this interface.");
+            _log.DebugFormat("You can find a copy of the logs here: {0}", txtMessageLogFilePath.Text);
+
+            //saveFileMessageLog.ShowDialog();
+            //txtMessageLogFilePath.Text = saveFileMessageLog.FileName;
+        }
+
+
+        #endregion Menu Events
 
 
         #region File Browsers
@@ -407,16 +438,6 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
 
 
-        private void btnSaveMessageLog_Click(object sender, EventArgs e)
-        {
-            saveFileMessageLog.ShowDialog();
-            txtMessageLogFilePath.Text = saveFileMessageLog.FileName;
-        }
-
-        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
 
 
 
@@ -452,7 +473,10 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
 
 
-
+        /// <summary>
+        /// Copies our form onto a 'job instance'
+        /// </summary>
+        /// <param name="isFishnet"></param>
         protected void GatherInputs(bool isFishnet)
         {
             /** TODO: Gather all inputs and update our controller / job instance */
@@ -515,10 +539,13 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             importObj.AddStrippedGEOIDcolumn = (chkStripExtraGeoID.Checked) ? "true" : string.Empty;
         }
 
+        /// <summary>
+        /// Copies a 'job instance' onto our form
+        /// </summary>
         protected void PopulateControls()
         {
             this.errorProvider1.Clear();
-           
+
 
             var importObj = FormController.Instance.JobInstance;
 
@@ -566,8 +593,6 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             chkPreserveJamValues.Checked = (!string.IsNullOrEmpty(importObj.PreserveJam));
             chkStripExtraGeoID.Checked = (!string.IsNullOrEmpty(importObj.AddStrippedGEOIDcolumn));
 
-
-            
         }
 
 
@@ -607,71 +632,62 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 return false;
             }
 
-            //TODO: prompt them to save it somewhere?
-            //if (string.IsNullOrEmpty(importObj.OutputFolder))
-            //{
-            //    MessageBox.Show("Required setting missing", "No Year Provided", MessageBoxButtons.OK, MessageBoxIcon.Question);
-            //    return false;
-            //}
-
-
             return true;
-
         }
 
 
+        protected void TryRunExport(bool isFishnet)
+        {
+            GatherInputs(isFishnet);
+            if (!CheckValidity(isFishnet))
+            {
+                return;
+            }
+
+            _log.Debug("Ready to go!");
+            HideLoadingSpinner();
+            this.backgroundWorker1.RunWorkerAsync(FormController.Instance.JobInstance);
+
+            SmartToggler();
+        }
 
 
-
-
+        /// <summary>
+        /// Export a shapefile using census boundaries!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnShapefile_Click(object sender, EventArgs e)
         {
-            GatherInputs(false);
-            if (!CheckValidity(false))
-            {
-                return;
-            }
-
-            _log.Debug("Ready to go!");
-            HideLoadingSpinner();
-            this.backgroundWorker1.RunWorkerAsync(FormController.Instance.JobInstance);
-
-            SmartToggler();
+            TryRunExport(false);
         }
 
+        /// <summary>
+        /// Export a fishnet
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnFishnet_Click(object sender, EventArgs e)
         {
-            GatherInputs(true);
-            if (!CheckValidity(true))
-            {
-                return;
-            }
-
-            _log.Debug("Ready to go!");
-            HideLoadingSpinner();
-            this.backgroundWorker1.RunWorkerAsync(FormController.Instance.JobInstance);
-
-            SmartToggler();
+            TryRunExport(true);
         }
 
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             ImportJob job = (ImportJob)e.Argument;
-
             job.OnProgressUpdated += new ImportJob.ProgressUpdateHandler(this.backgroundWorker1.ReportProgress);
-
             e.Result = job.ExecuteJob();
 
 
-
-            //TODO: add support for cancellation?
-            //TODO: add progress reporting?
-
-
+            //EXTRA CREDIT: add support for cancellation
         }
 
-
+        /// <summary>
+        /// On progress updated
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             this.pgbStatus.Value = e.ProgressPercentage;
@@ -679,6 +695,11 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             //string message = (string)e.UserState;
         }
 
+        /// <summary>
+        /// when we're done, re-enable the form
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (!(bool)e.Result)
@@ -781,16 +802,10 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         #endregion Control Validation
 
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            using (AboutBox1 about = new AboutBox1())
-            {
-                about.ShowDialog();
-            }
-        }
 
-     
-        
+
+
+
 
 
 

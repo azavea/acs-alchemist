@@ -193,6 +193,10 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             _log.Info("+-------------------------------------------------------------+");
         }
 
+        /// <summary>
+        /// Searches for our config file in the application path, if it can't find it,
+        /// just uses defaults
+        /// </summary>
         protected void LoadConfigFile()
         {
             Settings.ConfigFile = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.json.config"));
@@ -230,7 +234,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
 
         /// <summary>
-        /// TODO: Validate variables file:
+        /// Performs some sanity checks on our variables file
         /// (does it exist, can I read it, does it have at least one variable, etc.)
         /// </summary>
         /// <param name="p"></param>
@@ -243,21 +247,23 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 return false;
             }
 
-            //TODO: read in the file, make sure it is valid.
+            //EXTRA CREDIT: read / parse file, make sure it is a valid variables file
 
-
+            //DOUBLE BONUS EXTRA CREDIT: read / parse file, lookup corresponding description in sequence file, display to user
 
             errorMessage = string.Empty;
             return true;
         }
 
 
+        /// <summary>
+        /// replaces our current job instance with a new one loaded from a saved file
+        /// </summary>
+        /// <param name="filename"></param>
         internal void LoadNewJobInstance(string filename)
         {
-
             FormController.Instance.JobInstance = new ImportJob();
             FormController.Instance.JobInstance.Load(new string[] { filename });
-
         }
 
         /// <summary>
