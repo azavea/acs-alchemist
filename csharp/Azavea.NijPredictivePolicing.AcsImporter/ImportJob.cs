@@ -32,6 +32,10 @@ using System.IO;
 
 namespace Azavea.NijPredictivePolicing.ACSAlchemist
 {
+    /// <summary>
+    /// Encapsulates our command line arguments, and our main 'lifecycle' of how we imagine users will interact with the app.
+    /// Ensures we have files downloaded, databases created, etc.
+    /// </summary>
     public class ImportJob
     {
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -87,16 +91,16 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
         public string ReusePreviousJobTable { get; set; }
         public string ExportToShapefile { get; set; }
         public string ExportToGrid { get; set; }
-        
+
         public string DisplaySummaryLevels { get; set; }
         public string DisplayStateCodes { get; set; }
         public string ListYears { get; set; }
-        
+
 
         public string GridEnvelope { get; set; }
         public string OutputProjection { get; set; }
         public string IncludeEmptyGridCells { get; set; }
-        
+
         public string PreserveJam { get; set; }
         public string AddStrippedGEOIDcolumn { get; set; }
 
@@ -120,9 +124,9 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             }
         }
 
-        
 
-        
+
+
 
 
         public ImportJob()
@@ -130,6 +134,13 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             this.State = AcsState.None;
         }
 
+        /// <summary>
+        /// Replaced by 'FindDelimAfterWhitespace'
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="idx"></param>
+        /// <param name="delims"></param>
+        /// <returns></returns>
         public int IndexOf(string str, int idx, params char[] delims)
         {
             List<int> indices = new List<int>(delims.Length);
@@ -182,14 +193,19 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             return (indices.Count > 0) ? indices.Min() : -1;
         }
 
-
+        /// <summary>
+        /// Takes a collection of command line arguments, and parses them / loads them onto our properties.
+        /// Will also accept a single filename, and treat that as if it were provided at the command line
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public bool Load(string[] args)
         {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < args.Length; i++)
             {
                 sb.Append(args[i]).Append(' ');
-            }            
+            }
             string line = sb.ToString();
             this.ArgumentLine = line;
             //char delim = '-';
@@ -225,8 +241,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 }
             }
 
-            
 
+            // iterate over our input, copying values to our properties
 
             var thisType = typeof(ImportJob);
             idx = FindDelimAfterWhitespace(line, 0, delims);     //int idx = line.IndexOf(delim);
@@ -256,6 +272,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 idx = FindDelimAfterWhitespace(line, idx, delims);       //idx = line.IndexOf(delim, idx);
 
 
+                // actually set the properties now
                 for (int p = 0; p < Arguments.Length; p++)
                 {
                     var arg = Arguments[p];
@@ -274,9 +291,14 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
         #endregion Command Line Stuff
 
         #region Progress Reporting Stuff
-        
+
         public delegate void ProgressUpdateHandler(int percentage);
         public event ProgressUpdateHandler OnProgressUpdated;
+
+        /// <summary>
+        /// Event added so we can provide some basic feedback while this is running in a background thread
+        /// </summary>
+        /// <param name="value"></param>
         public void UpdateProgress(int value)
         {
             if (this.OnProgressUpdated != null)
@@ -284,11 +306,14 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 this.OnProgressUpdated(value);
             }
         }
-        
+
         #endregion Progress Reporting Stuff
 
 
-
+        /// <summary>
+        /// Performs our main 'lifecycle'
+        /// </summary>
+        /// <returns></returns>
         public bool ExecuteJob()
         {
             this.UpdateProgress(0);
@@ -318,7 +343,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                     {
                         //_log.DebugFormat("{0} - {1}", key, years[key].GetFilename());
 
-                        _log.InfoFormat(" * {0} ", key);                        
+                        _log.InfoFormat(" * {0} ", key);
                     }
                     _log.InfoFormat(Environment.NewLine + "Done!");
                     return true;
@@ -480,7 +505,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             StringBuilder sb = new StringBuilder(2048);
             sb.Append("#").Append(nl);
             sb.Append("#  ACS Alchemist save file").Append(nl);
-            sb.AppendFormat("#  Generated automatically at {0} - {1}", 
+            sb.AppendFormat("#  Generated automatically at {0} - {1}",
                 DateTime.Now.ToLongDateString(),
                 DateTime.Now.ToShortTimeString()
                 ).Append(nl);
@@ -504,7 +529,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                     //just keep the first one we find, not both, that's confusing to the user.
                     continue;
                 }
-               
+
 
                 var prop = thisType.GetProperty(arg.PropertyName);
                 object val = prop.GetValue(this, null);
@@ -546,10 +571,10 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 sb.Append(nl);
 
 
-               
+
                 //object defval = (prop.PropertyType == typeof(AcsState)) ? (object)AcsState.None : null;
                 //prop.GetValue(this, Utilities.GetAsType(prop.PropertyType, contents, defval), null);
-                
+
                 //break;
             }
 

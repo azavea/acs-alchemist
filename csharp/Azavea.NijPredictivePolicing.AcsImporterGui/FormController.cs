@@ -188,7 +188,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             _log.Info(" This is free software, and you are welcome to redistribute it");
             _log.Info(" under the terms of the GNU General Public License");
 
-            //TODO: are we obligated to list other libraries here?
+            //TODO: libraries we need to list here?
 
             _log.Info("+-------------------------------------------------------------+");
         }

@@ -58,7 +58,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
 
         protected static void ShowWelcomeScreen()
         {
-            //_log.Warn("DEBUG - DEBUG - PAUSING FOR DRAMATIC EFFECT - DEBUG - DEBUG"); Console.ReadKey();
             _log.Debug("+--------------------------------------------+");
             _log.Debug("|   Welcome to ACS Alchemist                 |");
             _log.Debug("+--------------------------------------------+");
@@ -68,7 +67,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             _log.Debug(" a Predictive Policing grant from the National Institute of Justice ");
             _log.Debug(" (Award # 2010-DE-BX-K004). ");
 
-            
+
             _log.Debug(" The source code is released under a GPLv3 license.");
             _log.Debug(" available here: https://github.com/azavea/acs-alchemist ");
             _log.Debug("");
@@ -82,11 +81,15 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             _log.Info(" This is free software, and you are welcome to redistribute it");
             _log.Info(" under the terms of the GNU General Public License");
 
-            //TODO: are we obligated to list other libraries here?
+            //TODO: libraries we need to list here?
 
             _log.Info("+-------------------------------------------------------------+");
         }
 
+        /// <summary>
+        /// Searches for our config file in the application path, if it can't find it,
+        /// just uses defaults
+        /// </summary>
         protected static void LoadConfigFile()
         {
             Settings.ConfigFile = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.json.config"));
@@ -95,15 +98,17 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 Settings.RestoreDefaults();
             }
 
+            //search for our 'per-year' config files that explain which paths to check, file naming, etc.
             Settings.LoadYearConfigs();
         }
 
 
-
+        /// <summary>
+        /// Iterates over our Arguments collection and displays descriptions, flags, etc.
+        /// </summary>
         protected static void DisplayOptions()
         {
-            int maxCols = 80;
-            //Console.ReadKey();
+            int maxCols = 80;   //try and wrap the output to look nice 
 
             foreach (var arg in ImportJob.Arguments)
             {
@@ -136,11 +141,13 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             _log.Info("");
         }
 
+        /// <summary>
+        /// Our main entry point for the command line app
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static int Main(string[] args)
         {
-            //Console.WriteLine("PAUSING SO YOU CAN ATTACH THE DEBUGGER - PRESS ANY KEY - WHEN READY");
-            //Console.ReadKey();
-
             Init();
             LoadConfigFile();
             ShowWelcomeScreen();
@@ -167,13 +174,13 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 DisplayOptions();
             }
 
-//#if DEBUG
-//            _log.Debug("Done! Press ANY KEY to Quit");
-//            Console.ReadKey();
-//#endif
+            //#if DEBUG
+            //            _log.Debug("Done! Press ANY KEY to Quit");
+            //            Console.ReadKey();
+            //#endif
             return 0;
         }
 
-        
+
     }
 }
