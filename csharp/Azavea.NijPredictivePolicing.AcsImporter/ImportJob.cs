@@ -303,7 +303,37 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
         {
             if (this.OnProgressUpdated != null)
             {
+                if (IsCancelled()) { value = 100; } 
+
                 this.OnProgressUpdated(value);
+            }
+        }
+
+        protected AcsDataManager _manager = null;
+        protected bool _cancelled = false;
+        public bool IsCancelled()
+        {
+            lock (this)
+            {
+                if (_cancelled && (_manager != null))
+                {
+                    _manager.Cancel();
+                }
+
+                return _cancelled;
+            }
+        }
+
+        public void Cancel()
+        {
+            lock (this)
+            {
+                _cancelled = true;
+
+                if (_manager != null)
+                {
+                    _manager.Cancel();
+                }
             }
         }
 
@@ -316,7 +346,10 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
         /// <returns></returns>
         public bool ExecuteJob()
         {
+            _manager = null; _cancelled = false;
+
             this.UpdateProgress(0);
+            if (IsCancelled()) { _log.Debug("Job Cancelled..."); return false; }
 
             DateTime startTime = DateTime.Now;
             try
@@ -365,6 +398,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
 
                 WorkingFolder = FileUtilities.CleanPath(WorkingFolder);
                 var manager = new AcsDataManager(this.State, WorkingFolder, this.Year);
+                this._manager = manager;
                 //TODO: check for bad combinations of inputs
                 manager.SummaryLevel = this.SummaryLevel;
                 manager.ExportFilterFilename = this.ExportFilterShapefile;
@@ -391,6 +425,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 }
 
                 this.UpdateProgress(25);
+                if (IsCancelled()) { _log.Debug("Job Cancelled..."); return false; }
 
                 if (string.IsNullOrEmpty(this.OutputProjection))
                 {
@@ -401,10 +436,13 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 _log.Info("   Loading Prerequisites...");
                 _log.Debug("/*************************************/");
 
-                if (!manager.CheckColumnMappingsFile()
-                    || !manager.CheckBlockGroupFile()
-                    || !manager.CheckDatabase()
-                    || !manager.CheckShapefiles())
+                bool hasPrerequesites = true;
+                hasPrerequesites &= !IsCancelled() && manager.CheckColumnMappingsFile();
+                hasPrerequesites &= !IsCancelled() && manager.CheckBlockGroupFile();
+                hasPrerequesites &= !IsCancelled() && manager.CheckDatabase();
+                hasPrerequesites &= !IsCancelled() && manager.CheckShapefiles();
+
+                if (!hasPrerequesites)
                 {
                     _log.Info("Loading Prerequisites... Failed!");
                     _log.Error("Import cannot continue, one or more prerequisites failed!");
@@ -412,6 +450,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 }
                 _log.Debug("Loading Prerequisites... Done!\r\n");
                 this.UpdateProgress(35);
+                if (IsCancelled()) { _log.Debug("Job Cancelled..."); return false; }
 
 
                 if (!string.IsNullOrEmpty(IncludedVariableFile) && !string.IsNullOrEmpty(this.JobName))
@@ -431,6 +470,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                     }
                 }
                 this.UpdateProgress(50);
+                if (IsCancelled()) { _log.Debug("Job Cancelled..."); return false; }
 
                 if (!string.IsNullOrEmpty(ExportToShapefile))
                 {
@@ -454,6 +494,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                     _log.Debug("\r\n/****  No shapefile export requested ****/\r\n");
                 }
                 this.UpdateProgress(75);
+                if (IsCancelled()) { _log.Debug("Job Cancelled..."); return false; }
 
                 if (!string.IsNullOrEmpty(ExportToGrid))
                 {
@@ -487,7 +528,14 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             finally
             {
                 TimeSpan elapsed = DateTime.Now - startTime;
-                _log.DebugFormat("Job completed in {0} seconds", elapsed.TotalSeconds);
+                if (IsCancelled())
+                {
+                    _log.DebugFormat("Job was cancelled and stopped at {0} seconds", elapsed.TotalSeconds);
+                }
+                else
+                {
+                    _log.DebugFormat("Job completed in {0} seconds", elapsed.TotalSeconds);
+                }
             }
 
             return false;
@@ -585,5 +633,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
 
 
 
+
+     
     }
 }

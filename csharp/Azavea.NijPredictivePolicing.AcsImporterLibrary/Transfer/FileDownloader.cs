@@ -50,7 +50,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         /// <param name="desiredURL"></param>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public static bool GetFileByURL(string desiredURL, string filePath)
+        public static bool GetFileByURL(string desiredURL, string filePath, ref bool cancelled)
         {
             bool preExists = false;
             if (File.Exists(filePath))
@@ -72,7 +72,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             {
                 try
                 {
-
                     _lastQuery = DateTime.Now;
                     System.Threading.Thread.Sleep(250); //just a little pre-nap so we don't hammer the server
 
@@ -82,7 +81,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     request.Timeout = Settings.TimeOutMs;
                     using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                     {
-
                         Stream downloadStream = response.GetResponseStream();
                         long expectedLength = response.ContentLength;
                         DateTime lastModified = response.LastModified;
@@ -103,19 +101,26 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                         }
 
                         FileStream output = new FileStream(filePath, FileMode.Create);
-                        Utilities.CopyToWithProgress(downloadStream, expectedLength, output);
+                        Utilities.CopyToWithProgress(downloadStream, expectedLength, output, ref cancelled);
 
                         downloadStream.Close();
                         output.Close();
                         response.Close();
                         request.Abort();
 
-                        FileUtilities.TryChangeLastWriteTime(filePath, response.LastModified);
-                        _log.DebugFormat("Downloaded of {0} was successful", Path.GetFileName(filePath));
 
-                        if (Settings.ShowFilePaths)
+                        FileUtilities.TryChangeLastWriteTime(filePath, response.LastModified);
+                        if (!cancelled)
                         {
-                            _log.InfoFormat("Downloaded File {0} saved to {1}", Path.GetFileName(filePath), filePath);
+                            _log.DebugFormat("Downloaded of {0} was successful", Path.GetFileName(filePath));
+                            if (Settings.ShowFilePaths)
+                            {
+                                _log.InfoFormat("Downloaded File {0} saved to {1}", Path.GetFileName(filePath), filePath);
+                            }
+                        }
+                        else
+                        {
+                            return false;
                         }
                     }
 

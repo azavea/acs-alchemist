@@ -205,7 +205,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 Settings.ColumnMappingsFileName + Settings.ColumnMappingsFileExtension);
 
 
-            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath))
+            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath, ref this._cancelled))
             {
                 _log.ErrorFormat("Downloading sequence files failed: unable to retrieve {0} ", desiredUrl);
                 return false;
@@ -233,7 +233,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             string destFilepath = GetLocalBlockGroupZipFileName();
 
 
-            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath))
+            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath, ref this._cancelled))
             {
                 _log.ErrorFormat("Downloading census data failed: unable to retrieve {0} ", desiredUrl);
                 return false;
@@ -300,7 +300,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         {
             _log.DebugFormat("Downloading shapefile of {0} for {1}", niceName, this.State);
 
-            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath))
+            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath, ref this._cancelled))
             {
                 _log.ErrorFormat("Shapefile download failed: Could not download {0}", niceName);
                 return false;
@@ -827,6 +827,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     int varNum = 0;
                     foreach (DataRow variableRow in reqVariablesDT.Rows)
                     {
+                        if (this.IsCancelled()) { return false; }
+
                         varNum++;
 
                         var sequenceNo = Utilities.GetAs<int>(variableRow["SEQNO"] as string, -1);
@@ -894,6 +896,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                                     rowsByLRN[lrn][newColumnName] = val;
                                 }
                             }
+
+                            if (this.IsCancelled()) { break; }
                         }
                         reader.Close();
 
@@ -921,14 +925,18 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                                     rowsByLRN[lrn][newErrorMarginColumnName] = val;
                                 }
                             }
+
+                            if (this.IsCancelled()) { break; }
                         }
                         reader.Close();
                     }
 
+                    if (this.IsCancelled()) { return false; }
                     _log.DebugFormat("Creating Table {0}", tableName);
                     string createTableSQL = SqliteDataClient.GenerateTableSQLFromTable(tableName, newTable, "LOGRECNO");
                     DbClient.GetCommand(createTableSQL, conn).ExecuteNonQuery();
 
+                    if (this.IsCancelled()) { return false; }
                     _log.DebugFormat("Saving Table {0}...", tableName);
                     var dba = DataClient.GetMagicAdapter(conn, DbClient, string.Format("SELECT * FROM \"{0}\"", tableName));
                     dba.Update(newTable);
@@ -1389,7 +1397,9 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     index.Insert(f.Geometry.EnvelopeInternal, f);
                     env.ExpandToInclude(f.Geometry.EnvelopeInternal);
                 }
+                if (IsCancelled()) { _log.Debug("Job Cancelled..."); return false; }
                 index.Build();
+                
 
 
 
@@ -1506,6 +1516,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                                    );
                                 lastCheck = DateTime.Now;
                                 lastProgress = step;
+
+                                if (IsCancelled()) { _log.Debug("Job Cancelled..."); return false; }
                             }
                         }
 
@@ -1548,6 +1560,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     newShapefilename = Path.Combine(OutputFolder, tableName);
                 }
 
+                if (IsCancelled()) { _log.Debug("Job Cancelled..."); return false; }
                 var writer = new ShapefileDataWriter(newShapefilename, ShapefileHelper.GetGeomFactory());
                 writer.Header = header;
                 writer.Write(features);
@@ -1648,6 +1661,19 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 this.GridCellHeight);
         }
 
+
+
+
+        protected bool _cancelled = false;
+        public bool IsCancelled()
+        {
+            return _cancelled;
+        }
+
+        public void Cancel()
+        {
+            _cancelled = true;
+        }
 
 
     }

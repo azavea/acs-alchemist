@@ -495,6 +495,13 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             this.SetTooltip(this.cboProjections, projectionText);
         }
 
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            _log.Debug("Cancelling... (this might take a minute)");
+            FormController.Instance.JobInstance.Cancel();
+        }
+
         #endregion Event Boilerplate
 
 
@@ -894,6 +901,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         }
 
         #endregion Control Validation
+
+     
 
 
 

@@ -101,6 +101,7 @@
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.fbdWorkingDir = new System.Windows.Forms.FolderBrowserDialog();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -551,10 +552,11 @@
             // 
             // pgbStatus
             // 
-            this.pgbStatus.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pgbStatus.Location = new System.Drawing.Point(0, 545);
+            this.pgbStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.pgbStatus.Location = new System.Drawing.Point(84, 545);
             this.pgbStatus.Name = "pgbStatus";
-            this.pgbStatus.Size = new System.Drawing.Size(919, 25);
+            this.pgbStatus.Size = new System.Drawing.Size(835, 25);
             this.pgbStatus.TabIndex = 24;
             // 
             // ofdOutputProjection
@@ -596,6 +598,7 @@
             // 
             // toolStripContainer1.ContentPanel
             // 
+            this.toolStripContainer1.ContentPanel.Controls.Add(this.btnCancel);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.txtWorkingDirectory);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.btnBrowseWorking);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.lblWorkingDir);
@@ -809,6 +812,17 @@
             this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             // 
+            // btnCancel
+            // 
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnCancel.Location = new System.Drawing.Point(3, 545);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(80, 25);
+            this.btnCancel.TabIndex = 30;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
@@ -917,5 +931,6 @@
         private System.Windows.Forms.Button btnBrowseWorking;
         private System.Windows.Forms.Label lblWorkingDir;
         private System.Windows.Forms.FolderBrowserDialog fbdWorkingDir;
+        private System.Windows.Forms.Button btnCancel;
     }
 }
