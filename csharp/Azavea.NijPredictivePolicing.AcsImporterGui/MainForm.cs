@@ -76,6 +76,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 this.SmartToggler();
 
                 this.FixWeirdStyles();
+
+                this.MinimumSize = new Size(800, 650);
             }
             catch (Exception ex)
             {
