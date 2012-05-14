@@ -43,6 +43,10 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             this.labelCompanyName.LinkBehavior = LinkBehavior.HoverUnderline;
             labelCompanyName.Links.Remove(labelCompanyName.Links[0]);
             labelCompanyName.Links.Add(0, labelCompanyName.Text.Length + 2, "http://www.azavea.com");
+
+            this.linkLabel1.LinkBehavior = LinkBehavior.HoverUnderline;
+            linkLabel1.Links.Remove(linkLabel1.Links[0]);
+            linkLabel1.Links.Add(0, linkLabel1.Text.Length + 2, "http://www.temple.edu/cj/cscs/");
         }
 
         #region Assembly Attribute Accessors
@@ -126,6 +130,12 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         #endregion
 
         private void labelCompanyName_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            ProcessStartInfo sInfo = new ProcessStartInfo(e.Link.LinkData.ToString());
+            Process.Start(sInfo);
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             ProcessStartInfo sInfo = new ProcessStartInfo(e.Link.LinkData.ToString());
             Process.Start(sInfo);

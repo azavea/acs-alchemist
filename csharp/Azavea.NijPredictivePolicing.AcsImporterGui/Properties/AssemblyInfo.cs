@@ -6,10 +6,10 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Acs Alchemist")]
-[assembly: AssemblyDescription("This tool was developed by Azavea in collaboration with Jerry Ratcliffe and Ralph Taylor of Temple University and partially funded by a Predictive Policing grant from the National Institute of Justice (Award # 2010-DE-BX-K004).  The source code is released under a GPLv3 license, and is available here: https://github.com/azavea/acs-alchemist")]
+[assembly: AssemblyDescription("This tool was developed by Azavea in collaboration with Jerry Ratcliffe and Ralph Taylor of Temple University Center for Security and Crime Science and partially funded by a Predictive Policing grant from the National Institute of Justice (Award # 2010-DE-BX-K004).  The source code is released under a GPLv3 license and is available at:  http://github.com/azavea/ACS-Alchemist/")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Azavea ( http://www.azavea.com )")]
-[assembly: AssemblyProduct("AcsAlchemist")]
+[assembly: AssemblyProduct("Acs Alchemist")]
 [assembly: AssemblyCopyright("Copyright © Azavea 2011-2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
