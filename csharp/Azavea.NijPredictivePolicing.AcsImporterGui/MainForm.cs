@@ -78,6 +78,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 this.FixWeirdStyles();
 
                 this.MinimumSize = new Size(800, 650);
+
+                this.PopulateControls();
             }
             catch (Exception ex)
             {
@@ -135,7 +137,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 //this.Font =  new Font(_fontCollection.Families[1], 9);
 
                 //however, we absolutely need a monospaced font here for this to look correct.
-                txtLogConsole.Font = new Font(_fontCollection.Families[0], 7.75f);
+                txtLogConsole.Font = new Font(_fontCollection.Families[0], 8f);
             }
             catch (Exception ex)
             {
@@ -380,6 +382,14 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             }
         }
 
+        private void btnBrowseWorking_Click(object sender, EventArgs e)
+        {
+            if (fbdWorkingDir.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                txtWorkingDirectory.Text = fbdWorkingDir.SelectedPath;
+            }
+        }
+
         #endregion File Browsers
 
 
@@ -415,6 +425,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 this.cboSummaryLevel.Enabled = enabledIfIdle;
                 this.txtVariableFilePath.Enabled = enabledIfIdle;
                 this.txtOutputDirectory.Enabled = enabledIfIdle;
+                this.txtWorkingDirectory.Enabled = enabledIfIdle;
 
                 this.radioDefaultSRID.Enabled = enabledIfIdle;
                 this.radioSRIDFromList.Enabled = enabledIfIdle;
@@ -435,6 +446,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
                 this.btnBrowseVariableFile.Enabled = enabledIfIdle;
                 this.btnBrowseOutputFolder.Enabled = enabledIfIdle;
+                this.btnBrowseWorking.Enabled = enabledIfIdle;
+
                 this.btnBrowseBoundaryShpFile.Enabled = enabledIfIdle;
                 this.btnBrowseFishnetEnvelopeFile.Enabled = enabledIfIdle;
             }
@@ -538,10 +551,9 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             importObj.SummaryLevel = ((int)cboSummaryLevel.SelectedValue).ToString();  //3
             importObj.IncludedVariableFile = txtVariableFilePath.Text;                 //4
             importObj.OutputFolder = txtOutputDirectory.Text;                          //5
+            importObj.WorkingFolder = txtWorkingDirectory.Text;                        //6
 
             //TODO: Stub in default output folder?
-
-
 
             //srid
             if (radioDefaultSRID.Checked)
@@ -603,7 +615,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             cboSummaryLevel.SelectedItem = Utilities.GetAs<BoundaryLevels>(importObj.SummaryLevel, BoundaryLevels.None);   //3
             txtVariableFilePath.Text = (importObj.IncludedVariableFile + string.Empty).Trim('\"');   //4
             txtOutputDirectory.Text = importObj.OutputFolder;                       //5
-
+            txtWorkingDirectory.Text = importObj.WorkingFolder;                     //6
 
             if (string.IsNullOrEmpty(importObj.OutputProjection))
             {
@@ -881,6 +893,9 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         #endregion Control Validation
 
+
+
+      
 
 
 
