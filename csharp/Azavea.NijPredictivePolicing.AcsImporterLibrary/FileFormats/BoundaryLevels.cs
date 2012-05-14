@@ -30,6 +30,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
     /// </summary>
     public enum BoundaryLevels
     {
+        None = 0,
+
         /*
         [DescriptionAttribute("Census Regions")]
         census_regions = 20,

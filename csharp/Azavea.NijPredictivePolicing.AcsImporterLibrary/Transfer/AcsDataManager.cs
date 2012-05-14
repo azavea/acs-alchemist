@@ -271,6 +271,9 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
             foreach (BoundaryLevels level in shapeFileLevels)
             {
+                if (level == BoundaryLevels.None)
+                    continue;
+
                 string url = ShapefileHelper.GetRemoteShapefileURL(level, this.StateFIPS);
                 string localPath = Path.Combine(this.WorkingPath, Path.GetFileName(url));
                 string name = level.ToString();

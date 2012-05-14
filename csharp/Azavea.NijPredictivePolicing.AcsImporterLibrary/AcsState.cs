@@ -69,7 +69,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary
         Ohio = 39,
         Oklahoma = 40,
         Oregon = 41,
-        Pennsylvania = 42,       
+        Pennsylvania = 42,
         RhodeIsland = 44,
         SouthCarolina = 45,
         SouthDakota = 46,
@@ -86,7 +86,10 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary
 
         PuertoRico = 72,
         None = -1
+
+
     }
+
 
     /// <summary>
     /// Encapsulates common operations with the States enum

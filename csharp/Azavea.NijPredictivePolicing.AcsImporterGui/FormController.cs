@@ -70,6 +70,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
                 //a quick initialization
                 _availableYears = new List<string>(Settings.LoadYearConfigs().Keys);
+                _availableYears.Insert(0, string.Empty);    //blank option
                 return _availableYears;
             }
             set { _availableYears = value; }
@@ -91,6 +92,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 _availableStates = Utilities.GetEnumAsList<AcsState>(
                     new HashSet<AcsState>(new AcsState[] { AcsState.None })
                     );
+                _availableStates.Insert(0, AcsState.None);    //blank option
 
                 return _availableStates;
             }
@@ -109,7 +111,10 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 if (_availableLevels != null) { return _availableLevels; }
 
                 //a quick initialization
-                _availableLevels = Utilities.GetEnumAsList<BoundaryLevels>(null);
+                _availableLevels = Utilities.GetEnumAsList<BoundaryLevels>(
+                    new HashSet<BoundaryLevels>(new BoundaryLevels[] { BoundaryLevels.None })
+                    );
+                _availableLevels.Insert(0, BoundaryLevels.None);    //blank option
 
                 return _availableLevels;
             }
@@ -297,9 +302,9 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             FormController.Instance.JobInstance.PreserveJam = "true";
             FormController.Instance.JobInstance.AddStrippedGEOIDcolumn = "true";
             FormController.Instance.JobInstance.IncludeEmptyGridCells = "true";
-            FormController.Instance.JobInstance.Year = "2009";
-            FormController.Instance.JobInstance.State = AcsState.Alabama;
-            FormController.Instance.JobInstance.SummaryLevel = BoundaryLevels.census_tracts.ToString();
+            FormController.Instance.JobInstance.Year = string.Empty;
+            FormController.Instance.JobInstance.State = AcsState.None;
+            FormController.Instance.JobInstance.SummaryLevel = BoundaryLevels.None.ToString();
         }
 
     }

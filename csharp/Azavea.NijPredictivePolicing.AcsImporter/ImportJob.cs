@@ -323,7 +323,9 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             {
                 if (!string.IsNullOrEmpty(DisplaySummaryLevels))
                 {
-                    Utilities.DisplayEnum("Summary Levels:", typeof(BoundaryLevels), "{1} - {0}");
+                    Utilities.DisplayEnum<BoundaryLevels>("Summary Levels:", "{1} - {0}",
+                        new HashSet<string>(new string[] { "None" })
+                        );
                     return true;
                 }
                 if (!string.IsNullOrEmpty(DisplayStateCodes))

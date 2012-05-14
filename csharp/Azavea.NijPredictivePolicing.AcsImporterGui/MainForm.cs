@@ -164,11 +164,39 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             this.cboStates.DataSource = new BindingSource(FormController.Instance.AvailableStates, string.Empty);
             this.cboSummaryLevel.DataSource = new BindingSource(FormController.Instance.AvailableLevels, string.Empty);
 
+
+            this.cboStates.FormattingEnabled = true;
+            this.cboStates.Format += delegate(object sender, ListControlConvertEventArgs e)
+            {
+                AcsState state = (AcsState)e.Value;
+                if (state == AcsState.None) { e.Value = string.Empty; }
+                else { e.Value = state.ToString(); }
+            };
+
+            this.cboSummaryLevel.FormattingEnabled = true;
+            this.cboSummaryLevel.Format += delegate(object sender, ListControlConvertEventArgs e)
+            {
+                BoundaryLevels level = (BoundaryLevels)e.Value;
+                switch (level)
+                {
+                    case BoundaryLevels.None:
+                        e.Value = string.Empty;
+                        break;
+                    case BoundaryLevels.census_tracts:
+                        e.Value = "Census Tracts";
+                        break;
+                    case BoundaryLevels.census_blockgroups:
+                        e.Value = "Census Blockgroups";
+                        break;
+                }
+            };
+
             //NOTE! We're doing this initialization in "radioSRIDFromList_CheckedChanged",
             //instead of here, this is because it's expensive (we have to read through a whole file)
             //so we're shaving a half-second off the init, and moving it to a spot where the user shouldn't notice.
             //this.cboProjections.DataSource = new BindingSource(FormController.Instance.AvailableProjections, string.Empty);                        
         }
+
 
         /// <summary>
         /// collection of tooltip controls
@@ -570,7 +598,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
             cboYear.Text = importObj.Year;                                          //1
             cboStates.SelectedItem = importObj.State;                               //2
-            cboSummaryLevel.SelectedItem = Utilities.GetAs<BoundaryLevels>(importObj.SummaryLevel, BoundaryLevels.census_tracts);   //3
+            cboSummaryLevel.SelectedItem = Utilities.GetAs<BoundaryLevels>(importObj.SummaryLevel, BoundaryLevels.None);   //3
             txtVariableFilePath.Text = (importObj.IncludedVariableFile + string.Empty).Trim('\"');   //4
             txtOutputDirectory.Text = importObj.OutputFolder;                       //5
 
@@ -747,6 +775,36 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         }
 
 
+        private void cboStates_Validating(object sender, CancelEventArgs e)
+        {
+            //this can now be blank
+            string errMessage = string.Empty;
+
+            bool valid = ((AcsState)cboStates.SelectedValue != AcsState.None);
+            if (!valid)
+            {
+                errMessage = "Please select a state from the list";
+            }
+
+            this.errorProvider1.SetError(this.cboStates, errMessage);
+        }
+
+        private void cboSummaryLevel_Validating(object sender, CancelEventArgs e)
+        {
+            //this can now be blank
+            string errMessage = string.Empty;
+
+            bool valid = ((BoundaryLevels)cboSummaryLevel.SelectedValue != BoundaryLevels.None);
+            if (!valid)
+            {
+                errMessage = "Please select a geographic summary level from the list";
+            }
+
+            this.errorProvider1.SetError(this.cboSummaryLevel, errMessage);
+        }
+
+
+
         private void txtVariableFilePath_Validating(object sender, CancelEventArgs e)
         {
             //validate variables file
@@ -820,6 +878,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         }
 
         #endregion Control Validation
+
 
 
 

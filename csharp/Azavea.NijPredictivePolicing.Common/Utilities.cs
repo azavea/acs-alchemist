@@ -238,12 +238,15 @@ namespace Azavea.NijPredictivePolicing.Common
         /// <param name="label"></param>
         /// <param name="enumType"></param>
         /// <param name="formatStr"></param>
-        public static void DisplayEnum(string label, Type enumType, string formatStr)
+        public static void DisplayEnum<T>(string label, string formatStr, HashSet<string> excluded)
         {
-            var levels = Enum.GetValues(enumType);
+            var levels = Enum.GetValues(typeof(T));
             _log.Debug(label);
             foreach (var value in levels)
             {
+                string valueKey = Enum.GetName(typeof(T), value);
+                if ((excluded != null) && (excluded.Contains(valueKey))) { continue; }
+
                 _log.InfoFormat(formatStr, value.ToString(), (int)value);
             }
         }
