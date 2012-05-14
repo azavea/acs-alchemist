@@ -192,9 +192,9 @@
             this.cboIncludeEmptyGeom.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cboIncludeEmptyGeom.Location = new System.Drawing.Point(6, 72);
             this.cboIncludeEmptyGeom.Name = "cboIncludeEmptyGeom";
-            this.cboIncludeEmptyGeom.Size = new System.Drawing.Size(118, 17);
+            this.cboIncludeEmptyGeom.Size = new System.Drawing.Size(157, 18);
             this.cboIncludeEmptyGeom.TabIndex = 2;
-            this.cboIncludeEmptyGeom.Text = "Include Empty Cells";
+            this.cboIncludeEmptyGeom.Text = "Include Empty Polygons";
             this.cboIncludeEmptyGeom.UseVisualStyleBackColor = true;
             // 
             // chkStripExtraGeoID
@@ -204,7 +204,7 @@
             this.chkStripExtraGeoID.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkStripExtraGeoID.Location = new System.Drawing.Point(6, 47);
             this.chkStripExtraGeoID.Name = "chkStripExtraGeoID";
-            this.chkStripExtraGeoID.Size = new System.Drawing.Size(111, 17);
+            this.chkStripExtraGeoID.Size = new System.Drawing.Size(123, 18);
             this.chkStripExtraGeoID.TabIndex = 1;
             this.chkStripExtraGeoID.Text = "Strip Extra GEOID";
             this.chkStripExtraGeoID.UseVisualStyleBackColor = true;
@@ -216,7 +216,7 @@
             this.chkPreserveJamValues.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkPreserveJamValues.Location = new System.Drawing.Point(6, 22);
             this.chkPreserveJamValues.Name = "chkPreserveJamValues";
-            this.chkPreserveJamValues.Size = new System.Drawing.Size(114, 17);
+            this.chkPreserveJamValues.Size = new System.Drawing.Size(124, 18);
             this.chkPreserveJamValues.TabIndex = 0;
             this.chkPreserveJamValues.Text = "Preserve ACS Jam";
             this.chkPreserveJamValues.UseVisualStyleBackColor = true;
