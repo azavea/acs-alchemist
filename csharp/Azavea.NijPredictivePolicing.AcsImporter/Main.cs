@@ -62,12 +62,19 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             _log.Debug("|   Welcome to ACS Alchemist                 |");
             _log.Debug("+--------------------------------------------+");
             _log.Debug("");
-            _log.Debug(" This tool was developed by Azavea in collaboration with Jerry Ratcliffe and ");
-            _log.Debug("Ralph Taylor of Temple University Center for Security and Crime Science and ");
-            _log.Debug("partially funded by a Predictive Policing grant from the National Institute ");
-            _log.Debug("of Justice (Award # 2010-DE-BX-K004).  The source code is released under a ");
-            _log.Debug("GPLv3 license and is available at:  http://github.com/azavea/ACS-Alchemist/");
+            _log.Debug(" This tool was developed by Azavea in collaboration with ");
+            _log.Debug("Jerry Ratcliffe and Ralph Taylor of Temple University Center ");
+            _log.Debug("for Security and Crime Science. ");
 
+            _log.Debug("");
+            _log.Debug(" This project was supported by Award No. 2010-DE-BX-K004, awarded by the ");
+            _log.Debug("National Institute of Justice, Office of Justice Programs, U.S. Department ");
+            _log.Debug("of Justice. The opinions, findings, and conclusions or recommendations ");
+            _log.Debug("expressed in this software are those of the author(s) and do not necessarily ");
+            _log.Debug("reflect those of the Department of Justice. ");
+            _log.Debug("");
+            _log.Debug(" The source code is released under a GPLv3 license and is available at: ");
+            _log.Debug("http://github.com/azavea/ACSAlchemist/");
             _log.Debug("");
         }
 

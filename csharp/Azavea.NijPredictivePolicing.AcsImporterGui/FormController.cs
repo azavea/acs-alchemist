@@ -190,12 +190,14 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         protected void ShowWelcomeScreen()
         {
-
-            string attrString = @"This tool was developed by Azavea in collaboration with Jerry Ratcliffe and Ralph Taylor of Temple University Center for Security and Crime Science and partially funded by a Predictive Policing grant from the National Institute of Justice (Award # 2010-DE-BX-K004).  The source code is released under a GPLv3 license and is available at:  http://github.com/azavea/ACS-Alchemist/";
-
             _log.Debug("Welcome to ACS Alchemist");
             _log.Debug("");
-            _log.Debug(attrString);
+
+
+            _log.Debug("This tool was developed by Azavea in collaboration with Jerry Ratcliffe and Ralph Taylor of Temple University Center for Security and Crime Science.");
+            _log.Debug("");
+            
+            _log.Debug(@"This project was supported by Award No. 2010-DE-BX-K004, awarded by the National Institute of Justice, Office of Justice Programs, U.S. Department of Justice. The opinions, findings, and conclusions or recommendations expressed in this software are those of the author(s) and do not necessarily reflect those of the Department of Justice. The source code is released under a GPLv3 license and is available at:  http://github.com/azavea/ACSAlchemist/");
          
             _log.Debug("");
         }
