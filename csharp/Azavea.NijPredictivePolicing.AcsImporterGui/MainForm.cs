@@ -237,8 +237,47 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         #region Menu Events
 
 
+        /// <summary>
+        /// Returns false if the following action should be cancelled
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckSave()
+        {
+            if (this.IsDirty)
+            {
+                //show prompt
+                var resp = MessageBox.Show("Save job first?", "Save your settings as a job file?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+                if (resp == System.Windows.Forms.DialogResult.Yes)
+                {
+                    //do a save
+                    this.saveJobFileToolStripMenuItem_Click(null, null);
+
+                    /*
+                     * Note! we don't do the infinite re-ask loop here.  But 
+                     */
+                    return true;
+                }
+                else if (resp == System.Windows.Forms.DialogResult.No)
+                {
+                    //continue
+                    return true;
+                }
+                else if (resp == System.Windows.Forms.DialogResult.Cancel)
+                {
+                    //bail
+                    return false;
+                }
+                //if prompt == cancel, return false;
+            }
+            return true;
+        }
+
+
         private void openJobFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (!CheckSave()) { return; }
+
             if (openFileJob.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 txtJobFilePath.Text = openFileJob.FileName;
@@ -255,6 +294,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         private void newJobToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (!CheckSave()) { return; }
+
             FormController.Instance.NewDefaultJobInstance();
             this.PopulateControls();
         }
@@ -281,6 +322,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (!CheckSave()) { return; }
+
             this.Close();
         }
 
@@ -412,7 +455,6 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             //projection file controls
             txtPrjFilePath.Enabled = (radioSRIDFile.Checked && !backgroundWorker1.IsBusy);
             btnBrowsePrjFile.Enabled = (radioSRIDFile.Checked && !backgroundWorker1.IsBusy);
-
 
             {
                 bool enabledIfIdle = !backgroundWorker1.IsBusy;
@@ -605,6 +647,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             //optional flags
             importObj.PreserveJam = (chkPreserveJamValues.Checked) ? "true" : string.Empty;
             importObj.AddStrippedGEOIDcolumn = (chkStripExtraGeoID.Checked) ? "true" : string.Empty;
+
+            this.IsDirty = false;
         }
 
         /// <summary>
@@ -663,6 +707,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
             //reset the progress bar
             pgbStatus.Value = 0;
+
+            this.IsDirty = false;
         }
 
 
@@ -902,11 +948,37 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
         #endregion Control Validation
 
-     
+        #region Dirty State Tracking
+
+        protected bool _isDirty = false;
+        public bool IsDirty
+        {
+            get { return _isDirty; }
+            set
+            {
+                _isDirty = value;
+                this.saveJobFileToolStripMenuItem.Text = (_isDirty) ? "*Save Job File" : "Save Job File";
+            }
+        }
+
+        private void general_SelectedValueChanged(object sender, EventArgs e)
+        {
+            IsDirty = true;
+        }
+
+        private void general_TextChanged(object sender, EventArgs e)
+        {
+            IsDirty = true;
+        }
+
+        private void general_CheckedChanged(object sender, EventArgs e)
+        {
+            IsDirty = true;
+        }
+
+        #endregion Dirty State Tracking
 
 
-
-      
 
 
 

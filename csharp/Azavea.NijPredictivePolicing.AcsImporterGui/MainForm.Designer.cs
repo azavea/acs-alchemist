@@ -85,6 +85,7 @@
             this.label15 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.txtWorkingDirectory = new System.Windows.Forms.TextBox();
             this.btnBrowseWorking = new System.Windows.Forms.Button();
             this.lblWorkingDir = new System.Windows.Forms.Label();
@@ -101,7 +102,6 @@
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.fbdWorkingDir = new System.Windows.Forms.FolderBrowserDialog();
-            this.btnCancel = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -197,10 +197,11 @@
             this.cboIncludeEmptyGeom.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cboIncludeEmptyGeom.Location = new System.Drawing.Point(6, 74);
             this.cboIncludeEmptyGeom.Name = "cboIncludeEmptyGeom";
-            this.cboIncludeEmptyGeom.Size = new System.Drawing.Size(157, 18);
+            this.cboIncludeEmptyGeom.Size = new System.Drawing.Size(139, 17);
             this.cboIncludeEmptyGeom.TabIndex = 2;
             this.cboIncludeEmptyGeom.Text = "Include Empty Polygons";
             this.cboIncludeEmptyGeom.UseVisualStyleBackColor = true;
+            this.cboIncludeEmptyGeom.CheckedChanged += new System.EventHandler(this.general_CheckedChanged);
             // 
             // chkStripExtraGeoID
             // 
@@ -209,10 +210,11 @@
             this.chkStripExtraGeoID.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkStripExtraGeoID.Location = new System.Drawing.Point(6, 48);
             this.chkStripExtraGeoID.Name = "chkStripExtraGeoID";
-            this.chkStripExtraGeoID.Size = new System.Drawing.Size(123, 18);
+            this.chkStripExtraGeoID.Size = new System.Drawing.Size(111, 17);
             this.chkStripExtraGeoID.TabIndex = 1;
             this.chkStripExtraGeoID.Text = "Strip Extra GEOID";
             this.chkStripExtraGeoID.UseVisualStyleBackColor = true;
+            this.chkStripExtraGeoID.CheckedChanged += new System.EventHandler(this.general_CheckedChanged);
             // 
             // chkPreserveJamValues
             // 
@@ -221,10 +223,11 @@
             this.chkPreserveJamValues.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkPreserveJamValues.Location = new System.Drawing.Point(6, 23);
             this.chkPreserveJamValues.Name = "chkPreserveJamValues";
-            this.chkPreserveJamValues.Size = new System.Drawing.Size(124, 18);
+            this.chkPreserveJamValues.Size = new System.Drawing.Size(114, 17);
             this.chkPreserveJamValues.TabIndex = 0;
             this.chkPreserveJamValues.Text = "Preserve ACS Jam";
             this.chkPreserveJamValues.UseVisualStyleBackColor = true;
+            this.chkPreserveJamValues.CheckedChanged += new System.EventHandler(this.general_CheckedChanged);
             // 
             // txtBoundaryShpFilePath
             // 
@@ -233,6 +236,7 @@
             this.txtBoundaryShpFilePath.Name = "txtBoundaryShpFilePath";
             this.txtBoundaryShpFilePath.Size = new System.Drawing.Size(147, 22);
             this.txtBoundaryShpFilePath.TabIndex = 2;
+            this.txtBoundaryShpFilePath.TextChanged += new System.EventHandler(this.general_TextChanged);
             // 
             // btnBrowseBoundaryShpFile
             // 
@@ -260,6 +264,7 @@
             this.txtPrjFilePath.Name = "txtPrjFilePath";
             this.txtPrjFilePath.Size = new System.Drawing.Size(119, 22);
             this.txtPrjFilePath.TabIndex = 2;
+            this.txtPrjFilePath.TextChanged += new System.EventHandler(this.general_TextChanged);
             this.txtPrjFilePath.Validating += new System.ComponentModel.CancelEventHandler(this.txtPrjFilePath_Validating);
             // 
             // btnBrowsePrjFile
@@ -288,6 +293,7 @@
             this.txtFishnetEnvelopeFilePath.Name = "txtFishnetEnvelopeFilePath";
             this.txtFishnetEnvelopeFilePath.Size = new System.Drawing.Size(188, 22);
             this.txtFishnetEnvelopeFilePath.TabIndex = 1;
+            this.txtFishnetEnvelopeFilePath.TextChanged += new System.EventHandler(this.general_TextChanged);
             // 
             // btnBrowseFishnetEnvelopeFile
             // 
@@ -315,6 +321,7 @@
             this.txtFishnetCellSize.Name = "txtFishnetCellSize";
             this.txtFishnetCellSize.Size = new System.Drawing.Size(54, 22);
             this.txtFishnetCellSize.TabIndex = 0;
+            this.txtFishnetCellSize.TextChanged += new System.EventHandler(this.general_TextChanged);
             this.txtFishnetCellSize.Validating += new System.ComponentModel.CancelEventHandler(this.txtFishnetCellSize_Validating);
             // 
             // chkReplaceJob
@@ -324,10 +331,11 @@
             this.chkReplaceJob.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkReplaceJob.Location = new System.Drawing.Point(193, 31);
             this.chkReplaceJob.Name = "chkReplaceJob";
-            this.chkReplaceJob.Size = new System.Drawing.Size(80, 18);
+            this.chkReplaceJob.Size = new System.Drawing.Size(71, 17);
             this.chkReplaceJob.TabIndex = 1;
             this.chkReplaceJob.Text = "Overwrite";
             this.chkReplaceJob.UseVisualStyleBackColor = true;
+            this.chkReplaceJob.CheckedChanged += new System.EventHandler(this.general_CheckedChanged);
             // 
             // txtJobName
             // 
@@ -336,6 +344,7 @@
             this.txtJobName.Name = "txtJobName";
             this.txtJobName.Size = new System.Drawing.Size(133, 22);
             this.txtJobName.TabIndex = 0;
+            this.txtJobName.TextChanged += new System.EventHandler(this.general_TextChanged);
             // 
             // label12
             // 
@@ -387,6 +396,7 @@
             this.cboYear.Name = "cboYear";
             this.cboYear.Size = new System.Drawing.Size(124, 22);
             this.cboYear.TabIndex = 0;
+            this.cboYear.SelectedValueChanged += new System.EventHandler(this.general_SelectedValueChanged);
             this.cboYear.Validating += new System.ComponentModel.CancelEventHandler(this.cboYear_Validating);
             // 
             // cboStates
@@ -397,6 +407,7 @@
             this.cboStates.Name = "cboStates";
             this.cboStates.Size = new System.Drawing.Size(157, 22);
             this.cboStates.TabIndex = 1;
+            this.cboStates.SelectedValueChanged += new System.EventHandler(this.general_SelectedValueChanged);
             this.cboStates.Validating += new System.ComponentModel.CancelEventHandler(this.cboStates_Validating);
             // 
             // cboSummaryLevel
@@ -407,6 +418,7 @@
             this.cboSummaryLevel.Name = "cboSummaryLevel";
             this.cboSummaryLevel.Size = new System.Drawing.Size(157, 22);
             this.cboSummaryLevel.TabIndex = 2;
+            this.cboSummaryLevel.SelectedValueChanged += new System.EventHandler(this.general_SelectedValueChanged);
             this.cboSummaryLevel.Validating += new System.ComponentModel.CancelEventHandler(this.cboSummaryLevel_Validating);
             // 
             // label7
@@ -449,6 +461,7 @@
             this.txtVariableFilePath.Name = "txtVariableFilePath";
             this.txtVariableFilePath.Size = new System.Drawing.Size(260, 22);
             this.txtVariableFilePath.TabIndex = 3;
+            this.txtVariableFilePath.TextChanged += new System.EventHandler(this.general_TextChanged);
             this.txtVariableFilePath.Validating += new System.ComponentModel.CancelEventHandler(this.txtVariableFilePath_Validating);
             // 
             // txtOutputDirectory
@@ -458,6 +471,7 @@
             this.txtOutputDirectory.Name = "txtOutputDirectory";
             this.txtOutputDirectory.Size = new System.Drawing.Size(260, 22);
             this.txtOutputDirectory.TabIndex = 5;
+            this.txtOutputDirectory.TextChanged += new System.EventHandler(this.general_TextChanged);
             // 
             // menuStrip1
             // 
@@ -641,6 +655,17 @@
             // 
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.menuStrip1);
             // 
+            // btnCancel
+            // 
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnCancel.Location = new System.Drawing.Point(3, 545);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(80, 25);
+            this.btnCancel.TabIndex = 30;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
             // txtWorkingDirectory
             // 
             this.txtWorkingDirectory.BackColor = System.Drawing.SystemColors.ControlLight;
@@ -648,6 +673,7 @@
             this.txtWorkingDirectory.Name = "txtWorkingDirectory";
             this.txtWorkingDirectory.Size = new System.Drawing.Size(260, 22);
             this.txtWorkingDirectory.TabIndex = 27;
+            this.txtWorkingDirectory.TextChanged += new System.EventHandler(this.general_TextChanged);
             // 
             // btnBrowseWorking
             // 
@@ -756,7 +782,7 @@
             this.radioSRIDFile.Location = new System.Drawing.Point(13, 73);
             this.radioSRIDFile.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             this.radioSRIDFile.Name = "radioSRIDFile";
-            this.radioSRIDFile.Size = new System.Drawing.Size(65, 18);
+            this.radioSRIDFile.Size = new System.Drawing.Size(64, 17);
             this.radioSRIDFile.TabIndex = 3;
             this.radioSRIDFile.TabStop = true;
             this.radioSRIDFile.Text = "PRJ File";
@@ -770,7 +796,7 @@
             this.radioDefaultSRID.Location = new System.Drawing.Point(13, 22);
             this.radioDefaultSRID.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             this.radioDefaultSRID.Name = "radioDefaultSRID";
-            this.radioDefaultSRID.Size = new System.Drawing.Size(204, 18);
+            this.radioDefaultSRID.Size = new System.Drawing.Size(180, 17);
             this.radioDefaultSRID.TabIndex = 0;
             this.radioDefaultSRID.TabStop = true;
             this.radioDefaultSRID.Text = "Default SRID (census projection)";
@@ -794,7 +820,7 @@
             this.radioSRIDFromList.Location = new System.Drawing.Point(13, 47);
             this.radioSRIDFromList.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             this.radioSRIDFromList.Name = "radioSRIDFromList";
-            this.radioSRIDFromList.Size = new System.Drawing.Size(95, 18);
+            this.radioSRIDFromList.Size = new System.Drawing.Size(90, 17);
             this.radioSRIDFromList.TabIndex = 1;
             this.radioSRIDFromList.TabStop = true;
             this.radioSRIDFromList.Text = "Desired SRID";
@@ -811,17 +837,6 @@
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
-            // 
-            // btnCancel
-            // 
-            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnCancel.Location = new System.Drawing.Point(3, 545);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(80, 25);
-            this.btnCancel.TabIndex = 30;
-            this.btnCancel.Text = "Cancel";
-            this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // MainForm
             // 
