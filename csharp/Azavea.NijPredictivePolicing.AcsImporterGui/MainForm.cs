@@ -654,6 +654,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             chkPreserveJamValues.Checked = (!string.IsNullOrEmpty(importObj.PreserveJam));
             chkStripExtraGeoID.Checked = (!string.IsNullOrEmpty(importObj.AddStrippedGEOIDcolumn));
 
+            //reset the progress bar
+            pgbStatus.Value = 0;
         }
 
 
