@@ -102,16 +102,22 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
                         FileStream output = new FileStream(filePath, FileMode.Create);
                         Utilities.CopyToWithProgress(downloadStream, expectedLength, output, ref cancelled);
-
+                        
                         downloadStream.Close();
                         output.Close();
                         response.Close();
                         request.Abort();
 
-
-                        FileUtilities.TryChangeLastWriteTime(filePath, response.LastModified);
+                        if (cancelled)
+                        {
+                            //try to clean up after ourselves
+                            FileUtilities.TryDelete(filePath);
+                            _log.DebugFormat("Cancelling... Attempting to delete partially downloaded file {0}", Path.GetFileName(filePath));
+                        }
+                        
                         if (!cancelled)
                         {
+                            FileUtilities.TryChangeLastWriteTime(filePath, response.LastModified);
                             _log.DebugFormat("Downloaded of {0} was successful", Path.GetFileName(filePath));
                             if (Settings.ShowFilePaths)
                             {

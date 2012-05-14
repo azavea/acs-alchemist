@@ -60,7 +60,7 @@ namespace Azavea.NijPredictivePolicing.Common
         /// </summary>
         /// <param name="from">The stream to read from</param>
         /// <param name="to">The stream to write to</param>
-        public static void CopyToWithProgress(Stream from, long expectedLength, Stream to)
+        public static void CopyToWithProgress(Stream from, long expectedLength, Stream to, ref bool cancelled)
         {
             byte[] buffer = new byte[4096];
             int numBytesRead = 0, lastProgress = 0;
@@ -82,6 +82,8 @@ namespace Azavea.NijPredictivePolicing.Common
                             step, elapsed.TotalSeconds, position
                             );
                         lastProgress = step;
+
+                        if (cancelled) { return; }
                     }
                 }
             }
