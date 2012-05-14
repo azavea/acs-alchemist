@@ -122,8 +122,9 @@
             this.txtLogConsole.Name = "txtLogConsole";
             this.txtLogConsole.ReadOnly = true;
             this.txtLogConsole.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtLogConsole.Size = new System.Drawing.Size(409, 436);
+            this.txtLogConsole.Size = new System.Drawing.Size(508, 436);
             this.txtLogConsole.TabIndex = 13;
+            this.txtLogConsole.Text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
             // 
             // label2
             // 
@@ -349,14 +350,14 @@
             this.txtJobFilePath.Location = new System.Drawing.Point(609, 21);
             this.txtJobFilePath.Name = "txtJobFilePath";
             this.txtJobFilePath.ReadOnly = true;
-            this.txtJobFilePath.Size = new System.Drawing.Size(290, 22);
+            this.txtJobFilePath.Size = new System.Drawing.Size(389, 22);
             this.txtJobFilePath.TabIndex = 10;
             this.txtJobFilePath.TabStop = false;
             // 
             // btnSaveMessageLog
             // 
             this.btnSaveMessageLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSaveMessageLog.Location = new System.Drawing.Point(828, 512);
+            this.btnSaveMessageLog.Location = new System.Drawing.Point(927, 512);
             this.btnSaveMessageLog.Name = "btnSaveMessageLog";
             this.btnSaveMessageLog.Size = new System.Drawing.Size(66, 26);
             this.btnSaveMessageLog.TabIndex = 15;
@@ -462,7 +463,7 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(909, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1008, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -542,7 +543,7 @@
             this.txtMessageLogFilePath.BackColor = System.Drawing.SystemColors.ControlLight;
             this.txtMessageLogFilePath.Location = new System.Drawing.Point(609, 512);
             this.txtMessageLogFilePath.Name = "txtMessageLogFilePath";
-            this.txtMessageLogFilePath.Size = new System.Drawing.Size(213, 22);
+            this.txtMessageLogFilePath.Size = new System.Drawing.Size(312, 22);
             this.txtMessageLogFilePath.TabIndex = 14;
             // 
             // pgbStatus
@@ -550,7 +551,7 @@
             this.pgbStatus.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pgbStatus.Location = new System.Drawing.Point(0, 545);
             this.pgbStatus.Name = "pgbStatus";
-            this.pgbStatus.Size = new System.Drawing.Size(909, 25);
+            this.pgbStatus.Size = new System.Drawing.Size(1008, 25);
             this.pgbStatus.TabIndex = 24;
             // 
             // ofdOutputProjection
@@ -619,11 +620,11 @@
             this.toolStripContainer1.ContentPanel.Controls.Add(this.label6);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.label4);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.label5);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(909, 570);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(1008, 570);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
-            this.toolStripContainer1.Size = new System.Drawing.Size(909, 594);
+            this.toolStripContainer1.Size = new System.Drawing.Size(1008, 594);
             this.toolStripContainer1.TabIndex = 0;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -780,7 +781,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(909, 594);
+            this.ClientSize = new System.Drawing.Size(1008, 594);
             this.Controls.Add(this.toolStripContainer1);
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));

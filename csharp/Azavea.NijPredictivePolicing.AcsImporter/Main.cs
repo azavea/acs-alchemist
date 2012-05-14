@@ -56,27 +56,25 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
         }
 
 
-        protected static void ShowWelcomeScreen()
+        public static void ShowWelcomeScreen()
         {
             _log.Debug("+--------------------------------------------+");
             _log.Debug("|   Welcome to ACS Alchemist                 |");
             _log.Debug("+--------------------------------------------+");
             _log.Debug("");
-            _log.Debug(" This tool was developed by Azavea in collaboration with");
-            _log.Debug(" Jerry Ratcliffe and Ralph Taylor of Temple University and partially funded by ");
-            _log.Debug(" a Predictive Policing grant from the National Institute of Justice ");
-            _log.Debug(" (Award # 2010-DE-BX-K004). ");
+            _log.Debug(" This tool was developed by Azavea in collaboration with Jerry Ratcliffe and ");
+            _log.Debug("Ralph Taylor of Temple University Center for Security and Crime Science and ");
+            _log.Debug("partially funded by a Predictive Policing grant from the National Institute ");
+            _log.Debug("of Justice (Award # 2010-DE-BX-K004).  The source code is released under a ");
+            _log.Debug("GPLv3 license and is available at:  http://github.com/azavea/ACS-Alchemist/");
 
-
-            _log.Debug(" The source code is released under a GPLv3 license.");
-            _log.Debug(" available here: https://github.com/azavea/acs-alchemist ");
             _log.Debug("");
         }
 
-        protected static void ShowCopyrightAndLicense()
+        public static void ShowCopyrightAndLicense()
         {
             _log.Info("+-------------------------------------------------------------+");
-            _log.Info(" ACS Alchemist  Copyright (C) 2012 Azavea, Inc.");
+            _log.Info(" ACS Alchemist - Copyright (c) 2011-2012 Azavea Inc.");
             _log.Info(" This program comes with ABSOLUTELY NO WARRANTY;");
             _log.Info(" This is free software, and you are welcome to redistribute it");
             _log.Info(" under the terms of the GNU General Public License");
@@ -85,6 +83,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
 
             _log.Info("+-------------------------------------------------------------+");
         }
+
 
         /// <summary>
         /// Searches for our config file in the application path, if it can't find it,
