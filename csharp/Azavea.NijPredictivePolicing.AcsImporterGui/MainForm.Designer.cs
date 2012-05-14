@@ -116,7 +116,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.txtLogConsole.BackColor = System.Drawing.SystemColors.InactiveBorder;
             this.txtLogConsole.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtLogConsole.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
+            this.txtLogConsole.ForeColor = System.Drawing.SystemColors.ControlText;
             this.txtLogConsole.Location = new System.Drawing.Point(493, 73);
             this.txtLogConsole.Multiline = true;
             this.txtLogConsole.Name = "txtLogConsole";
@@ -124,7 +124,6 @@
             this.txtLogConsole.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtLogConsole.Size = new System.Drawing.Size(508, 436);
             this.txtLogConsole.TabIndex = 13;
-            this.txtLogConsole.Text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
             // 
             // label2
             // 

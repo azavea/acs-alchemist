@@ -135,7 +135,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                 //this.Font =  new Font(_fontCollection.Families[1], 9);
 
                 //however, we absolutely need a monospaced font here for this to look correct.
-                txtLogConsole.Font = new Font(_fontCollection.Families[0], 8f);
+                txtLogConsole.Font = new Font(_fontCollection.Families[0], 7.75f);
             }
             catch (Exception ex)
             {
