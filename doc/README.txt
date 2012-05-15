@@ -19,8 +19,16 @@ Getting Started
 -------------------------------------
 To install the ACS Alchemist, run the ACSAlchemist.exe installer, and select an installation folder.  You can launch the application from the Start Menu as follows:
 
-1. Click on [Start]->[Programs]->[Azavea]->[ACS Alchemist]
-2. Type AcsAlchemist.exe in the command prompt
+The installer provides both a command line application, as well as a more friendly graphical interface:
+
+Running the GUI:
+ 1.) Click on [Start]->[Programs]->[Azavea]->[ACS Alchemist GUI]
+ 2.) Fill out the form, select a variables file, and click export!  You can also save and load your job at any time!  These job files can be used interchangeably with the command line app.
+
+Running the Command Line Interface:
+ 1.) Click on [Start]->[Programs]->[Azavea]->[ACS Alchemist] 
+ 2.) Type AcsAlchemist.exe in the command prompt to list options
+
 
 The importer will download files to an output directory so you will need to have write permissions for this directory. If you receive permission errors when attempting to run the application in Windows Vista or Windows 7, please try the following steps:
 
