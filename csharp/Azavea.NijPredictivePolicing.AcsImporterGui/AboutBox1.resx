@@ -363,6 +363,6 @@
 </value>
   </data>
   <data name="textBoxDescription.Text" xml:space="preserve">
-    <value>This tool was developed by Azavea in collaboration with Jerry Ratcliffe and Ralph Taylor of Temple University Center for Security and Crime Science and partially funded by a Predictive Policing grant from the National Institute of Justice (Award # 2010-DE-BX-K004).  The source code is released under a GPLv3 license and is available at:  http://github.com/azavea/ACS-Alchemist/</value>
+    <value>This tool was developed by Azavea in collaboration with Jerry Ratcliffe and Ralph Taylor of Temple University Center for Security and Crime Science and partially funded by a Predictive Policing grant from the National Institute of Justice (Award # 2010-DE-BX-K004).  The source code is released under a GPLv3 license and is available at:  https://github.com/azavea/acs-alchemist</value>
   </data>
 </root>

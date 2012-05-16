@@ -74,7 +74,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             _log.Debug("reflect those of the Department of Justice. ");
             _log.Debug("");
             _log.Debug(" The source code is released under a GPLv3 license and is available at: ");
-            _log.Debug("http://github.com/azavea/ACSAlchemist/");
+            _log.Debug("https://github.com/azavea/acs-alchemist");
             _log.Debug("");
         }
 
