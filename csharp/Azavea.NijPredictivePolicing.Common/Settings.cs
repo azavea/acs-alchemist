@@ -190,8 +190,8 @@ namespace Azavea.NijPredictivePolicing.Common
 
             if (!years.ContainsKey(year))
             {
-                _log.ErrorFormat("The importer couldn't find/read the \"AcsAlchemist.{0}.config\" file, the importer cannot continue", year);
-                _log.FatalFormat("The importer couldn't find/read the \"AcsAlchemist.{0}.config\" file, the importer cannot continue", year);
+                _log.ErrorFormat("The importer couldn't find/read the \"AcsAlchemist.json.{0}.config\" file, the importer cannot continue", year);
+                _log.FatalFormat("The importer couldn't find/read the \"AcsAlchemist.json.{0}.config\" file, the importer cannot continue", year);
                 Environment.Exit(-1);
             }
 
@@ -222,7 +222,7 @@ namespace Azavea.NijPredictivePolicing.Common
                 };
                 foreach (string path in paths)
                 {
-                    string[] files = Directory.GetFiles(path, "AcsAlchemist.*.config");
+                    string[] files = Directory.GetFiles(path, "AcsAlchemist.json.*.config");
                     if ((files != null) && (files.Length > 0))
                     {
                         foreach (string filename in files)
@@ -230,7 +230,7 @@ namespace Azavea.NijPredictivePolicing.Common
                             //2009, 2010, acs2010_3yr
                             string key = Path.GetFileNameWithoutExtension(filename);
 
-                            key = key.Replace("AcsAlchemist.", string.Empty);
+                            key = key.Replace("AcsAlchemist.json.", string.Empty);
                             if (key == "json")
                                 continue;
 
@@ -246,14 +246,14 @@ namespace Azavea.NijPredictivePolicing.Common
 
                 if (!foundConfigs.ContainsKey("2009"))
                 {
-                    Config c = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.2009.config"));
+                    Config c = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.json.2009.config"));
                     Settings.RestoreYear2009(c);
                     _yearConfigs["2009"] = c;
                 }
 
                 if (!foundConfigs.ContainsKey("2010"))
                 {
-                    Config c = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.2010.config"));
+                    Config c = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.json.2010.config"));
                     Settings.RestoreYear2010(c);
                     _yearConfigs["2010"] = c;
                 }
