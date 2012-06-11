@@ -91,8 +91,8 @@ Section -Main SEC0000
 	
 	SetOutPath $INSTDIR
 	#23265 -- any config files must be present!  otherwise the user will need to be an admin on first run, which is annoying
-	File ${SOURCE_DIR}\AcsAlchemist.2009.config
-	File ${SOURCE_DIR}\AcsAlchemist.2010.config
+	File ${SOURCE_DIR}\AcsAlchemist.json.2009.config
+	File ${SOURCE_DIR}\AcsAlchemist.json.2010.config
 	
 	
 	SetOutPath $INSTDIR\Docs
