@@ -246,7 +246,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
         public bool CheckCensusAggregatedDataFile()
         {
-            if ((this.SummaryLevel == "150") && (this.SummaryLevel == "140"))
+            if ((this.SummaryLevel == "150") || (this.SummaryLevel == "140"))
             {
                 //if summary level is tracts / block groups
                 return CheckBlockGroupFile();
@@ -263,7 +263,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         /// <returns></returns>
         public string GetAggregateDataPath()
         {
-            if ((this.SummaryLevel == "150") && (this.SummaryLevel == "140"))
+            if ((this.SummaryLevel == "150") || (this.SummaryLevel == "140"))
             {
                 return FileUtilities.PathEnsure(this.WorkingPath, Settings.CurrentAcsDirectory);
             }
