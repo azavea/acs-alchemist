@@ -62,17 +62,18 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
             _log.Debug("|   Welcome to ACS Alchemist                 |");
             _log.Debug("+--------------------------------------------+");
             _log.Debug("");
-            _log.Debug(" This tool was developed by Azavea in collaboration with ");
-            _log.Debug("Jerry Ratcliffe and Ralph Taylor of Temple University Center ");
-            _log.Debug("for Security and Crime Science. ");
+			
+			_log.Debug("This project was supported by Award No. 2010-DE-BX-K004,");
+			_log.Debug("awarded by the National Institute of Justice, Office of ");
+			_log.Debug("Justice Programs, U.S. Department of Justice. The opinions, ");
+			_log.Debug("findings, and conclusions or recommendations expressed in this ");
+			_log.Debug("software are those of the author(s) and do not necessarily reflect");
+			_log.Debug("those of the Department of Justice or Temple University.");
 
-            _log.Debug("");
-            _log.Debug(" This project was supported by Award No. 2010-DE-BX-K004, awarded by the ");
-            _log.Debug("National Institute of Justice, Office of Justice Programs, U.S. Department ");
-            _log.Debug("of Justice. The opinions, findings, and conclusions or recommendations ");
-            _log.Debug("expressed in this software are those of the author(s) and do not necessarily ");
-            _log.Debug("reflect those of the Department of Justice. ");
-            _log.Debug("");
+			_log.Debug("The software was developed by Azavea in connection with the ");
+			_log.Debug("National Institute of Justice grant awarded to Jerry Ratcliffe");
+			_log.Debug("and Ralph Taylor of Temple University's Center for Security and Crime Science.");
+			
             _log.Debug(" The source code is released under a GPLv3 license and is available at: ");
             _log.Debug("https://github.com/azavea/acs-alchemist");
             _log.Debug("");

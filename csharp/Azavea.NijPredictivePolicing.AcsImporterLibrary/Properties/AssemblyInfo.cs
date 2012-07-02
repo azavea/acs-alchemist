@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Azavea.NijPredictivePolicing.ACSAlchemistLibrary")]
-[assembly: AssemblyDescription("This tool was developed by Azavea in collaboration with Jerry Ratcliffe and Ralph Taylor of Temple University Center for Security and Crime Science. This project was supported by Award No. 2010-DE-BX-K004, awarded by the National Institute of Justice, Office of Justice Programs, U.S. Department of Justice. The opinions, findings, and conclusions or recommendations expressed in this software are those of the author(s) and do not necessarily reflect those of the Department of Justice.  The source code is released under a GPLv3 license and is available at:  https://github.com/azavea/acs-alchemist")]
+[assembly: AssemblyDescription("This project was supported by Award No. 2010-DE-BX-K004, awarded by the National Institute of Justice, Office of Justice Programs, U.S. Department of Justice. The opinions, findings, and conclusions or recommendations expressed in this software are those of the author(s) and do not necessarily reflect those of the Department of Justice or Temple University.  The software was developed by Azavea in connection with the National Institute of Justice grant awarded to Jerry Ratcliffe and Ralph Taylor of Temple University's Center for Security and Crime Science.  The source code is released under a GPLv3 license and is available at:  https://github.com/azavea/acs-alchemist")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Azavea")]
 [assembly: AssemblyProduct("Azavea.NijPredictivePolicing.ACSAlchemistLibrary")]
