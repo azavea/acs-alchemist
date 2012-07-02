@@ -306,5 +306,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             FormController.Instance.JobInstance.WorkingFolder = Settings.AppDataDirectory;
         }
 
+
+        public bool IsOffline { get; set; }
     }
 }

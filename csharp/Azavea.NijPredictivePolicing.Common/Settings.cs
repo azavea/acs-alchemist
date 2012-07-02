@@ -364,9 +364,14 @@ namespace Azavea.NijPredictivePolicing.Common
         public static string BlockGroupsDataTableSuffix { get { return Settings.GetYear("BlockGroupsDataTableSuffix", string.Empty); } }
 
         /// <summary>
+        /// non tract/block-group files in CurrentAcsAllStateTablesDirectory are named by the convention [state name] + AllGeographiesDataTableSuffix
+        /// </summary>
+        public static string AllGeographiesDataTableSuffix { get { return Settings.GetYear("AllGeographiesDataTableSuffix", string.Empty); } }        
+
+        /// <summary>
         /// Currently the files in CurrentAcsAllStateTablesDirectory are named by the convention [state name] + BlockGroupsDataTableSuffix
         /// </summary>
-        public static string BlockGroupsFileTypeExtension { get { return Settings.GetYear("BlockGroupsFileTypeExtension", ".zip"); } }
+        public static string DataFileTypeExtension { get { return Settings.GetYear("DataFileTypeExtension", ".zip"); } }
 
         /// <summary>
         /// Used in the ShapeFile*Filename variables as a placeholder for the state fips code
@@ -491,8 +496,8 @@ namespace Azavea.NijPredictivePolicing.Common
 
 
             // COUNTY SHAPES NOT UPDATED PER: http://www.census.gov/geo/www/cob/cbf_counties.html
-            //c.Set("ShapeFileCountiesURL", "http://www.census.gov/geo/cob/bdy/co/co00shp/");
-            //c.Set("ShapeFileCountiesFilename", "co{FIPS-code}_d00_shp.zip");
+            c.Set("ShapeFileCountiesURL", "http://www.census.gov/geo/cob/bdy/co/co00shp/");
+            c.Set("ShapeFileCountiesFilename", "co{FIPS-code}_d00_shp.zip");
 
             //c.Set("ShapeFileVotingURL", "http://www.census.gov/geo/cob/bdy/vt/vt00shp/");
             //c.Set("ShapeFileVotingFilename", "vt{FIPS-code}_d00_shp.zip");
@@ -506,8 +511,11 @@ namespace Azavea.NijPredictivePolicing.Common
             c.Set("SummaryFileDirectory", "summaryfile");
             c.Set("ColumnMappingsFileDirectory", "UserTools");
             c.Set("ColumnMappingsFileExtension", ".zip");
+
             c.Set("BlockGroupsDataTableSuffix", "_Tracts_Block_Groups_Only");
-            c.Set("BlockGroupsFileTypeExtension", ".zip");
+            c.Set("AllGeographiesDataTableSuffix", "_All_Geographies_Not_Tracts_Block_Groups");
+            c.Set("DataFileTypeExtension", ".zip");
+
 
             c.Set("CurrentColumnMappingsFileUrl", "{CensusFtpRoot}/{CurrentAcsDirectory}/{SummaryFileDirectory}/{ColumnMappingsFileDirectory}/{ColumnMappingsFileName}{ColumnMappingsFileExtension}");
             c.Set("CurrentAcsAllStateTablesUrl", "{CensusFtpRoot}/{CurrentAcsDirectory}/{SummaryFileDirectory}/{CurrentAcsAllStateTablesDirectory}");

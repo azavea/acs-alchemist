@@ -176,9 +176,21 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
             this.ShapePath = FileUtilities.PathEnsure(this.WorkingPath, "shapes");
             this.CurrentDataPath = FileUtilities.PathEnsure(this.WorkingPath, Settings.CurrentAcsDirectory);
+            
 
             this.DbClient = DataClient.GetDefaultClient(this.DBFilename);
         }
+
+       
+
+
+        public string GetLocalAllGeometriesZipFileName()
+        {
+            string remoteFilename = FileLocator.GetStateAllGeometryFileName(this.State);
+            string localFilename = Settings.RequestedYear + "_" + remoteFilename;
+            return FileUtilities.PathCombine(this.WorkingPath, localFilename);
+        }
+
 
 
         public string GetLocalBlockGroupZipFileName()
@@ -189,7 +201,17 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         }
         public string GetLocalGeographyFileName()
         {
-            return FileLocator.GetStateBlockGroupGeographyFilename(this.CurrentDataPath);
+            return FileLocator.GetAggregateDataGeographyFilename(this.GetAggregateDataPath());
+        }
+        public string GetGeographyTablename()
+        {
+            string geographies = "geographies";
+            if ((this.SummaryLevel != "150") && (this.SummaryLevel != "140"))
+            {
+                geographies += "_all";
+            }
+
+            return geographies;
         }
         public string GetLocalColumnMappingsDirectory()
         {
@@ -205,7 +227,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 Settings.ColumnMappingsFileName + Settings.ColumnMappingsFileExtension);
 
 
-            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath, ref this._cancelled))
+            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath, ref this._cancelled, WorkOffline))
             {
                 _log.ErrorFormat("Downloading sequence files failed: unable to retrieve {0} ", desiredUrl);
                 return false;
@@ -221,25 +243,88 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             return true;
         }
 
+
+        public bool CheckCensusAggregatedDataFile()
+        {
+            if ((this.SummaryLevel == "150") && (this.SummaryLevel == "140"))
+            {
+                //if summary level is tracts / block groups
+                return CheckBlockGroupFile();
+            }
+            else
+            {
+                return CheckAllGeometriesFile();
+            }
+        }
+
+        /// <summary>
+        /// Gets either the standard data path based on year, or appends an 'all' if we're not doing tracts or block-groups
+        /// </summary>
+        /// <returns></returns>
+        public string GetAggregateDataPath()
+        {
+            if ((this.SummaryLevel == "150") && (this.SummaryLevel == "140"))
+            {
+                return FileUtilities.PathEnsure(this.WorkingPath, Settings.CurrentAcsDirectory);
+            }
+            else
+            {
+                return FileUtilities.PathEnsure(this.WorkingPath, Settings.CurrentAcsDirectory + "_all");
+            }
+        }
+
+
         /// <summary>
         /// Downloads the census DATA for the given state
         /// </summary>
         /// <returns></returns>
         public bool CheckBlockGroupFile()
         {
-            _log.DebugFormat("Downloading census data for {0}", this.State);
+            _log.DebugFormat("Downloading census data for tract and block groups for {0}", this.State);
 
             string desiredUrl = FileLocator.GetStateBlockGroupUrl(this.State);
             string destFilepath = GetLocalBlockGroupZipFileName();
 
 
-            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath, ref this._cancelled))
+            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath, ref this._cancelled, WorkOffline))
             {
                 _log.ErrorFormat("Downloading census data failed: unable to retrieve {0} ", desiredUrl);
                 return false;
             }
 
-            if (!FileLocator.ExpandZipFile(destFilepath, this.CurrentDataPath))
+            //double-check to make sure we're not expanding this ON-TOP of the 'all-geometries' data!!!
+            //current data path should NOT be acs2010_5yr
+            if (!FileLocator.ExpandZipFile(destFilepath, this.GetAggregateDataPath()))
+            {
+                _log.ErrorFormat("Downloading census data failed: unable to expand file {0}", destFilepath);
+                return false;
+            }
+
+            _log.Debug("Downloading census data... Done!");
+            return true;
+        }
+
+        /// <summary>
+        /// Downloads the census DATA for the given state
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckAllGeometriesFile()
+        {
+            _log.DebugFormat("Downloading census data for all geometries for {0}", this.State);
+
+            string desiredUrl = FileLocator.GetStateAllGeometryUrl(this.State);
+            string destFilepath = GetLocalAllGeometriesZipFileName();
+
+
+            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath, ref this._cancelled, WorkOffline))
+            {
+                _log.ErrorFormat("Downloading census data failed: unable to retrieve {0} ", desiredUrl);
+                return false;
+            }
+
+            //double-check to make sure we're not expanding this ON-TOP of the block-group data!!!
+            //current data path should NOT be acs2010_5yr
+            if (!FileLocator.ExpandZipFile(destFilepath, this.GetAggregateDataPath()))
             {
                 _log.ErrorFormat("Downloading census data failed: unable to expand file {0}", destFilepath);
                 return false;
@@ -261,13 +346,18 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             BoundaryLevels[] shapeFileLevels = new BoundaryLevels[] {
                 BoundaryLevels.census_blockgroups,
                 BoundaryLevels.census_tracts,
+                BoundaryLevels.county_subdivisions,                
+                BoundaryLevels.counties,
+
                 /*
-                BoundaryLevels.county_subdivisions,
-                BoundaryLevels.zipthree,
-                BoundaryLevels.zipfive,
-                BoundaryLevels.counties
-                 */
+                 BoundaryLevels.census_regions,
+                 BoundaryLevels.census_divisions,
+                 BoundaryLevels.states
+                 BoundaryLevels.zipthree,
+                 BoundaryLevels.zipfive,
+                 */                
             };
+
 
             foreach (BoundaryLevels level in shapeFileLevels)
             {
@@ -300,7 +390,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         {
             _log.DebugFormat("Downloading shapefile of {0} for {1}", niceName, this.State);
 
-            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath, ref this._cancelled))
+            if (!FileDownloader.GetFileByURL(desiredUrl, destFilepath, ref this._cancelled, WorkOffline))
             {
                 _log.ErrorFormat("Shapefile download failed: Could not download {0}", niceName);
                 return false;
@@ -384,7 +474,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         public bool CreateGeographiesTable(DbConnection conn)
         {
             //create the table
-            string createGeographyTableSQL = DataClient.GenerateTableSQLFromFields(DbConstants.TABLE_Geographies, GeographyFileReader.Columns);
+            string createGeographyTableSQL = DataClient.GenerateTableSQLFromFields(this.GetGeographyTablename(), GeographyFileReader.Columns);
             DbClient.GetCommand(createGeographyTableSQL, conn).ExecuteNonQuery();
 
             //parse in the file
@@ -393,7 +483,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             if (geoReader.HasFile)
             {
                 _log.Debug("Importing Geographies File...");
-                string tableSelect = string.Format("select * from \"{0}\"", DbConstants.TABLE_Geographies);
+                string tableSelect = string.Format("select * from \"{0}\"", this.GetGeographyTablename());
                 var adapter = DataClient.GetMagicAdapter(conn, DbClient, tableSelect);
                 var table = DataClient.GetMagicTable(conn, DbClient, tableSelect);
 
@@ -555,7 +645,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             using (var conn = DbClient.GetConnection())
             {
                 _log.Debug("Checking for geographies table...");
-                if (!DataClient.HasTable(conn, DbClient, "geographies"))
+                if (!DataClient.HasTable(conn, DbClient, this.GetGeographyTablename()))
                 {
                     if (!CreateGeographiesTable(conn))
                     {
@@ -832,14 +922,14 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                         varNum++;
 
                         var sequenceNo = Utilities.GetAs<int>(variableRow["SEQNO"] as string, -1);
-                        var seqFile = Directory.GetFiles(this.CurrentDataPath, "e*" + sequenceNo.ToString("0000") + "000.txt");    //0001000
+                        var seqFile = Directory.GetFiles(this.GetAggregateDataPath(), "e*" + sequenceNo.ToString("0000") + "000.txt");    //0001000
                         if ((seqFile == null) || (seqFile.Length == 0))
                         {
                             _log.DebugFormat("Couldn't find sequence file {0}", sequenceNo);
                             continue;
                         }
 
-                        var errorFile = Directory.GetFiles(this.CurrentDataPath, "m*" + sequenceNo.ToString("0000") + "000.txt");    //0001000
+                        var errorFile = Directory.GetFiles(this.GetAggregateDataPath(), "m*" + sequenceNo.ToString("0000") + "000.txt");    //0001000
                         if ((errorFile == null) || (errorFile.Length == 0))
                         {
                             _log.DebugFormat("Couldn't find error margin file {0}", sequenceNo);
@@ -958,11 +1048,52 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             return false;
         }
 
+        public delegate string GetGeometryRowKey(DataRow row);
+
+        public GetGeometryRowKey GetGeometryRowKeyGenerator()
+        {
+            GetGeometryRowKey keyDelegate = null;
+
+            if ((this.SummaryLevel == "140") || (this.SummaryLevel == "150"))
+            {
+                keyDelegate = (DataRow row) =>
+                {
+                    string county = Utilities.GetAs<string>(row["COUNTY"], "-1");
+                    string tract = Utilities.GetAs<string>(row["TRACT"], "-1");
+                    string blkgroup = Utilities.GetAs<string>(row["BLKGROUP"], "-1");
+                    if (tract.Trim().Length != 6)
+                        tract += "00";
+
+                    return string.Format("{0}_{1}_{2}", county, tract, blkgroup);
+                };
+            }
+            else if (this.SummaryLevel == "060")
+            {
+                keyDelegate = (DataRow row) =>
+                {
+                    string county = Utilities.GetAs<string>(row["COUNTY"], "-1");
+                    string cousub = Utilities.GetAs<string>(row["COUSUB"], "-1");
+
+                    return string.Format("{0}_{1}", county, cousub);
+                };
+            }
+            else if (this.SummaryLevel == "050")
+            {
+                keyDelegate = (DataRow row) =>
+                {
+                    return Utilities.GetAs<string>(row["COUNTY"], "-1");
+                };
+            }
+
+            return keyDelegate;
+        }
+
 
         protected Dictionary<string, DataRow> GetShapeRowsByLOGRECNO(DbConnection conn)
         {
-            string geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGRP) as blkgroup, GEOID from geographies order by county, tract, blkgrp ";
-            var wholeGeomTable = DataClient.GetMagicTable(conn, DbClient, geomSQL);
+            string geomSQL;
+            string geographiesTablename = this.GetGeographyTablename();
+            
 
             string shapeSQL = string.Empty;
             switch (this.SummaryLevel)
@@ -970,14 +1101,23 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 //census_regions
                 //census_divisions
                 //states
-                //counties
-                case "060":
-                    //TODO: add subdivisions
-                    shapeSQL = "select *, '' as GEOID from county_subdivisions ";
+                
+                case "050":
+                    //counties
+                    shapeSQL = "select trim(COUNTY) as county, AsBinary(Geometry) as Geometry, '' as GEOID from counties ";
+                    geomSQL = "select LOGRECNO, trim(COUNTY) as county, GEOID from geographies_all where SUMLEVEL = '050' order by county ";
                     break;
+
+                //subdivisions
+                case "060":
+                    shapeSQL = "select trim(COUNTY) as county,  trim(COUSUB) as cousub, AsBinary(Geometry) as Geometry, '' as GEOID from county_subdivisions ";
+                    geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(COUSUB) as cousub, GEOID from geographies_all  where SUMLEVEL = '060' order by county, cousub";
+                    break;
+
                 case "140":
                     //tracts
-                    shapeSQL = "select trim(COUNTY) as county, trim(TRACT) as tract, '' as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_tracts ";
+                    shapeSQL = "select trim(COUNTY) as county, trim(TRACT) as tract, '' as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_tracts order by county, tract, blkgroup";
+                    geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGRP) as blkgroup, GEOID from geographies where SUMLEVEL = '140' order by county, tract, blkgrp ";
                     break;
                 case "150":
                 default:
@@ -996,13 +1136,16 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     string blkGroupColumn = (hasAbbrevColumn) ? "BLKGRP" : "BLKGROUP";
 
                     //block groups
-                    shapeSQL = string.Format("select trim(COUNTY) as county, trim(TRACT) as tract, trim({0}) as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_blockgroups ",
+                    shapeSQL = string.Format("select trim(COUNTY) as county, trim(TRACT) as tract, trim({0}) as blkgroup, AsBinary(Geometry) as Geometry, '' as GEOID from census_blockgroups order by county, tract, blkgroup",
                         blkGroupColumn);
+                    geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(TRACT) as tract, trim(BLKGRP) as blkgroup, GEOID from geographies  where SUMLEVEL = '150' order by county, tract, blkgrp ";
+
                     break;
             }
-            shapeSQL += "order by county, tract, blkgroup";
+          
 
 
+            var wholeGeomTable = DataClient.GetMagicTable(conn, DbClient, geomSQL);
             var wholeShapeTable = DataClient.GetMagicTable(conn, DbClient, shapeSQL);
             if (wholeShapeTable == null)
             {
@@ -1010,34 +1153,39 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 return null;
             }
 
+            
+            //
+            // Construct the appropriate key for whatever summary level we're using
+            //
+            GetGeometryRowKey keyDelegate = GetGeometryRowKeyGenerator();
+            
 
-
+            //
+            // organize our freshly pulled geometries table by composite_id
+            //
             var geomKeys = new Dictionary<string, DataRow>();
             foreach (DataRow row in wholeGeomTable.Rows)
             {
-                string county = Utilities.GetAs<string>(row["COUNTY"], "-1");
-                string tract = Utilities.GetAs<string>(row["TRACT"], "-1");
-                string blkgroup = Utilities.GetAs<string>(row["BLKGROUP"], "-1");
-                if (tract.Trim().Length != 6)
-                    tract += "00";
-
-                string key = string.Format("{0}_{1}_{2}", county, tract, blkgroup);
+                string key = keyDelegate(row);
                 geomKeys[key] = row;
             }
 
+
             var dict = new Dictionary<string, DataRow>();
-            GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
-                    ShapefileHelper.GetGeomFactory());
+            GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(ShapefileHelper.GetGeomFactory());
             GisSharpBlog.NetTopologySuite.IO.WKBWriter binWriter = new WKBWriter();
+
             foreach (DataRow row in wholeShapeTable.Rows)
             {
-                string county = Utilities.GetAs<string>(row["COUNTY"], "-1");
-                string tract = Utilities.GetAs<string>(row["TRACT"], "-1");
-                string blkgroup = Utilities.GetAs<string>(row["BLKGROUP"], "-1");
-                if (tract.Trim().Length != 6)
-                    tract += "00";
+                //string county = Utilities.GetAs<string>(row["COUNTY"], "-1");
+                //string tract = Utilities.GetAs<string>(row["TRACT"], "-1");
+                //string blkgroup = Utilities.GetAs<string>(row["BLKGROUP"], "-1");
+                //if (tract.Trim().Length != 6)
+                //    tract += "00";
+                //string key = string.Format("{0}_{1}_{2}", county, tract, blkgroup);
 
-                string key = string.Format("{0}_{1}_{2}", county, tract, blkgroup);
+                string key = keyDelegate(row);
+
                 if (geomKeys.ContainsKey(key))
                 {
                     string logrecno = geomKeys[key]["LOGRECNO"] as string;
@@ -1059,7 +1207,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                          * http://www.census.gov/geo/www/cob/tr_metadata.html
                          */
 
-                        _log.DebugFormat("Duplicate records encountered for logical record number {0} (County:{1}, Tract:{2}, Block Group:{3}).", logrecno, county, tract, blkgroup);
+                        _log.DebugFormat("Duplicate records encountered for logical record number {0} (key {1}).", logrecno, key);
                         if (row["GEOID"] != dict[logrecno]["GEOID"])
                         {
                             _log.DebugFormat("GEOID {0} collided with GEOID {1}", row["GEOID"], dict[logrecno]["GEOID"]);
@@ -1071,9 +1219,13 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                             IGeometry geomToAdd = binReader.Read(geomBytes);
                             geomBytes = (byte[])dict[logrecno]["Geometry"];
                             IGeometry currentGeom = binReader.Read(geomBytes);
-                            geomBytes = binWriter.Write(currentGeom.Union(geomToAdd));
-                            row["Geometry"] = geomBytes;    //saved to dict at end of current if clause
-                            _log.Debug("Geometry merge succeeded!  Please double check all features in the output that match the above logrecno for consistency.");
+
+                            if (!geomToAdd.Equals(currentGeom))
+                            {
+                                geomBytes = binWriter.Write(currentGeom.Union(geomToAdd));
+                                row["Geometry"] = geomBytes;    //saved to dict at end of current if clause
+                                _log.Debug("Geometry merge succeeded!  Please double check all features in the output that match the above logrecno for consistency.");
+                            }
                         }
                         catch (Exception)
                         {
@@ -1085,8 +1237,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 }
                 else
                 {
-                    _log.DebugFormat("Couldn't find a geometry matching County:{0}, Tract:{1}, Block Group:{2}",
-                        county, tract, blkgroup);
+                    _log.DebugFormat("Couldn't find a geometry matching KEY  (county/tract/blkgrp) {0}", key);
                 }
             }
 
@@ -1676,5 +1827,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         }
 
 
+
+        public bool WorkOffline { get; set; }
     }
 }

@@ -399,6 +399,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 WorkingFolder = FileUtilities.CleanPath(WorkingFolder);
                 var manager = new AcsDataManager(this.State, WorkingFolder, this.Year);
                 this._manager = manager;
+                manager.WorkOffline = this.WorkOffline;
                 //TODO: check for bad combinations of inputs
                 manager.SummaryLevel = this.SummaryLevel;
                 manager.ExportFilterFilename = this.ExportFilterShapefile;
@@ -438,7 +439,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
 
                 bool hasPrerequesites = true;
                 hasPrerequesites &= !IsCancelled() && manager.CheckColumnMappingsFile();
-                hasPrerequesites &= !IsCancelled() && manager.CheckBlockGroupFile();
+                hasPrerequesites &= !IsCancelled() && manager.CheckCensusAggregatedDataFile();
                 hasPrerequesites &= !IsCancelled() && manager.CheckDatabase();
                 hasPrerequesites &= !IsCancelled() && manager.CheckShapefiles();
 
@@ -634,6 +635,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
 
 
 
-     
+
+
+        public bool WorkOffline { get; set; }
     }
 }

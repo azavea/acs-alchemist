@@ -186,6 +186,12 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                     case BoundaryLevels.None:
                         e.Value = string.Empty;
                         break;
+                    case BoundaryLevels.counties:
+                        e.Value = "Counties";
+                        break;
+                    case BoundaryLevels.county_subdivisions:
+                        e.Value = "County Subdivisions";
+                        break;
                     case BoundaryLevels.census_tracts:
                         e.Value = "Census Tracts";
                         break;
@@ -594,6 +600,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
             var importObj = FormController.Instance.JobInstance;
 
+            FormController.Instance.JobInstance.WorkOffline = FormController.Instance.IsOffline;
 
             importObj.Year = cboYear.Text;                                             //1
             importObj.State = (AcsState)cboStates.SelectedValue;                       //2
@@ -977,6 +984,12 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         }
 
         #endregion Dirty State Tracking
+
+        private void workOfflineToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormController.Instance.IsOffline = !FormController.Instance.IsOffline;
+            workOfflineToolStripMenuItem.Checked = FormController.Instance.IsOffline;
+        }
 
 
 

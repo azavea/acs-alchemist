@@ -91,7 +91,7 @@ namespace Azavea.NijPredictivePolicing.Test.ACSAlchemistLibrary
 
 
             var manager = new AcsDataManager(AcsState.Wyoming);
-            if (manager.CheckBlockGroupFile())
+            if (manager.CheckCensusAggregatedDataFile())
             {
                 string filename = manager.GetLocalBlockGroupZipFileName();
 

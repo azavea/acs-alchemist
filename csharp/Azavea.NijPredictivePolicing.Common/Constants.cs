@@ -48,7 +48,7 @@ and all other parameters must match that projection.
 
     public static class DbConstants
     {
-        public const string TABLE_Geographies = "geographies";
+        //public const string TABLE_Geographies = "geographies";
         public const string TABLE_ColumnMappings = "columnMappings";
         public const string TABLE_DesiredColumns = "desiredColumns";
 

@@ -102,6 +102,8 @@
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.fbdWorkingDir = new System.Windows.Forms.FolderBrowserDialog();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.workOfflineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -478,7 +480,8 @@
             this.menuStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.helpToolStripMenuItem});
+            this.helpToolStripMenuItem,
+            this.optionsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(919, 24);
@@ -538,7 +541,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.aboutToolStripMenuItem.Text = "&About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -838,6 +841,21 @@
             this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.workOfflineToolStripMenuItem});
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.optionsToolStripMenuItem.Text = "&Options";
+            // 
+            // workOfflineToolStripMenuItem
+            // 
+            this.workOfflineToolStripMenuItem.Name = "workOfflineToolStripMenuItem";
+            this.workOfflineToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.workOfflineToolStripMenuItem.Text = "Work &Offline";
+            this.workOfflineToolStripMenuItem.Click += new System.EventHandler(this.workOfflineToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
@@ -947,5 +965,7 @@
         private System.Windows.Forms.Label lblWorkingDir;
         private System.Windows.Forms.FolderBrowserDialog fbdWorkingDir;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem workOfflineToolStripMenuItem;
     }
 }

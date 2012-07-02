@@ -57,8 +57,33 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary
         /// <returns></returns>
         public static string GetStateBlockGroupFileName(AcsState state)
         {
+            //TODO:
             return States.StateToCensusName(state) + Settings.BlockGroupsDataTableSuffix 
-                + Settings.BlockGroupsFileTypeExtension;
+                + Settings.DataFileTypeExtension;
+        }
+
+        /// <summary>
+        /// Given a state, returns the URL to the file containing its block group data
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public static string GetStateAllGeometryUrl(AcsState state)
+        {
+            //TODO:
+            return string.Concat(
+                Settings.CurrentAcsAllStateTablesUrl,
+                '/', GetStateAllGeometryFileName(state));
+        }
+
+        /// <summary>
+        /// Given a state, returns the name to the file containing its block group data
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public static string GetStateAllGeometryFileName(AcsState state)
+        {
+            return States.StateToCensusName(state) + Settings.AllGeographiesDataTableSuffix
+                + Settings.DataFileTypeExtension;
         }
 
         /// <summary>
@@ -69,7 +94,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary
         public static string GetStateBlockGroupDataFilePath(AcsState state)
         {
             string basePath = FileUtilities.PathEnsure(Settings.AppDataDirectory, Settings.CurrentAcsDirectory);
-            return Path.Combine(basePath, state.ToString() + Settings.BlockGroupsFileTypeExtension);
+            return Path.Combine(basePath, state.ToString() + Settings.DataFileTypeExtension);
         }
 
         /// <summary>
@@ -103,7 +128,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary
         /// </summary>
         /// <param name="dataDirectory"></param>
         /// <returns></returns>
-        public static string GetStateBlockGroupGeographyFilename(string dataDirectory)
+        public static string GetAggregateDataGeographyFilename(string dataDirectory)
         {
             var files = Directory.GetFiles(dataDirectory, "g*.txt");
             if ((files != null) && (files.Length > 0))

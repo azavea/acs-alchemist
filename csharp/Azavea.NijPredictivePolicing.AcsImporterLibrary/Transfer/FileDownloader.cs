@@ -50,7 +50,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         /// <param name="desiredURL"></param>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public static bool GetFileByURL(string desiredURL, string filePath, ref bool cancelled)
+        public static bool GetFileByURL(string desiredURL, string filePath, ref bool cancelled, bool workOffline = false)
         {
             bool preExists = false;
             if (File.Exists(filePath))
@@ -67,11 +67,18 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             }
 
             int retries = 0;
-
+            
             while ((!File.Exists(filePath) || preExists) && retries < 4)
             {
                 try
                 {
+                    if (workOffline && File.Exists(filePath))
+                    {
+                        _log.DebugFormat("Working Offline! - Skipping file stamp check");
+                        return true;
+                    }
+
+
                     _lastQuery = DateTime.Now;
                     System.Threading.Thread.Sleep(250); //just a little pre-nap so we don't hammer the server
 

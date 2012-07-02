@@ -31,23 +31,21 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
     public enum BoundaryLevels
     {
         None = 0,
+       
+        //[DescriptionAttribute("Census Regions")]
+        //census_regions = 20,
 
-        /*
-        [DescriptionAttribute("Census Regions")]
-        census_regions = 20,
+        //[DescriptionAttribute("Census Divisions")]
+        //census_divisions = 30,
 
-        [DescriptionAttribute("Census Divisions")]
-        census_divisions = 30,
-
-        [DescriptionAttribute("State and State Equivalent Areas")]
-        states = 40,
+        //[DescriptionAttribute("State and State Equivalent Areas")]
+        //states = 40,
 
         [DescriptionAttribute("County and County Equivalent Areas by State")]
         counties = 50,
 
         [DescriptionAttribute("County Subdivisions by State 2000 ")]
-        county_subdivisions = 60,
-         */
+        county_subdivisions = 60,        
 
         [DescriptionAttribute("Census Tracts by State 2000 ")]
         census_tracts = 140,

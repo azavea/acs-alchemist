@@ -1,0 +1,5 @@
+B08541021,walkedcar
+B08541022,walked_0car
+B08541023,walked_1car
+B08541024,walked_2car
+B08541025,walked_3car
