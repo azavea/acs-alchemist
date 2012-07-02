@@ -699,7 +699,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
             if (!string.IsNullOrEmpty(this.SummaryLevel))
             {
-                using (var cmd = DbClient.GetCommand("select LOGRECNO from geographies where SUMLEVEL = @sum", conn))
+                string sql = string.Format("select LOGRECNO from {0} where SUMLEVEL = @sum", this.GetGeographyTablename());
+                using (var cmd = DbClient.GetCommand(sql, conn))
                 {
                     DbClient.AddParameter(cmd, "sum", this.SummaryLevel);
                     using (var reader = cmd.ExecuteReader())
