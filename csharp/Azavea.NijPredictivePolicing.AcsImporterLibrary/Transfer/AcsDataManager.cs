@@ -123,6 +123,14 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         public bool AddStrippedGEOIDcolumn = false;
 
         /// <summary>
+        /// If true, this feature will add a number of columns to the end of the export with
+        /// calculated values about the projected geometries
+        /// Area, Perimeter, and Centroid
+        /// It should also truncate requested variables to make sure things fit, but should warn the user.        
+        /// </summary>
+        public bool AddGeometryAttributesToOutput = true;
+
+        /// <summary>
         /// 
         /// </summary>
         public IDataClient DbClient;
@@ -1325,6 +1333,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     }
                 }
 
+              
+
                 GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
                     ShapefileHelper.GetGeomFactory());
                 var features = new List<Feature>(variablesDT.Rows.Count);
@@ -1378,6 +1388,16 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                         t.AddAttribute("GEOID_STRP", (t["GEOID"] as string).Replace(Settings.GeoidPrefix, ""));
                     }
 
+                    if (this.AddGeometryAttributesToOutput)
+                    {
+                        t.AddAttribute("AREA", geom.Area);
+                        t.AddAttribute("PERIMETER", geom.Length);
+
+                        var centroid = geom.Centroid;
+                        t.AddAttribute("CENTROID_X", centroid.X);
+                        t.AddAttribute("CENTROID_Y", centroid.Y);
+                    }
+
                     features.Add(new Feature(geom, t));
                 }
 
@@ -1423,6 +1443,17 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                         {
                             t.AddAttribute("GEOID_STRP", (t["GEOID"] as string).Replace(Settings.GeoidPrefix, ""));
                         }
+
+                        if (this.AddGeometryAttributesToOutput)
+                        {
+                            t.AddAttribute("AREA", geom.Area);
+                            t.AddAttribute("PERIMETER", geom.Length);
+
+                            var centroid = geom.Centroid;
+                            t.AddAttribute("CENTROID_X", centroid.X);
+                            t.AddAttribute("CENTROID_Y", centroid.Y);
+                        }
+
                         t["LOGRECNO"] = id;
                         features.Add(new Feature(geom, t));
                     }
@@ -1462,6 +1493,14 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 if (this.AddStrippedGEOIDcolumn)
                 {
                     ShapefileHelper.AddColumn(header, "GEOID_STRP", typeof(string));
+                }
+
+                if (this.AddGeometryAttributesToOutput)
+                {
+                    ShapefileHelper.AddColumn(header, "AREA", typeof(double));
+                    ShapefileHelper.AddColumn(header, "PERIMETER", typeof(double));
+                    ShapefileHelper.AddColumn(header, "CENTROID_X", typeof(double));
+                    ShapefileHelper.AddColumn(header, "CENTROID_Y", typeof(double));
                 }
 
                 header.NumRecords = exportFeatures.Count;
@@ -1613,6 +1652,14 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 {
                     ShapefileHelper.AddColumn(header, "GEOID_STRP", typeof(string));
                 }
+
+                //lets not add these to the fishnet exports just yet
+                //if (this.AddGeometryAttributesToOutput)
+                //{
+                //    ShapefileHelper.AddColumn(header, "AREA", typeof(double));
+                //    ShapefileHelper.AddColumn(header, "PERIMETER", typeof(double));
+                //    ShapefileHelper.AddColumn(header, "CENTROID", typeof(double));
+                //}
 
                 int cellCount = 0;
                 int xidx = 0;

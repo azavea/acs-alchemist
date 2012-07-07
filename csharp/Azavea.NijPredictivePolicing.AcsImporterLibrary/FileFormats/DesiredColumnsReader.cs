@@ -267,7 +267,15 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
             return string.Empty;
         }
 
-
+        /// <summary>
+        /// To keep things simple, lets say the max # of columns in a shapefile is 256, 
+        /// so 100 vars * 2 (var + error margin) == 200 columns, 
+        /// we don't need to test for room for the extra "AREA/PERIMETER/CENTROID" mode, unless we change our max
+        /// from 100 columns. The extra room is to try and avoid running out of memory during
+        /// an export.
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
         private string CheckForMaxColumns(DataTable dt)
         {
             if (dt.Rows.Count > 100)

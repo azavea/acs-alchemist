@@ -300,6 +300,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             //we need to set some defaults here, to keep things happy
             FormController.Instance.JobInstance.PreserveJam = "true";
             FormController.Instance.JobInstance.AddStrippedGEOIDcolumn = "true";
+            FormController.Instance.JobInstance.AddGeometryAttributesToOutput = "true";            
             FormController.Instance.JobInstance.IncludeEmptyGridCells = "true";
             FormController.Instance.JobInstance.Year = string.Empty;
             FormController.Instance.JobInstance.State = AcsState.None;

@@ -103,6 +103,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
 
         public string PreserveJam { get; set; }
         public string AddStrippedGEOIDcolumn { get; set; }
+        public string AddGeometryAttributesToOutput { get; set; }
+        
 
         protected string _outputFolder;
         protected string _workingFolder;
@@ -408,7 +410,9 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 manager.OutputProjectionFilename = this.OutputProjection;
                 manager.PreserveJam = (!string.IsNullOrEmpty(this.PreserveJam));
                 manager.AddStrippedGEOIDcolumn = (!string.IsNullOrEmpty(this.AddStrippedGEOIDcolumn));
+                manager.AddGeometryAttributesToOutput = (!string.IsNullOrEmpty(this.AddGeometryAttributesToOutput));
                 manager.OutputFolder = FileUtilities.CleanPath(OutputFolder);
+                
 
                 //if (!string.IsNullOrEmpty(this.WorkingFolder))
                 //{

@@ -654,6 +654,8 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             //optional flags
             importObj.PreserveJam = (chkPreserveJamValues.Checked) ? "true" : string.Empty;
             importObj.AddStrippedGEOIDcolumn = (chkStripExtraGeoID.Checked) ? "true" : string.Empty;
+            importObj.AddGeometryAttributesToOutput = "true";//TODO: AddGeometryAttributesToOutput (Default is true)
+            
 
             this.IsDirty = false;
         }
@@ -711,6 +713,7 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             //optional flags
             chkPreserveJamValues.Checked = (!string.IsNullOrEmpty(importObj.PreserveJam));
             chkStripExtraGeoID.Checked = (!string.IsNullOrEmpty(importObj.AddStrippedGEOIDcolumn));
+            //TODO: AddGeometryAttributesToOutput (Default is true)
 
             //reset the progress bar
             pgbStatus.Value = 0;
