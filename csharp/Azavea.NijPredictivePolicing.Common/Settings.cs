@@ -37,6 +37,11 @@ namespace Azavea.NijPredictivePolicing.Common
 
         public static string RequestedYear = "2009";
 
+        /// <summary>
+        /// Name of the folder config files are stored in relative to the app directory.
+        /// </summary>
+        public const string ConfigFolder = "configs";
+
 
         /// <summary>
         /// Path to the ACS prj file for the ACS shapefiles
@@ -72,17 +77,6 @@ namespace Azavea.NijPredictivePolicing.Common
                     throw new Exception("Could not find application path!");
             }
 
-            //These MUST be in the constructor, because static class fields are initialized before the constructor
-            //is run, which would mean ApplicationPath would be empty
-            //_tempPath = FileUtilities.SafePathEnsure(Settings.ApplicationPath, "Data");
-
-
-            //_tempPath = FileUtilities.SafePathEnsure(
-            //    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            //    "Data");
-            //_log.InfoFormat("Settings Initialized, default data path is {0}", _tempPath);
-
-
             AcsPrjFilePath = Path.Combine(Settings.ApplicationPath, "WGS84NAD83.prj");
             RequestedYear = "2009";
         }
@@ -113,10 +107,7 @@ namespace Azavea.NijPredictivePolicing.Common
 
         public static string SpatialiteDLL = "libspatialite-2.dll";
 
-        /// <summary>
-        /// 
-        /// </summary>
-        private static string _AppDataPath;
+        private static string _AppDataDirectory;
 
 
         /// <summary>
@@ -127,23 +118,25 @@ namespace Azavea.NijPredictivePolicing.Common
         {
             get
             {
-                if (string.IsNullOrEmpty(_AppDataPath))
+                if (string.IsNullOrEmpty(_AppDataDirectory))
                 {
-                    _AppDataPath = FileUtilities.SafePathEnsure(
+                    _AppDataDirectory = FileUtilities.SafePathEnsure(
                         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                         Settings.ApplicationName,
                         "Data"
                         );
-                    //_log.InfoFormat("AppDataPath Initialized, default data path is {0}", _AppDataPath);
-
-                    //deprecated
-                    //_AppDataPath = FileUtilities.PathEnsure(Path.GetTempPath(), ApplicationName);
                 }
-                return _AppDataPath;
+                return _AppDataDirectory;
             }
-            set { _AppDataPath = value; }
+            set
+            {
+                _AppDataDirectory = value;
+            }
         }
 
+        /// <summary>
+        /// Determines whether various filepaths are printed to the log
+        /// </summary>
         public static bool ShowFilePaths = true;
 
         /// <summary>
@@ -158,7 +151,6 @@ namespace Azavea.NijPredictivePolicing.Common
             if (Settings.ConfigFile == null)
             {
                 Settings.ConfigFile = new Config("defaults.config");
-                Settings.RestoreDefaults();                
             }
 
             return Settings.ConfigFile.Get<T>(key, ifEmpty);
@@ -190,9 +182,8 @@ namespace Azavea.NijPredictivePolicing.Common
 
             if (!years.ContainsKey(year))
             {
-                _log.ErrorFormat("The importer couldn't find/read the \"AcsAlchemist.json.{0}.config\" file, the importer cannot continue", year);
                 _log.FatalFormat("The importer couldn't find/read the \"AcsAlchemist.json.{0}.config\" file, the importer cannot continue", year);
-                Environment.Exit(-1);
+                Environment.Exit(Utilities.GetAs<int>(Constants.ExitCodes.BadConfig, -1));
             }
 
             return years[year].Get<T>(key, ifEmpty);
@@ -216,7 +207,7 @@ namespace Azavea.NijPredictivePolicing.Common
                 //try really hard to find these files, files found later on are assumed to be more authoritative, 
                 //this is because appPath is the default, and the next two would be user overrides
                 string[] paths = new string[] {
-                    Settings.ApplicationPath,                    
+                    Path.Combine(Settings.ApplicationPath, Settings.ConfigFolder),                    
                     Settings.AppDataDirectory,
                     Environment.CurrentDirectory
                 };
@@ -232,36 +223,23 @@ namespace Azavea.NijPredictivePolicing.Common
 
                             key = key.Replace("AcsAlchemist.json.", string.Empty);
                             if (key == "json")
+                            {
                                 continue;
+                            }
 
                             foundConfigs[key] = filename;
                         }
                     }
                 }
 
-                //Settings.RestoreYear2009();
-                //Settings.RestoreDefaults();
-
                 _yearConfigs = new Dictionary<string, Config>();
-
-                if (!foundConfigs.ContainsKey("2009"))
-                {
-                    Config c = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.json.2009.config"));
-                    Settings.RestoreYear2009(c);
-                    _yearConfigs["2009"] = c;
-                }
-
-                if (!foundConfigs.ContainsKey("2010"))
-                {
-                    Config c = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.json.2010.config"));
-                    Settings.RestoreYear2010(c);
-                    _yearConfigs["2010"] = c;
-                }
 
                 foreach (string key in foundConfigs.Keys)
                 {
                     if (key == "json")
+                    {
                         continue;
+                    }
 
                     _yearConfigs[key] = new Config(foundConfigs[key]);
                 }
@@ -440,111 +418,6 @@ namespace Azavea.NijPredictivePolicing.Common
             {
                 return Settings.GetYear("ReservedColumnNames", "GEOID,GEOID_STRP");                
             }
-        }
-
-        public static void RestoreDefaults()
-        {
-            var c = Settings.ConfigFile;
-            c.Set("AppDataDirectory", string.Empty);
-            c.Set("TimeOutMs", 10000);
-            c.Set("GeoidPrefix", "15000US");
-            c.Save();
-        }
-
-
-        public static void RestoreYear2009(Config c)
-        {
-            RestoreCensusDefaults(c);
-            c.Set("CensusFtpRoot", "http://www2.census.gov");
-            c.Set("CurrentAcsDirectory", "acs2005_2009_5yr");
-            c.Set("CurrentAcsAllStateTablesDirectory", "2005-2009_ACSSF_By_State_All_Tables");
-            c.Set("ColumnMappingsFileName", "2005-2009_SummaryFileXLS");
-            c.Save();
-        }
-
-        public static void RestoreYear2010(Config c)
-        {
-            //SEE: http://www2.census.gov/acs2010_5yr/summaryfile/UserTools/ACS_2006-2010_SF_Tech_Doc.pdf
-            RestoreCensusDefaults(c);
-            c.Set("CensusFtpRoot", "http://www2.census.gov");
-            c.Set("CurrentAcsDirectory", "acs2010_5yr");
-            c.Set("CurrentAcsAllStateTablesDirectory", "2006-2010_ACSSF_By_State_All_Tables");
-            c.Set("ColumnMappingsFileName", "2010_SummaryFileTemplates");
-
-
-            c.Set("ShapeFileBlockGroupURL", "http://www2.census.gov/geo/tiger/GENZ2010/");
-            c.Set("ShapeFileBlockGroupFilename", "gz_2010_{FIPS-code}_150_00_500k.zip");
-
-            c.Set("ShapeFileTractURL", "http://www2.census.gov/geo/tiger/GENZ2010/");
-            c.Set("ShapeFileTractFilename", "gz_2010_{FIPS-code}_140_00_500k.zip");
-
-            c.Set("ShapeFileCountySubdivisionsURL", "http://www2.census.gov/geo/tiger/GENZ2010/");
-            c.Set("ShapeFileCountySubdivisionsFilename", "gz_2010_{FIPS-code}_060_00_500k.zip");
-
-
-            //upper / lower voting districts
-            //http://www.census.gov/geo/www/cob/cbf_states.html
-
-
-            //did not find here: http://www.census.gov/geo/www/cob/index.html
-            //c.Set("ShapeFileThreeDigitZipsURL", string.Empty);
-            //c.Set("ShapeFileThreeDigitZipsFilename", string.Empty);
-
-            //did not find here: http://www.census.gov/geo/www/cob/index.html
-            //c.Set("ShapeFileFiveDigitZipsURL", "http://www.census.gov/geo/cob/bdy/zt/z500shp/");
-            //c.Set("ShapeFileFiveDigitZipsFilename", "zt{FIPS-code}_d00_shp.zip");
-
-
-            // COUNTY SHAPES NOT UPDATED PER: http://www.census.gov/geo/www/cob/cbf_counties.html
-            c.Set("ShapeFileCountiesURL", "http://www.census.gov/geo/cob/bdy/co/co00shp/");
-            c.Set("ShapeFileCountiesFilename", "co{FIPS-code}_d00_shp.zip");
-
-            //c.Set("ShapeFileVotingURL", "http://www.census.gov/geo/cob/bdy/vt/vt00shp/");
-            //c.Set("ShapeFileVotingFilename", "vt{FIPS-code}_d00_shp.zip");
-
-            
-            c.Save();
-        }
-
-        public static void RestoreCensusDefaults(Config c)
-        {
-            c.Set("SummaryFileDirectory", "summaryfile");
-            c.Set("ColumnMappingsFileDirectory", "UserTools");
-            c.Set("ColumnMappingsFileExtension", ".zip");
-
-            c.Set("BlockGroupsDataTableSuffix", "_Tracts_Block_Groups_Only");
-            c.Set("AllGeographiesDataTableSuffix", "_All_Geographies_Not_Tracts_Block_Groups");
-            c.Set("DataFileTypeExtension", ".zip");
-
-
-            c.Set("CurrentColumnMappingsFileUrl", "{CensusFtpRoot}/{CurrentAcsDirectory}/{SummaryFileDirectory}/{ColumnMappingsFileDirectory}/{ColumnMappingsFileName}{ColumnMappingsFileExtension}");
-            c.Set("CurrentAcsAllStateTablesUrl", "{CensusFtpRoot}/{CurrentAcsDirectory}/{SummaryFileDirectory}/{CurrentAcsAllStateTablesDirectory}");
-
-            c.Set("FipsPlaceholder", "{FIPS-code}");
-            c.Set("DefaultPrj", "GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]");
-
-            c.Set("ReservedColumnNames", "GEOID,GEOID_STRP");
-
-            c.Set("ShapeFileBlockGroupURL", "http://www.census.gov/geo/cob/bdy/bg/bg00shp/");
-            c.Set("ShapeFileBlockGroupFilename", "bg{FIPS-code}_d00_shp.zip");
-
-            c.Set("ShapeFileTractURL", "http://www.census.gov/geo/cob/bdy/tr/tr00shp/");
-            c.Set("ShapeFileTractFilename", "tr{FIPS-code}_d00_shp.zip");
-
-            c.Set("ShapeFileCountySubdivisionsURL", "http://www.census.gov/geo/cob/bdy/cs/cs00shp/");
-            c.Set("ShapeFileCountySubdivisionsFilename", "cs{FIPS-code}_d00_shp.zip");
-
-            c.Set("ShapeFileThreeDigitZipsURL", "http://www.census.gov/geo/cob/bdy/zt/z300shp/");
-            c.Set("ShapeFileThreeDigitZipsFilename", "z3{FIPS-code}_d00_shp.zip");
-
-            c.Set("ShapeFileFiveDigitZipsURL", "http://www.census.gov/geo/cob/bdy/zt/z500shp/");
-            c.Set("ShapeFileFiveDigitZipsFilename", "zt{FIPS-code}_d00_shp.zip");
-
-            c.Set("ShapeFileVotingURL", "http://www.census.gov/geo/cob/bdy/vt/vt00shp/");
-            c.Set("ShapeFileVotingFilename", "vt{FIPS-code}_d00_shp.zip");
-
-            c.Set("ShapeFileCountiesURL", "http://www.census.gov/geo/cob/bdy/co/co00shp/");
-            c.Set("ShapeFileCountiesFilename", "co{FIPS-code}_d00_shp.zip");
         }
 
     }

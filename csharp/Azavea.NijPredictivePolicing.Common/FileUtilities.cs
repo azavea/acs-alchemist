@@ -130,7 +130,7 @@ namespace Azavea.NijPredictivePolicing.Common
                 
                 //I'd rather do this here, than directly in the constructor or class definition.
                 //The file system loves to throw exceptions, and I'd rather see em than a app 'exit'!
-                //In Soviet Russia, computer throws things at YOU!
+                //In Soviet Russia, computer throws things at YOU!!
 
                 return FileUtilities.PathEnsure(basepath, chunks);
             }
@@ -161,38 +161,6 @@ namespace Azavea.NijPredictivePolicing.Common
 
             return result;
         }
-
-        //public static bool UnzipFileTo(string basePath, string zipFileName)
-        //{
-        //    try
-        //    {
-        //        FileUtilities.SafePathEnsure(basePath);
-
-        //        //using (System.IO.Packaging.Package pack = ZipPackage.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-        //        using (var pack = Package.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-        //        {
-        //            var parts = pack.GetParts();
-        //            foreach (var part in parts)
-        //            {
-        //                string newFilePath = FileUtilities.PathCombine(newPath, part.Uri.ToString());
-        //                var zipStream = part.GetStream(FileMode.Open, FileAccess.Read);
-        //                var outputStream = new FileStream(newFilePath, FileMode.Create);
-        //                Utilities.CopyTo(zipStream, outputStream);
-
-        //                outputStream.Close();
-        //                zipStream.Close();
-        //            }
-
-        //            pack.Close();
-        //        }
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _log.Error("Error while unzipping file", ex);
-        //    }
-        //    return false;
-        //}
 
         /// <summary>
         /// Uses Ionic.Zip library to expand a file (without overwriting) to a given location
