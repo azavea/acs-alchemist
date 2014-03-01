@@ -39,7 +39,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary
         Colorado = 08,
         Connecticut = 09,
         Delaware = 10,
-        DistrictofColumbia = 11,
+        //DistrictofColumbia = 11,      // This appears to have been removed from ACS downloads at some point
         Florida = 12,
         Georgia = 13,
         Hawaii = 15,
@@ -86,8 +86,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary
 
         PuertoRico = 72,
         None = -1
-
-
     }
 
 
@@ -105,17 +103,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary
         {
             return state.ToString();
         }
-
-        ///// <summary>
-        ///// Shows how to use the settings
-        ///// </summary>
-        ///// <param name="state"></param>
-        ///// <returns></returns>
-        //public static string StateToCurrentBlockGroupFilename(AcsState state)
-        //{
-        //    return string.Concat(state.ToString(), Settings.BlockGroupsDataTableSuffix);
-        //}
-
 
         /// <summary>
         /// Get's a pretty name for a state

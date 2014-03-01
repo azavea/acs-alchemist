@@ -164,7 +164,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             if (!string.IsNullOrEmpty(workingFolder))
             {
                 //override where we're storing temporary files
-                //Settings.AppDataDirectory = FileUtilities.SafePathEnsure(workingFolder, Settings.RequestedYear);
                 Settings.AppDataDirectory = FileUtilities.SafePathEnsure(workingFolder);
             }
             _log.InfoFormat("Working directory is {0} ", workingFolder);
@@ -415,12 +414,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             var client = DbClient;
             using (var conn = client.GetConnection())
             {
-                //if (DataClient.HasTable(conn, client, tablename))
-                //{
-                //    _log.DebugFormat("{0} table already exists, skipping...", tablename);
-                //    return true;
-                //}
-                //else
 
                 if (DataClient.HasTable(conn, client, tablename))
                 {
@@ -1186,13 +1179,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
             foreach (DataRow row in wholeShapeTable.Rows)
             {
-                //string county = Utilities.GetAs<string>(row["COUNTY"], "-1");
-                //string tract = Utilities.GetAs<string>(row["TRACT"], "-1");
-                //string blkgroup = Utilities.GetAs<string>(row["BLKGROUP"], "-1");
-                //if (tract.Trim().Length != 6)
-                //    tract += "00";
-                //string key = string.Format("{0}_{1}_{2}", county, tract, blkgroup);
-
                 string key = keyDelegate(row);
 
                 if (geomKeys.ContainsKey(key))
@@ -1270,8 +1256,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                         var fg = filt.GetGeometryN(g);
                         if (fg.Intersects(geom))
                         {
-                            //double commonArea = fg.Intersection(geom).Area;
-                            //if(commonArea > 0.01 * fg.Area || commonArea > 0.01 * geom.Area)
                             return true;
                         }
                     }
@@ -1306,12 +1290,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 {
                     destCRS = Utilities.GetCoordinateSystemByWKTFile(this.OutputProjectionFilename);
                     reprojector = Utilities.BuildTransformationObject(GeographicCoordinateSystem.WGS84, destCRS);
-
-                    //Reproject everything in this file to the requested projection...                    
-                    //exportFeatures = Utilities.ReprojectFeaturesTo(exportFeatures, this.OutputProjectionFilename);
-
-                    //THESE MUST BE PROVIDED ALREADY PROJECTED!
-                    //filteringGeoms = Utilities.ReprojectFeaturesTo(filteringGeoms, this.OutputProjectionFilename);
                 }
 
                 //TODO:
@@ -1333,7 +1311,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     }
                 }
 
-              
 
                 GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
                     ShapefileHelper.GetGeomFactory());
@@ -1484,8 +1461,10 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 DbaseFileHeader header = null;
                 using (var conn = DbClient.GetConnection())
                 {
-                    //Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
-                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, string.Format("SELECT * FROM \"{0}\" where 0 = 1 ", tableName));
+                    var variablesDT = DataClient.GetMagicTable(
+                        conn,
+                        DbClient,
+                        string.Format("SELECT * FROM \"{0}\" where 0 = 1 ", tableName));
                     header = ShapefileHelper.SetupHeader(variablesDT);
                 }
 
@@ -1538,9 +1517,10 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             }
             catch (FileNotFoundException notFound)
             {
-                _log.Error("A needed file couldn't be found: " + notFound.FileName);
+                string msg = "A needed file couldn't be found: " + notFound.FileName;
+                _log.Error(msg);
                 _log.Fatal("The export cannot continue.  Exiting...");
-                Environment.Exit(-1);
+                throw new ApplicationException(msg);
             }
             catch (Exception ex)
             {
@@ -1548,8 +1528,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             }
             return false;
         }
-
-
 
 
         /// <summary>
@@ -1618,9 +1596,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
 
                 var features = new List<Feature>(exportFeatures.Count);
-                //var cellStepPoint = Utilities.GetCellFeetForProjection(GridCellWidthFeet, GridCellHeightFeet);
-                //double cellWidth = cellStepPoint.X;
-                //double cellHeight = cellStepPoint.Y;
 
                 double cellWidth = GridCellWidth;
                 double cellHeight = GridCellHeight;
@@ -1780,9 +1755,10 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             }
             catch (FileNotFoundException notFound)
             {
-                _log.Error("A needed file couldn't be found: " + notFound.FileName);
+                string msg = "A needed file couldn't be found: " + notFound.FileName;
+                _log.Error(msg);
                 _log.Fatal("The export cannot continue.  Exiting...");
-                Environment.Exit(-1);
+                throw new ApplicationException(msg);
             }
             catch (Exception ex)
             {
@@ -1815,13 +1791,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
             return env;
         }
-
-
-
-
-
-
-
 
 
         public void Dispose()
@@ -1873,8 +1842,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         {
             _cancelled = true;
         }
-
-
 
         public bool WorkOffline { get; set; }
     }

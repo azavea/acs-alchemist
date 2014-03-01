@@ -31,8 +31,9 @@ namespace Azavea.NijPredictivePolicing.Common
     {
         public enum ExitCodes
         {
-            BAD_ARGUMENTS = -1,
-            OK = 0
+            BadArguments = -1,
+            OK = 0,
+            BadConfig = 1
         }
 
         public const string Warning_MissingProjection = @"
@@ -48,7 +49,6 @@ and all other parameters must match that projection.
 
     public static class DbConstants
     {
-        //public const string TABLE_Geographies = "geographies";
         public const string TABLE_ColumnMappings = "columnMappings";
         public const string TABLE_DesiredColumns = "desiredColumns";
 

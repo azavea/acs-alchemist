@@ -141,9 +141,10 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 }
                 catch (UnauthorizedAccessException cantWriteEx)
                 {
-                    _log.Error("The importer couldn't save the file, please run this application as administrator, or set the output directory.");
+                    string msg = "The importer couldn't save the file, please run this application as administrator, or set the output directory.";
+                    _log.Error(msg);
                     _log.Fatal("The importer cannot continue.  Exiting...");
-                    Environment.Exit(-1);
+                    throw new ApplicationException(msg);
                 }
                 catch (Exception ex)
                 {

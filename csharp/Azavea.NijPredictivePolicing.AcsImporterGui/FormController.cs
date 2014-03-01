@@ -147,16 +147,14 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
 
 
 
-
-
-
-
-
-
         #region Initialization Boilerplate
 
 
         private static ILog _log = null;
+
+        public const string DefaultConfigPath = "configs/AcsAlchemist.json.config";
+
+
         internal void InitLogging(IAppender appenderObj)
         {
             if (_log != null)
@@ -193,14 +191,9 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
             _log.Debug("Welcome to ACS Alchemist");
             _log.Debug("");
 
-
             _log.Debug(@"This project was supported by Award No. 2010-DE-BX-K004, awarded by the National Institute of Justice, Office of Justice Programs, U.S. Department of Justice. The opinions, findings, and conclusions or recommendations expressed in this software are those of the author(s) and do not necessarily reflect those of the Department of Justice or Temple University.  The software was developed by Azavea in connection with the National Institute of Justice grant awarded to Jerry Ratcliffe and Ralph Taylor of Temple University's Center for Security and Crime Science.  The source code is released under a GPLv3 license and is available at:  https://github.com/azavea/acs-alchemist");
 			
             _log.Debug("");
-
-            //_log.Debug(@"This project was supported by Award No. 2010-DE-BX-K004, awarded by the National Institute of Justice, Office of Justice Programs, U.S. Department of Justice. The opinions, findings, and conclusions or recommendations expressed in this software are those of the author(s) and do not necessarily reflect those of the Department of Justice. The source code is released under a GPLv3 license and is available at:  https://github.com/azavea/acs-alchemist");
-         
-            //_log.Debug("");
         }
 
         protected void ShowCopyrightAndLicense()
@@ -220,10 +213,12 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         /// </summary>
         protected void LoadConfigFile()
         {
-            Settings.ConfigFile = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.json.config"));
+            string configName = Path.Combine(Settings.ApplicationPath, DefaultConfigPath);
+            Settings.ConfigFile = new Config(configName);
             if (Settings.ConfigFile.IsEmpty())
             {
-                Settings.RestoreDefaults();
+                _log.FatalFormat("Config file {0} missing or empty!  Cannot continue, exiting", DefaultConfigPath);
+                Environment.Exit((int)Constants.ExitCodes.BadConfig);
             }
 
             Settings.LoadYearConfigs();
@@ -235,26 +230,14 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
         /// </summary>
         internal void Initialize()
         {
-            //InitLogging();
-
             LoadConfigFile();
             ShowWelcomeScreen();
             ShowCopyrightAndLicense();
-
-            //this.JobInstance = new ImportJob();
             NewDefaultJobInstance();
         }
 
 
         #endregion Initialization Boilerplate
-
-
-
-
-
-
-
-
 
         /// <summary>
         /// Performs some sanity checks on our variables file
