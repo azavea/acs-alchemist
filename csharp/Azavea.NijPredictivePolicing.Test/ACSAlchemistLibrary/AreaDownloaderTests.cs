@@ -34,7 +34,7 @@ using Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer;
 namespace Azavea.NijPredictivePolicing.Test.ACSAlchemistLibrary
 {
     [TestFixture]
-    public class AreaDownloaderTests
+    public class AreaDownloaderTests : BaseTest
     {
         private static ILog _log = null;
 
@@ -87,17 +87,28 @@ namespace Azavea.NijPredictivePolicing.Test.ACSAlchemistLibrary
         [Test]
         public void TestFileDownload()
         {
-            //Wyoming has smallest file to download
-            var manager = new AcsDataManager(AcsState.Wyoming);
-            if (manager.CheckCensusAggregatedDataFile())
+            var oldConfig = Settings.ConfigFile;
+            try
             {
-                string filename = manager.GetLocalBlockGroupZipFileName();
+                // Wyoming has smallest file to download
+                var manager = new AcsDataManager(AcsState.Wyoming, BaseDir, "2012");
+                manager.SummaryLevel = "150";
 
-                Assert.IsTrue(File.Exists(filename), "File wasn't downloaded!");
+                //Settings.ConfigFile = new Config("configs\\AcsAlchemist.json.2012.config");
+                if (manager.CheckCensusAggregatedDataFile())
+                {
+                    string filename = manager.GetLocalBlockGroupZipFileName();
+
+                    Assert.IsTrue(File.Exists(filename), "File wasn't downloaded!");
+                }
+                else
+                {
+                    Assert.Fail("Some error was thrown during the download");
+                }
             }
-            else
+            finally
             {
-                Assert.Fail("Some error was thrown during the download");
+                Settings.ConfigFile = oldConfig;
             }
         }
     }

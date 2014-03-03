@@ -7,6 +7,7 @@ using log4net;
 using System.Configuration;
 using System.IO;
 using Azavea.NijPredictivePolicing.Test.Helpers;
+using Azavea.NijPredictivePolicing.Common;
 
 
 namespace Azavea.NijPredictivePolicing.Test
@@ -16,7 +17,15 @@ namespace Azavea.NijPredictivePolicing.Test
     {
         protected static ILog _log = null;
 
+        /// <summary>
+        /// Location of the Azavea.NijPredictivePolicing.Test folder
+        /// </summary>
         public static readonly string BaseDir;
+
+        /// <summary>
+        /// Value to use for Settings.AppDataDirectory
+        /// </summary>
+        public static readonly string WorkingDir;
 
         static BaseTest()
         {
@@ -31,6 +40,13 @@ namespace Azavea.NijPredictivePolicing.Test
                 }
             }
             BaseDir = Path.GetFullPath(BaseDir);
+
+            string workingDir = Path.Combine(BaseDir, "Working");
+            if (Directory.Exists(workingDir))
+            {
+                Directory.Delete(workingDir, true);
+            }
+            Settings.AppDataDirectory = workingDir;
         }
 
         [TestFixtureSetUp]

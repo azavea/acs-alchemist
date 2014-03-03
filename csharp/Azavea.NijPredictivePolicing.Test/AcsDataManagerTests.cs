@@ -41,6 +41,19 @@ namespace Azavea.NijPredictivePolicing.Test.ACSAlchemistLibrary
         /// </summary>
         protected const string OutputDir = @"output\";
 
+        /// <summary>
+        /// Default variables to use for sequence file tests
+        /// </summary>
+        /// <remarks>
+        /// CENSUS_TABLE_ID, NAME, COLNO, SEQNO
+        /// </remarks>
+        public readonly string[] TestVariables = new string[] {
+            "B00001001,ALLPOP,6,9",
+            "B01001002,TOTALMALE,7,10",
+            "B01001003,TOTMALE1,8,10",
+            "B01001026,TOTALFEMALE,31,10"
+        };
+
         [TestFixtureSetUp]
         public void Init()
         {
@@ -124,30 +137,30 @@ namespace Azavea.NijPredictivePolicing.Test.ACSAlchemistLibrary
         public void TestRead2009SequenceFiles()
         {
             string testYear = "2009";
-
-            //CENSUS_TABLE_ID, NAME, COLNO, SEQNO
-            string[] testVariables = new string[] {
-                    "B00001001,ALLPOP,6,9",
-                    "B01001002,TOTALMALE,7,10",
-                    "B01001003,TOTMALE1,8,10",
-                    "B01001026,TOTALFEMALE,31,10"
-                };
-            TestReadSequenceFiles(testYear, testVariables);
+            TestReadSequenceFiles(testYear, TestVariables);
         }
 
         [Test]
         public void TestRead2010SequenceFiles()
         {
             string testYear = "2010";
+            TestReadSequenceFiles(testYear, TestVariables);
+        }
 
-            //CENSUS_TABLE_ID, NAME, COLNO, SEQNO
-            string[] testVariables = new string[] {
-                    "B00001001,ALLPOP,6,9",
-                    "B01001002,TOTALMALE,7,10",
-                    "B01001003,TOTMALE1,8,10",
-                    "B01001026,TOTALFEMALE,31,10"
-                };
-            TestReadSequenceFiles(testYear, testVariables);
+        [Ignore("TODO: These seem to have different expected values than the previous years")]
+        [Test]
+        public void TestRead2011SequenceFiles()
+        {
+            string testYear = "2011";
+            TestReadSequenceFiles(testYear, TestVariables);
+        }
+
+        [Ignore("TODO: These seem to have different expected values than the previous years")]
+        [Test]
+        public void TestRead2012SequenceFiles()
+        {
+            string testYear = "2012";
+            TestReadSequenceFiles(testYear, TestVariables);
         }
 
 
@@ -293,7 +306,7 @@ namespace Azavea.NijPredictivePolicing.Test.ACSAlchemistLibrary
 
         protected AcsDataManager GetManager(string year)
         {
-            AcsDataManager m = new AcsDataManager(AcsState.Wyoming, BaseDir, year);            
+            AcsDataManager m = new AcsDataManager(AcsState.Wyoming, Path.Combine(BaseDir, "Working"), year);            
             m.WorkingPath = FileUtilities.PathEnsure(BaseDir, "TestData");
 
             string dbPath = FileUtilities.PathEnsure(m.WorkingPath, "database");
