@@ -315,14 +315,13 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
                     url = Settings.ShapeFileTractURL + Settings.ShapeFileTractFilename;
                     break;
 
+                /*
                 case BoundaryLevels.county_subdivisions:
                     url = Settings.ShapeFileCountySubdivisionsURL + Settings.ShapeFileCountySubdivisionsFilename;
                     break;
                 case BoundaryLevels.counties:
                     url = Settings.ShapeFileCountiesURL + Settings.ShapeFileCountiesFilename;
                     break;
-
-                /*
                 
                 case BoundaryLevels.voting:
                     url = Settings.ShapeFileVotingURL + Settings.ShapeFileVotingFilename;
@@ -338,7 +337,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
                 case BoundaryLevels.states:
                 case BoundaryLevels.census_regions:
                 case BoundaryLevels.census_divisions:
-                 */
+                */
                 default:
                     break;
             }

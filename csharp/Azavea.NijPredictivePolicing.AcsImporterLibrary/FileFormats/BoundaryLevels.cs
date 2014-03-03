@@ -27,6 +27,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
 {
     /// <summary>
     /// Describes the supported census boundary levels
+    /// See http://www.census.gov/geo/maps-data/data/summary_level.html
     /// </summary>
     public enum BoundaryLevels
     {
@@ -41,11 +42,11 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
         //[DescriptionAttribute("State and State Equivalent Areas")]
         //states = 40,
 
-        [DescriptionAttribute("County and County Equivalent Areas by State")]
-        counties = 50,
+        //[DescriptionAttribute("County and County Equivalent Areas by State")]
+        //counties = 50,
 
-        [DescriptionAttribute("County Subdivisions by State 2000 ")]
-        county_subdivisions = 60,        
+        //[DescriptionAttribute("County Subdivisions by State 2000 ")]
+        //county_subdivisions = 60,
 
         [DescriptionAttribute("Census Tracts by State 2000 ")]
         census_tracts = 140,

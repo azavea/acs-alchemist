@@ -186,12 +186,12 @@ namespace Azavea.NijPredictivePolicing.AcsAlchemistGui
                     case BoundaryLevels.None:
                         e.Value = string.Empty;
                         break;
-                    case BoundaryLevels.counties:
-                        e.Value = "Counties";
-                        break;
-                    case BoundaryLevels.county_subdivisions:
-                        e.Value = "County Subdivisions";
-                        break;
+                    //case BoundaryLevels.counties:
+                    //    e.Value = "Counties";
+                    //    break;
+                    //case BoundaryLevels.county_subdivisions:
+                    //    e.Value = "County Subdivisions";
+                    //    break;
                     case BoundaryLevels.census_tracts:
                         e.Value = "Census Tracts";
                         break;

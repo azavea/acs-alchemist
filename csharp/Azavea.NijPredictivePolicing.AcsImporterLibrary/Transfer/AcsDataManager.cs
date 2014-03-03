@@ -353,8 +353,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             BoundaryLevels[] shapeFileLevels = new BoundaryLevels[] {
                 BoundaryLevels.census_blockgroups,
                 BoundaryLevels.census_tracts,
-                BoundaryLevels.county_subdivisions,                
-                BoundaryLevels.counties,
+                //BoundaryLevels.county_subdivisions,                
+                //BoundaryLevels.counties,
 
                 /*
                  BoundaryLevels.census_regions,
@@ -1106,29 +1106,29 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 //census_divisions
                 //states
                 
-                case "050":
-                    //counties
-                    // Note: original sql for files fount at:
-                    //      "ShapeFileCountiesURL": "http://www.census.gov/geo/cob/bdy/co/co00shp/"
-                    //      "ShapeFileCountiesFilename": "co{FIPS-code}_d00_shp.zip"
-                    // was:
-                    //      "select trim(COUNTY) as county, AsBinary(Geometry) as Geometry, '' as GEOID from counties ";
-                    //
-                    //
-                    // Current source:
-                    //        "ShapeFileCountiesURL": "http://www2.census.gov/geo/tiger/TIGER2010/COUNTY/2010/",
-                    //        "ShapeFileCountiesFilename": "tl_2010_{FIPS-code}_county10.zip",
-                    // Docs for current source: http://www.census.gov/geo/maps-data/data/pdfs/tiger/tgrshp2010/TGRSHP10SF1AA.pdf
-                    //
-                    shapeSQL = "select trim(COUNTYFP10) as county, AsBinary(Geometry) as Geometry, '' as GEOID from counties ";
-                    geomSQL = "select LOGRECNO, trim(COUNTY) as county, GEOID from geographies_all where SUMLEVEL = '050' order by county ";
-                    break;
+                //case "050":
+                //    //counties
+                //    // Note: original sql for files fount at:
+                //    //      "ShapeFileCountiesURL": "http://www.census.gov/geo/cob/bdy/co/co00shp/"
+                //    //      "ShapeFileCountiesFilename": "co{FIPS-code}_d00_shp.zip"
+                //    // was:
+                //    //      "select trim(COUNTY) as county, AsBinary(Geometry) as Geometry, '' as GEOID from counties ";
+                //    //
+                //    //
+                //    // Current source:
+                //    //        "ShapeFileCountiesURL": "http://www2.census.gov/geo/tiger/TIGER2010/COUNTY/2010/",
+                //    //        "ShapeFileCountiesFilename": "tl_2010_{FIPS-code}_county10.zip",
+                //    // Docs for current source: http://www.census.gov/geo/maps-data/data/pdfs/tiger/tgrshp2010/TGRSHP10SF1AA.pdf
+                //    //
+                //    shapeSQL = "select trim(COUNTYFP10) as county, AsBinary(Geometry) as Geometry, '' as GEOID from counties ";
+                //    geomSQL = "select LOGRECNO, trim(COUNTY) as county, GEOID from geographies_all where SUMLEVEL = '050' order by county ";
+                //    break;
 
-                //subdivisions
-                case "060":
-                    shapeSQL = "select trim(COUNTY) as county,  trim(COUSUB) as cousub, AsBinary(Geometry) as Geometry, '' as GEOID from county_subdivisions ";
-                    geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(COUSUB) as cousub, GEOID from geographies_all  where SUMLEVEL = '060' order by county, cousub";
-                    break;
+                ////subdivisions
+                //case "060":
+                //    shapeSQL = "select trim(COUNTY) as county,  trim(COUSUB) as cousub, AsBinary(Geometry) as Geometry, '' as GEOID from county_subdivisions ";
+                //    geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(COUSUB) as cousub, GEOID from geographies_all  where SUMLEVEL = '060' order by county, cousub";
+                //    break;
 
                 case "140":
                     //tracts
