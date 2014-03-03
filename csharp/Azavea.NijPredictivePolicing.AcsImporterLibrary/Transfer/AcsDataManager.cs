@@ -475,7 +475,9 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         public bool CreateGeographiesTable(DbConnection conn)
         {
             //create the table
-            string createGeographyTableSQL = DataClient.GenerateTableSQLFromFields(this.GetGeographyTablename(), GeographyFileReader.Columns);
+            string createGeographyTableSQL = DataClient.GenerateTableSQLFromFields(
+                this.GetGeographyTablename(),
+                GeographyFileReader.Columns);
             DbClient.GetCommand(createGeographyTableSQL, conn).ExecuteNonQuery();
 
             //parse in the file
@@ -1106,7 +1108,19 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 
                 case "050":
                     //counties
-                    shapeSQL = "select trim(COUNTY) as county, AsBinary(Geometry) as Geometry, '' as GEOID from counties ";
+                    // Note: original sql for files fount at:
+                    //      "ShapeFileCountiesURL": "http://www.census.gov/geo/cob/bdy/co/co00shp/"
+                    //      "ShapeFileCountiesFilename": "co{FIPS-code}_d00_shp.zip"
+                    // was:
+                    //      "select trim(COUNTY) as county, AsBinary(Geometry) as Geometry, '' as GEOID from counties ";
+                    //
+                    //
+                    // Current source:
+                    //        "ShapeFileCountiesURL": "http://www2.census.gov/geo/tiger/TIGER2010/COUNTY/2010/",
+                    //        "ShapeFileCountiesFilename": "tl_2010_{FIPS-code}_county10.zip",
+                    // Docs for current source: http://www.census.gov/geo/maps-data/data/pdfs/tiger/tgrshp2010/TGRSHP10SF1AA.pdf
+                    //
+                    shapeSQL = "select trim(COUNTYFP10) as county, AsBinary(Geometry) as Geometry, '' as GEOID from counties ";
                     geomSQL = "select LOGRECNO, trim(COUNTY) as county, GEOID from geographies_all where SUMLEVEL = '050' order by county ";
                     break;
 
