@@ -9,7 +9,6 @@ Name "ACS Alchemist"
 !define COMPANY Azavea
 !define URL http://www.azavea.com
 !define SOURCE_DIR C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporterGui\bin\x86\Debug
-#!define SOURCE_DIR "C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug"
 
 # MUI Symbol Definitions
 !define MUI_ICON "C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporter\Icon1.ico"
@@ -26,7 +25,6 @@ Name "ACS Alchemist"
 # Included files
 !include Sections.nsh
 !include MUI2.nsh
-#!include ShellLink.nsh
 !include nsDialogs.nsh
 !include LogicLib.nsh
 
@@ -77,23 +75,16 @@ Var Checkbox_State
 
 # Installer sections
 Section -Main SEC0000
-    SetOutPath $INSTDIR
-    SetOverwrite on
-    File /r /x *.log /x logs ${SOURCE_DIR}\* 
-    ;File /r C:\projects\acs-alchemist\csharp\Azavea.NijPredictivePolicing.AcsImporter\bin\Debug\*
-    File C:\projects\acs-alchemist\doc\README.txt
+  SetOutPath $INSTDIR
+  SetOverwrite on
+  File /r /x *.log /x logs ${SOURCE_DIR}\*
+  File C:\projects\acs-alchemist\doc\README.txt
 	
 	;SetOutPath $INSTDIR\logs
 	;File /r /x *.log ${SOURCE_DIR}\logs
 	
 	CreateDirectory $INSTDIR\logs
 	AccessControl::GrantOnFile "$INSTDIR\logs" "Everyone" "FullAccess"
-	
-	SetOutPath $INSTDIR
-	#23265 -- any config files must be present!  otherwise the user will need to be an admin on first run, which is annoying
-	File ${SOURCE_DIR}\AcsAlchemist.json.2009.config
-	File ${SOURCE_DIR}\AcsAlchemist.json.2010.config
-	
 	
 	SetOutPath $INSTDIR\Docs
 	File C:\projects\acs-alchemist\doc\README.txt
@@ -104,7 +95,6 @@ Section -Main SEC0000
 	File C:\projects\acs-alchemist\doc\ACS-Alchemist-UserManual.pdf
 	
 	#Licenses#
-	SetOutPath $INSTDIR\Licenses
 	SetOutPath $INSTDIR\Licenses\Ionic
 	File C:\projects\acs-alchemist\lib\dotnetzip\License.txt
 	File C:\projects\acs-alchemist\lib\dotnetzip\PleaseDonate.txt
@@ -130,17 +120,15 @@ Section -Main SEC0000
 	SetOutPath $INSTDIR\Licenses\sqlite
 	File C:\projects\acs-alchemist\lib\sqlite\license.txt	
 	
-    SetOutPath $SMPROGRAMS\$StartMenuGroup	
+  SetOutPath $SMPROGRAMS\$StartMenuGroup	
 	CreateShortcut "$SMPROGRAMS\$StartMenuGroup\ACS Alchemist GUI.lnk" "$INSTDIR\AcsAlchemistGui.exe"	
-	
 	CreateShortcut "$SMPROGRAMS\$StartMenuGroup\View Files.lnk" "$INSTDIR"	
-    CreateShortcut "${SHORTCUTFILE}" "cmd" "/k cd $INSTDIR"
-	#ShellLink::SetRunAsAdministrator "${SHORTCUTFILE}"
-	#Pop $0
+  CreateShortcut "${SHORTCUTFILE}" "cmd" "/k cd $INSTDIR"
+  
 	ShellLink::SetShortCutWorkingDirectory "${SHORTCUTFILE}" $INSTDIR
 	Pop $0
 	
-    WriteRegStr HKLM "${REGKEY}\Components" Main 1
+  WriteRegStr HKLM "${REGKEY}\Components" Main 1
 SectionEnd
 
 Section -post SEC0001
