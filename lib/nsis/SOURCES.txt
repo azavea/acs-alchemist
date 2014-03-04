@@ -1,0 +1,2 @@
+AccessControl: http://nsis.sourceforge.net/AccessControl_plug-in
+ShellLink: http://nsis.sourceforge.net/ShellLink_plug-in
