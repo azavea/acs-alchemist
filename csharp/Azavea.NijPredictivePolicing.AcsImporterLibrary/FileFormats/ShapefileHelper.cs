@@ -78,7 +78,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
                     return false;
                 }
 
-                //string workingDirectory = FileUtilities.SafePathEnsure(TempPath, Path.GetFileNameWithoutExtension(filename));
                 using (DbConnection conn = DbClient.GetConnection())
                 {
                     if (!ShapefileHelper.ImportShapefile(conn, DbClient, filename, tableName, (int)CRS.AuthorityCode))
@@ -213,7 +212,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
 
                 if (File.Exists(sourceProjectionFilename))
                 {
-                    File.Copy(sourceProjectionFilename, prjFileName, true);        //File.WriteAllText(prjFileName, File.ReadAllText(wktProjFilename));
+                    File.Copy(sourceProjectionFilename, prjFileName, true);
                 }
                 else
                 {
@@ -243,18 +242,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
             //Geographic - 4326 - World WGS84, Geographic, decimal degrees
             return new GeometryFactory(new PrecisionModel(), 4269);
         }
-
-        ///// <summary>
-        ///// Helper function for cre
-        ///// </summary>
-        ///// <param name="shapefilename"></param>
-        ///// <param name="acsState"></param>
-        ///// <returns></returns>
-        //public static System.Data.DataTable GetTable(string shapefilename, AcsState acsState)
-        //{
-        //    return Shapefile.CreateDataTable(shapefilename, acsState.ToString(), ShapefileHelper.GetGeomFactory());
-        //}
-
 
         /// <summary>
         /// Consumes an ADO.net datatable and correctly initializes a Shapefile header object
@@ -295,8 +282,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
             }
             else if (t == typeof(DateTime))
             {
-                // D stores only the date
-                //retVal.AddColumn(shapefileColumnName, 'D', 8, 0);
                 header.AddColumn(columnName, 'C', 22, 0);
             }
             else if (t == typeof(float) || t == typeof(double) || t == typeof(decimal))
@@ -330,14 +315,13 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
                     url = Settings.ShapeFileTractURL + Settings.ShapeFileTractFilename;
                     break;
 
+                /*
                 case BoundaryLevels.county_subdivisions:
                     url = Settings.ShapeFileCountySubdivisionsURL + Settings.ShapeFileCountySubdivisionsFilename;
                     break;
                 case BoundaryLevels.counties:
                     url = Settings.ShapeFileCountiesURL + Settings.ShapeFileCountiesFilename;
                     break;
-
-                /*
                 
                 case BoundaryLevels.voting:
                     url = Settings.ShapeFileVotingURL + Settings.ShapeFileVotingFilename;
@@ -353,7 +337,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
                 case BoundaryLevels.states:
                 case BoundaryLevels.census_regions:
                 case BoundaryLevels.census_divisions:
-                 */
+                */
                 default:
                     break;
             }
@@ -374,7 +358,11 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
         /// <returns></returns>
         public static bool IsForbiddenShapefileName(string name)
         {
-            string[] levels = new string[] {
+            if (string.IsNullOrEmpty(name))
+            {
+                return true;
+            }
+            var levels = (new List<string> {
                 Settings.ShapeFileBlockGroupFilename,
                 Settings.ShapeFileTractFilename,
                 Settings.ShapeFileCountySubdivisionsFilename,
@@ -382,7 +370,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
                 Settings.ShapeFileThreeDigitZipsFilename,
                 Settings.ShapeFileFiveDigitZipsFilename,
                 Settings.ShapeFileCountiesFilename
-                };
+                }).Where(s => !string.IsNullOrEmpty(s));
 
             StringBuilder newRegex = new StringBuilder(512);
             foreach (string level in levels)

@@ -83,59 +83,6 @@ namespace Azavea.NijPredictivePolicing.Common
             return false;
         }
 
-        public bool Save()
-        {
-            return Save(string.Empty);
-        }
-
-        public bool Save(string filename)
-        {
-            try
-            {
-                if (!string.IsNullOrEmpty(filename))
-                {
-                    _filename = filename;
-                }
-
-                if (File.Exists(filename))
-                {
-                    File.Delete(filename);
-                }
-
-                JsonSerializerSettings s = new JsonSerializerSettings();
-                s.TypeNameHandling = TypeNameHandling.All;
-                s.TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple;
-
-                string fileContents = JsonConvert.SerializeObject(this._data, Formatting.Indented, s);
-                File.WriteAllText(_filename, fileContents);
-                return true;
-            }
-            catch (UnauthorizedAccessException cantWriteEx)
-            {
-                _log.Error("The importer couldn't write its config file.  Please run this application as an Administrator");
-                _log.Fatal("The importer cannot continue.  Exiting...");
-                Environment.Exit(-1);
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Error saving configuration", ex);
-            }
-            return false;
-        }
-
-        public string SaveToMemory()
-        {
-            try
-            {
-                return JsonConvert.SerializeObject(this._data, Formatting.Indented);
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Error saving configuration", ex);
-            }
-            return string.Empty;
-        }
-
         public T Get<T>(string key, T ifEmpty)
         {
             if ((_data != null) && (_data.ContainsKey(key)))
@@ -148,7 +95,7 @@ namespace Azavea.NijPredictivePolicing.Common
         public List<object> GetList(string key)
         {
 
-            if (_data != null) //&& (_data.ContainsKey(key)))
+            if (_data != null)
             {
                 var o = _data[key];
                 return new List<object>(o as IEnumerable<object>);

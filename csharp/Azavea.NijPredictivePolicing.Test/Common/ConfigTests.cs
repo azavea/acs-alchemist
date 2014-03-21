@@ -29,36 +29,22 @@ using System.IO;
 namespace Azavea.NijPredictivePolicing.Test.Common
 {
     [TestFixture]
-    public class ConfigTests
+    public class ConfigTests : BaseTest
     {
-        private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         [Test]
         public void CreateNewConfig()
         {
-            var c = new Config();
-            c.Set("foo", "bar");
-            c.Set("123", 123);
-            c.Set("abc", new string[] { "a", "b", "c" });
+            string filename = Path.Combine(BaseDir, @"TestData\ParserTests\testconfig.config");
+            var c = new Config(filename);
 
-            string contents = c.SaveToMemory();
-            _log.DebugFormat("Contents were: {0}", contents);
-            Assert.IsNotEmpty(contents, "Unable to save contents!");
+            Assert.AreEqual("bar", c["foo"], "string values out of sync!");
+            Assert.AreEqual(c["foo"], c["foo"], "string values out of sync!");
 
-            string filename = "CreateNewConfig.foo";
-            c.Save(filename);
-            Assert.IsTrue(File.Exists(filename), "New Config File not found!");
+            Assert.AreEqual(123, c["123"], "numeric values out of sync!");
+            Assert.AreEqual(c["123"], c["123"], "numeric values out of sync!");
 
-
-            var fromFile = new Config(filename);
-            Assert.AreEqual("bar", fromFile["foo"], "string values out of sync!");
-            Assert.AreEqual(c["foo"], fromFile["foo"], "string values out of sync!");
-
-            Assert.AreEqual(123, fromFile["123"], "numeric values out of sync!");
-            Assert.AreEqual(c["123"], fromFile["123"], "numeric values out of sync!");
-
-            Assert.IsTrue(AreListsEqual(new string[] { "a", "b", "c" }, fromFile.GetList("abc")), "array values out of sync!");
-            Assert.IsTrue(AreListsEqual(c.GetList("abc"), fromFile.GetList("abc")), "array values out of sync!");
+            Assert.IsTrue(AreListsEqual(new string[] { "a", "b", "c" }, c.GetList("abc")), "array values out of sync!");
+            Assert.IsTrue(AreListsEqual(c.GetList("abc"), c.GetList("abc")), "array values out of sync!");
         }
 
         public static bool AreListsEqual(IList<object> left, IList<object> right)

@@ -164,7 +164,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             if (!string.IsNullOrEmpty(workingFolder))
             {
                 //override where we're storing temporary files
-                //Settings.AppDataDirectory = FileUtilities.SafePathEnsure(workingFolder, Settings.RequestedYear);
                 Settings.AppDataDirectory = FileUtilities.SafePathEnsure(workingFolder);
             }
             _log.InfoFormat("Working directory is {0} ", workingFolder);
@@ -354,8 +353,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             BoundaryLevels[] shapeFileLevels = new BoundaryLevels[] {
                 BoundaryLevels.census_blockgroups,
                 BoundaryLevels.census_tracts,
-                BoundaryLevels.county_subdivisions,                
-                BoundaryLevels.counties,
+                //BoundaryLevels.county_subdivisions,                
+                //BoundaryLevels.counties,
 
                 /*
                  BoundaryLevels.census_regions,
@@ -415,12 +414,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             var client = DbClient;
             using (var conn = client.GetConnection())
             {
-                //if (DataClient.HasTable(conn, client, tablename))
-                //{
-                //    _log.DebugFormat("{0} table already exists, skipping...", tablename);
-                //    return true;
-                //}
-                //else
 
                 if (DataClient.HasTable(conn, client, tablename))
                 {
@@ -482,7 +475,9 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         public bool CreateGeographiesTable(DbConnection conn)
         {
             //create the table
-            string createGeographyTableSQL = DataClient.GenerateTableSQLFromFields(this.GetGeographyTablename(), GeographyFileReader.Columns);
+            string createGeographyTableSQL = DataClient.GenerateTableSQLFromFields(
+                this.GetGeographyTablename(),
+                GeographyFileReader.Columns);
             DbClient.GetCommand(createGeographyTableSQL, conn).ExecuteNonQuery();
 
             //parse in the file
@@ -1111,17 +1106,29 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 //census_divisions
                 //states
                 
-                case "050":
-                    //counties
-                    shapeSQL = "select trim(COUNTY) as county, AsBinary(Geometry) as Geometry, '' as GEOID from counties ";
-                    geomSQL = "select LOGRECNO, trim(COUNTY) as county, GEOID from geographies_all where SUMLEVEL = '050' order by county ";
-                    break;
+                //case "050":
+                //    //counties
+                //    // Note: original sql for files fount at:
+                //    //      "ShapeFileCountiesURL": "http://www.census.gov/geo/cob/bdy/co/co00shp/"
+                //    //      "ShapeFileCountiesFilename": "co{FIPS-code}_d00_shp.zip"
+                //    // was:
+                //    //      "select trim(COUNTY) as county, AsBinary(Geometry) as Geometry, '' as GEOID from counties ";
+                //    //
+                //    //
+                //    // Current source:
+                //    //        "ShapeFileCountiesURL": "http://www2.census.gov/geo/tiger/TIGER2010/COUNTY/2010/",
+                //    //        "ShapeFileCountiesFilename": "tl_2010_{FIPS-code}_county10.zip",
+                //    // Docs for current source: http://www.census.gov/geo/maps-data/data/pdfs/tiger/tgrshp2010/TGRSHP10SF1AA.pdf
+                //    //
+                //    shapeSQL = "select trim(COUNTYFP10) as county, AsBinary(Geometry) as Geometry, '' as GEOID from counties ";
+                //    geomSQL = "select LOGRECNO, trim(COUNTY) as county, GEOID from geographies_all where SUMLEVEL = '050' order by county ";
+                //    break;
 
-                //subdivisions
-                case "060":
-                    shapeSQL = "select trim(COUNTY) as county,  trim(COUSUB) as cousub, AsBinary(Geometry) as Geometry, '' as GEOID from county_subdivisions ";
-                    geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(COUSUB) as cousub, GEOID from geographies_all  where SUMLEVEL = '060' order by county, cousub";
-                    break;
+                ////subdivisions
+                //case "060":
+                //    shapeSQL = "select trim(COUNTY) as county,  trim(COUSUB) as cousub, AsBinary(Geometry) as Geometry, '' as GEOID from county_subdivisions ";
+                //    geomSQL = "select LOGRECNO, trim(COUNTY) as county, trim(COUSUB) as cousub, GEOID from geographies_all  where SUMLEVEL = '060' order by county, cousub";
+                //    break;
 
                 case "140":
                     //tracts
@@ -1186,13 +1193,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
             foreach (DataRow row in wholeShapeTable.Rows)
             {
-                //string county = Utilities.GetAs<string>(row["COUNTY"], "-1");
-                //string tract = Utilities.GetAs<string>(row["TRACT"], "-1");
-                //string blkgroup = Utilities.GetAs<string>(row["BLKGROUP"], "-1");
-                //if (tract.Trim().Length != 6)
-                //    tract += "00";
-                //string key = string.Format("{0}_{1}_{2}", county, tract, blkgroup);
-
                 string key = keyDelegate(row);
 
                 if (geomKeys.ContainsKey(key))
@@ -1270,8 +1270,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                         var fg = filt.GetGeometryN(g);
                         if (fg.Intersects(geom))
                         {
-                            //double commonArea = fg.Intersection(geom).Area;
-                            //if(commonArea > 0.01 * fg.Area || commonArea > 0.01 * geom.Area)
                             return true;
                         }
                     }
@@ -1306,12 +1304,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 {
                     destCRS = Utilities.GetCoordinateSystemByWKTFile(this.OutputProjectionFilename);
                     reprojector = Utilities.BuildTransformationObject(GeographicCoordinateSystem.WGS84, destCRS);
-
-                    //Reproject everything in this file to the requested projection...                    
-                    //exportFeatures = Utilities.ReprojectFeaturesTo(exportFeatures, this.OutputProjectionFilename);
-
-                    //THESE MUST BE PROVIDED ALREADY PROJECTED!
-                    //filteringGeoms = Utilities.ReprojectFeaturesTo(filteringGeoms, this.OutputProjectionFilename);
                 }
 
                 //TODO:
@@ -1333,7 +1325,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     }
                 }
 
-              
 
                 GisSharpBlog.NetTopologySuite.IO.WKBReader binReader = new WKBReader(
                     ShapefileHelper.GetGeomFactory());
@@ -1484,8 +1475,10 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 DbaseFileHeader header = null;
                 using (var conn = DbClient.GetConnection())
                 {
-                    //Dictionary<string, DataRow> shapeDict = GetShapeRowsByLOGRECNO(conn);
-                    var variablesDT = DataClient.GetMagicTable(conn, DbClient, string.Format("SELECT * FROM \"{0}\" where 0 = 1 ", tableName));
+                    var variablesDT = DataClient.GetMagicTable(
+                        conn,
+                        DbClient,
+                        string.Format("SELECT * FROM \"{0}\" where 0 = 1 ", tableName));
                     header = ShapefileHelper.SetupHeader(variablesDT);
                 }
 
@@ -1538,9 +1531,10 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             }
             catch (FileNotFoundException notFound)
             {
-                _log.Error("A needed file couldn't be found: " + notFound.FileName);
+                string msg = "A needed file couldn't be found: " + notFound.FileName;
+                _log.Error(msg);
                 _log.Fatal("The export cannot continue.  Exiting...");
-                Environment.Exit(-1);
+                throw new ApplicationException(msg);
             }
             catch (Exception ex)
             {
@@ -1548,8 +1542,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             }
             return false;
         }
-
-
 
 
         /// <summary>
@@ -1618,9 +1610,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
 
                 var features = new List<Feature>(exportFeatures.Count);
-                //var cellStepPoint = Utilities.GetCellFeetForProjection(GridCellWidthFeet, GridCellHeightFeet);
-                //double cellWidth = cellStepPoint.X;
-                //double cellHeight = cellStepPoint.Y;
 
                 double cellWidth = GridCellWidth;
                 double cellHeight = GridCellHeight;
@@ -1780,9 +1769,10 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             }
             catch (FileNotFoundException notFound)
             {
-                _log.Error("A needed file couldn't be found: " + notFound.FileName);
+                string msg = "A needed file couldn't be found: " + notFound.FileName;
+                _log.Error(msg);
                 _log.Fatal("The export cannot continue.  Exiting...");
-                Environment.Exit(-1);
+                throw new ApplicationException(msg);
             }
             catch (Exception ex)
             {
@@ -1815,13 +1805,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
             return env;
         }
-
-
-
-
-
-
-
 
 
         public void Dispose()
@@ -1873,8 +1856,6 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
         {
             _cancelled = true;
         }
-
-
 
         public bool WorkOffline { get; set; }
     }

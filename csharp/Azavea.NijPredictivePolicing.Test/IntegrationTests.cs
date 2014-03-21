@@ -60,9 +60,6 @@ B01001026,TOTALFEMALE
 ";
             File.WriteAllText("myVariablesFile.txt", myVariablesStr);
 
-            //string jobName = DateTime.Now.ToShortDateString();
-
-
             var args = new string[] {
                 "-s",
                 "Wyoming",

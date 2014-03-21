@@ -412,14 +412,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                 manager.AddStrippedGEOIDcolumn = (!string.IsNullOrEmpty(this.AddStrippedGEOIDcolumn));
                 manager.AddGeometryAttributesToOutput = (!string.IsNullOrEmpty(this.AddGeometryAttributesToOutput));
                 manager.OutputFolder = FileUtilities.CleanPath(OutputFolder);
-                
-
-                //if (!string.IsNullOrEmpty(this.WorkingFolder))
-                //{
-                //    manager.WorkingPath = FileUtilities.SafePathEnsure(this.WorkingFolder);
-                //}
                 manager.IncludeEmptyGridCells = (!string.IsNullOrEmpty(this.IncludeEmptyGridCells));
-                //manager.SRID = Utilities.GetAs<int>(this.ExportFilterSRID, -1);
 
 
                 if (FileUtilities.SafePathEnsure(OutputFolder) != OutputFolder)
@@ -617,28 +610,13 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
                     val = val + "       #" + Utilities.GetAs<BoundaryLevels>(val, BoundaryLevels.census_blockgroups);
                 }
 
-
-
-                //sb.Append("#").Append(nl);
                 sb.Append("# ").Append(arg.Description).Append(nl);
-                //sb.Append("#").Append(nl);
                 sb.Append("-" + arg.Flag).Append(" ").Append(val).Append(nl);
                 sb.Append(nl);
-
-
-
-                //object defval = (prop.PropertyType == typeof(AcsState)) ? (object)AcsState.None : null;
-                //prop.GetValue(this, Utilities.GetAsType(prop.PropertyType, contents, defval), null);
-
-                //break;
             }
 
             File.WriteAllText(filename, sb.ToString());
         }
-
-
-
-
 
 
         public bool WorkOffline { get; set; }

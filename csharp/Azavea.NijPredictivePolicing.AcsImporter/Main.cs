@@ -35,6 +35,9 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
     public class Program
     {
         private static ILog _log = null;
+
+        public const string DefaultConfigPath = "configs/AcsAlchemist.json.config";
+
         protected static void Init()
         {
             try
@@ -99,10 +102,12 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemist
         /// </summary>
         protected static void LoadConfigFile()
         {
-            Settings.ConfigFile = new Config(Path.Combine(Settings.ApplicationPath, "AcsAlchemist.json.config"));
+            string configName = Path.Combine(Settings.ApplicationPath, DefaultConfigPath);
+            Settings.ConfigFile = new Config(configName);
             if (Settings.ConfigFile.IsEmpty())
             {
-                Settings.RestoreDefaults();
+                _log.FatalFormat("Config file {0} missing or empty!  Cannot continue, exiting", DefaultConfigPath);
+                Environment.Exit((int)Constants.ExitCodes.BadConfig);
             }
 
             //search for our 'per-year' config files that explain which paths to check, file naming, etc.
