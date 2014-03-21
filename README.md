@@ -20,7 +20,7 @@ The software was developed by Azavea in connection with the National Institute o
 
 Download / Install
 -------------------------------------
-You can obtain the latest prepared installer for the Windows operating system here: https://github.com/azavea/acs-alchemist/downloads 
+You can obtain the latest prepared installer for the Windows operating system here: https://github.com/azavea/acs-alchemist/releases
 
 
 Disclaimer / License
