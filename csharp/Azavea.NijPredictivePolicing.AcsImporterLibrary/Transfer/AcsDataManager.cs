@@ -474,6 +474,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 
         public bool CreateGeographiesTable(DbConnection conn)
         {
+            DbClient.GetCommand(string.Format("DROP TABLE IF EXISTS \"{0}\";", GetGeographyTablename()), conn).ExecuteNonQuery();
+
             //create the table
             string createGeographyTableSQL = DataClient.GenerateTableSQLFromFields(
                 this.GetGeographyTablename(),
@@ -648,7 +650,8 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
             using (var conn = DbClient.GetConnection())
             {
                 _log.Debug("Checking for geographies table...");
-                if (!DataClient.HasTable(conn, DbClient, this.GetGeographyTablename()))
+                if (!DataClient.HasTable(conn, DbClient, this.GetGeographyTablename())
+                    || (DataClient.RowCount(conn, DbClient, this.GetGeographyTablename()) == 0))
                 {
                     if (!CreateGeographiesTable(conn))
                     {
