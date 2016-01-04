@@ -546,7 +546,9 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 _log.Debug("Importing Sequence Files...");
 
                 int ixid = 0;
-                foreach (string file in Directory.GetFiles(colMapDir, "Seq*.xls", SearchOption.TopDirectoryOnly))
+                // Note: this used to search only the top directory, but the 2014 data uses subdirectories,
+                // so those must now be searched as well.
+                foreach (string file in Directory.GetFiles(colMapDir, "Seq*.xls", SearchOption.AllDirectories))
                 {
                     //Extract sequence number from filename
                     string localFilename = Path.GetFileName(file);
