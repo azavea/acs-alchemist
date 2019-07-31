@@ -128,6 +128,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="TestData\ParserTests\Seq10.csv" />
     <None Include="TestData\ParserTests\Seq10.xls" />
     <None Include="TestData\ParserTests\wellFormed.csv" />

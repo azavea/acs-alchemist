@@ -39,6 +39,7 @@ using System.Collections;
 using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.CoordinateSystems;
 using ProjNet.CoordinateSystems;
+using ExcelDataReader;
 
 namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
 {
@@ -548,11 +549,15 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                 int ixid = 0;
                 // Note: this used to search only the top directory, but the 2014 data uses subdirectories,
                 // so those must now be searched as well.
+                string[] seqFiles = Directory.GetFiles(colMapDir, "Seq*.xls", SearchOption.AllDirectories);
+
+                _log.Debug("Found " + seqFiles.Length + " Sequence Files.");
+
                 foreach (string file in Directory.GetFiles(colMapDir, "Seq*.xls", SearchOption.AllDirectories))
                 {
                     //Extract sequence number from filename
-                    string localFilename = Path.GetFileName(file);
-                    Regex sequenceFormat = new Regex(@"^Seq(\d{1,4})\.xls$");
+                    string localFilename = Path.GetFileName(file).ToLower(); //Sequence files changed case in 2017
+                    Regex sequenceFormat = new Regex(@"^seq(\d{1,4})\.(xls|xlsx)$");
                     Match match = sequenceFormat.Match(localFilename);
                     if (!match.Groups[0].Success)
                     {
@@ -569,7 +574,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                         continue;
                     }
 
-                    DataSet fileData = reader.AsDataSet(false);
+                    DataSet fileData = reader.AsDataSet();
                     if (fileData.Tables == null || fileData.Tables.Count == 0)
                     {
                         _log.ErrorFormat("Sequence File had no readable variables: {0} ", file);

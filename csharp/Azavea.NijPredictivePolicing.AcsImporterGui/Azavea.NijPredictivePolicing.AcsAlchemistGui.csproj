@@ -131,6 +131,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="fonts\LiberationMono-Regular.ttf" />
     <None Include="fonts\LiberationSans-Regular.ttf" />
     <None Include="fonts\LiberationSansNarrow-Regular.ttf" />

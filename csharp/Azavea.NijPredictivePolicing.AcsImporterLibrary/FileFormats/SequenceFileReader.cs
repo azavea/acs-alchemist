@@ -21,7 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Excel;
+using ExcelDataReader;
 using log4net;
 using System.IO;
 using Azavea.NijPredictivePolicing.Common.Data;
@@ -36,7 +36,7 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
         private static ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 
-        protected ExcelBinaryReader _reader;
+        protected IExcelDataReader _reader;
         protected FileStream _input;
         public bool HasFile = false;
 
@@ -46,11 +46,11 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.FileFormats
             if(HasFile)
             {
                 _input = new FileStream(filename, FileMode.Open, FileAccess.Read);
-                _reader = ExcelReaderFactory.CreateBinaryReader(_input) as ExcelBinaryReader;
+                _reader = ExcelReaderFactory.CreateReader(_input);
             }
         }
 
-        public ExcelBinaryReader GetReader()
+        public IExcelDataReader GetReader()
         {
             return _reader;
         }
