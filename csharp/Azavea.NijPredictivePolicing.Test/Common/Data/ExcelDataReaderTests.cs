@@ -69,7 +69,6 @@ namespace Azavea.NijPredictivePolicing.Test.Common.Data
         public void ReadExcelFile()
         {
             FileStream input = new FileStream(InputFile, FileMode.Open, FileAccess.Read);
-
             IExcelDataReader reader = ExcelReaderFactory.CreateBinaryReader(input);
             IDataFileWriter writer = new CommaSeparatedValueWriter(OutputFile);
 
