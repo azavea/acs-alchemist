@@ -82,6 +82,11 @@ namespace Azavea.NijPredictivePolicing.ACSAlchemistLibrary.Transfer
                     _lastQuery = DateTime.Now;
                     System.Threading.Thread.Sleep(250); //just a little pre-nap so we don't hammer the server
 
+                    //The following 3 lines force a TLS 1.2 connection
+                    ServicePointManager.Expect100Continue = true;
+                    ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+                    ServicePointManager.DefaultConnectionLimit = 9999;
+
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(desiredURL);
                     request.KeepAlive = false;  //We're only doing this once
                     request.Credentials = CredentialCache.DefaultCredentials;
